@@ -9,10 +9,12 @@ The SDK ABI is being designed. No 0.x package published from this repository sho
 Implemented in the first platform phase:
 
 - `PCL.N.Plugin.Abstractions` lifecycle and capability ABI
+- stable service IDs: logging / dispatcher / notifications / settings / commands / tasks
 - strict plugin IDs and SemVer 2.0 versions
 - typed `plugin.json` manifest contracts
 - manifest/API/dependency/permission validation
 - `schemas/plugin.schema.json`
+- `PCL.N.Plugin.Analyzers` **PNPSDK001–003** (forbid `PCL.Application` / `PCL.Desktop` / `PCL.Plugin` references)
 - three-platform build, test, and pack CI
 
 The first-party `PCL.Plugin` HostModule is deliberately not part of this public third-party ABI. Third-party plugins implement `IPclNPlugin`; the built-in HostModule uses a separate host contract owned by PCL N.

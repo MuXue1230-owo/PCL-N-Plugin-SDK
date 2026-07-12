@@ -8,12 +8,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+    <ProjectReference Include="../../src/PCL.N.Plugin.Analyzers/PCL.N.Plugin.Analyzers.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Testing/PCL.N.Plugin.Testing.csproj" />
     <ProjectReference Include="../../examples/HelloPlugin/HelloPlugin.csproj" />

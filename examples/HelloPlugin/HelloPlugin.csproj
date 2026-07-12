@@ -8,5 +8,8 @@
   <ItemGroup>
     <ProjectReference Include="../../src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj" />
+    <ProjectReference Include="../../src/PCL.N.Plugin.Analyzers/PCL.N.Plugin.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

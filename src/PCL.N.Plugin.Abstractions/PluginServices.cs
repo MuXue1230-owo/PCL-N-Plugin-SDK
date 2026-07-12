@@ -27,6 +27,10 @@ public static class PluginServiceIds
     public static PluginServiceId Notifications { get; } = new("pcl.notifications");
 
     public static PluginServiceId Settings { get; } = new("pcl.settings");
+
+    public static PluginServiceId Commands { get; } = new("pcl.commands");
+
+    public static PluginServiceId Tasks { get; } = new("pcl.tasks");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
@@ -110,6 +114,61 @@ public interface IPluginSettingsStore : IPluginService
         PluginSettingKey<T> key,
         T value,
         CancellationToken cancellationToken = default);
+}
+
+/// <summary>Host command palette / action registration (design §9.3).</summary>
+public sealed record PluginCommandDescriptor
+{
+    public PluginCommandDescriptor(
+        string id,
+        string title,
+        Func<CancellationToken, Task> executeAsync,
+        string? description = null,
+        string? icon = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentNullException.ThrowIfNull(executeAsync);
+        Id = id.Trim();
+        Title = title.Trim();
+        ExecuteAsync = executeAsync;
+        Description = description;
+        Icon = icon;
+    }
+
+    public string Id { get; init; }
+
+    public string Title { get; init; }
+
+    public Func<CancellationToken, Task> ExecuteAsync { get; init; }
+
+    public string? Description { get; init; }
+
+    public string? Icon { get; init; }
+}
+
+public interface IPluginCommandService : IPluginService
+{
+    IPluginRegistration Register(PluginCommandDescriptor descriptor);
+
+    /// <summary>Invokes a previously registered command by id (host/test helper).</summary>
+    Task InvokeAsync(string commandId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>Tracked background work owned by the plugin lifetime (design §9.5).</summary>
+public interface IPluginTaskRegistration : IPluginRegistration
+{
+    Task Completion { get; }
+}
+
+public interface IPluginTaskService : IPluginService
+{
+    IPluginTaskRegistration Run(string id, Func<CancellationToken, Task> task);
+
+    IPluginTaskRegistration SchedulePeriodic(
+        string id,
+        TimeSpan interval,
+        Func<CancellationToken, Task> task);
 }
 
 /// <summary>
