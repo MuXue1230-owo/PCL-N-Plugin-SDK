@@ -14,7 +14,8 @@ Implemented in the first platform phase:
 - typed `plugin.json` manifest contracts
 - manifest/API/dependency/permission validation
 - `schemas/plugin.schema.json`
-- `PCL.N.Plugin.Analyzers` **PNPSDK001–003** (forbid `PCL.Application` / `PCL.Desktop` / `PCL.Plugin` references)
+- `PCL.N.Plugin.Analyzers` **PNPSDK001–003** (forbid host assembly refs), **PNPSDK004** (entry type shape), **PNPSDK010** (untracked background work)
+- UI Surface contracts (`IPluginUiSurfaceRegistry`, slots, inject contribution capability)
 - three-platform build, test, and pack CI
 
 The first-party `PCL.Plugin` HostModule is deliberately not part of this public third-party ABI. Third-party plugins implement `IPclNPlugin`; the built-in HostModule uses a separate host contract owned by PCL N.
