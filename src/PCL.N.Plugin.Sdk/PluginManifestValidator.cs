@@ -112,8 +112,20 @@ public static class PluginManifestValidator
         return path.Split('/').All(segment => segment.Length > 0 && segment is not "." and not "..");
     }
 
-    private static void ValidateApiRange(PluginApiRangeManifest api, List<PluginManifestValidationIssue> issues)
+    private static void ValidateApiRange(PluginApiRangeManifest? api, List<PluginManifestValidationIssue> issues)
     {
+        // PNPSDK008: API version range is required.
+        if (api is null ||
+            string.IsNullOrWhiteSpace(api.Minimum) ||
+            string.IsNullOrWhiteSpace(api.MaximumExclusive))
+        {
+            issues.Add(new PluginManifestValidationIssue(
+                "PNPSDK008",
+                "$.api",
+                "Plugin API version range (minimum / maximumExclusive) is required."));
+            return;
+        }
+
         bool minimumValid = TryParseApiVersion(api.Minimum, out PluginApiVersion minimum);
         bool maximumValid = TryParseApiVersion(api.MaximumExclusive, out PluginApiVersion maximum);
         if (!minimumValid)

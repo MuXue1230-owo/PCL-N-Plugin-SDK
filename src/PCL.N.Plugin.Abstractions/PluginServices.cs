@@ -35,6 +35,8 @@ public static class PluginServiceIds
     public static PluginServiceId InstancesRead { get; } = new("pcl.instances.read");
 
     public static PluginServiceId Ui { get; } = new("pcl.ui");
+
+    public static PluginServiceId UiPatch { get; } = new("pcl.ui.patch");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
