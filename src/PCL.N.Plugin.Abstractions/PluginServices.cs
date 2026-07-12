@@ -31,6 +31,8 @@ public static class PluginServiceIds
     public static PluginServiceId Commands { get; } = new("pcl.commands");
 
     public static PluginServiceId Tasks { get; } = new("pcl.tasks");
+
+    public static PluginServiceId InstancesRead { get; } = new("pcl.instances.read");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
@@ -169,6 +171,20 @@ public interface IPluginTaskService : IPluginService
         string id,
         TimeSpan interval,
         Func<CancellationToken, Task> task);
+}
+
+/// <summary>Read-only Minecraft instance listing (design §9; requires permission <c>pcl.instances.read</c>).</summary>
+public sealed record PluginInstanceInfo(
+    string Id,
+    string Name,
+    string InstanceDirectory,
+    string? VersionJsonPath = null);
+
+public interface IPluginInstanceReadService : IPluginService
+{
+    IReadOnlyList<PluginInstanceInfo> ListInstances();
+
+    bool TryGetInstance(string id, out PluginInstanceInfo? instance);
 }
 
 /// <summary>

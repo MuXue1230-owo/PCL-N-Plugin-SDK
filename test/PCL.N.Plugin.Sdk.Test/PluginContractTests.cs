@@ -78,6 +78,7 @@ public sealed class PluginContractTests
         Assert.AreEqual("pcl.settings", PluginServiceIds.Settings.Value);
         Assert.AreEqual("pcl.commands", PluginServiceIds.Commands.Value);
         Assert.AreEqual("pcl.tasks", PluginServiceIds.Tasks.Value);
+        Assert.AreEqual("pcl.instances.read", PluginServiceIds.InstancesRead.Value);
 
         PluginApiVersion v = new(0, 1);
         Assert.IsTrue(PluginServiceVersionRanges.Matches("*", v));
@@ -87,6 +88,7 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginSettingsStore).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginCommandService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginTaskService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(IPluginInstanceReadService).IsAssignableTo(typeof(IPluginService)));
     }
 
     private static TestPluginContext CreateContext() =>
