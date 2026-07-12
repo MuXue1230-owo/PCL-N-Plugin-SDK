@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PCL.Plugin.Sdk/PCL.Plugin.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/HelloPlugin/HelloPlugin.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/PCL.Plugin.Sdk.Test/PCL.Plugin.Sdk.Test.csproj" />
+  </Folder>
+</Solution>

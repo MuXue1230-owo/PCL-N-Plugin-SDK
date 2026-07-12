@@ -8,6 +8,16 @@ The SDK ABI is being designed. No package published from this repository should 
 
 The current first-party `PCL.Plugin` integration compiles against the host contracts on the PCL N `dev` branch. This keeps the initial HostModule integration testable while the stable, versioned SDK boundary is finalized.
 
+## Local validation
+
+Install the .NET 10 SDK, then run:
+
+```console
+dotnet test PCL-N-Plugin-SDK.slnx
+```
+
+The solution includes the contract library, a minimal HostModule example, and SDK unit tests.
+
 ## Planned scope
 
 - Versioned HostModule and host-builder contracts
