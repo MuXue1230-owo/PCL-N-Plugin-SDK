@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>PCL.N.Plugin.Sdk</AssemblyName>
+    <RootNamespace>PCL.N.Plugin.Sdk</RootNamespace>
+    <Version>0.1.0-alpha.1</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>PCL.N.Plugin.Sdk</PackageId>
+    <Description>Developer helpers for the PCL N plugin ABI.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</RepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,20 +1,24 @@
-using PCL.Plugin.Sdk;
+using PCL.N.Plugin;
+using PCL.N.Plugin.Sdk;
 
 namespace HelloPlugin;
 
-public sealed class HelloHostModule : IPclHostModule
+public sealed class HelloPlugin : IPclNPlugin
 {
-    public HostModuleId Id => new("example.hello");
-
-    public void Configure(IPclHostBuilder builder)
+    public ValueTask InitializeAsync(IPluginContext context, CancellationToken cancellationToken)
     {
-        IHostSettingsPageRegistry pages = builder.RequireCapability<IHostSettingsPageRegistry>();
-        pages.Add(new HostSettingsPage(
+        cancellationToken.ThrowIfCancellationRequested();
+        IPluginSettingsPageCapability pages = context.Capabilities.Require<IPluginSettingsPageCapability>();
+        IPluginRegistration registration = pages.Register(new PluginSettingsPageDescriptor(
             "example.hello.settings",
             "Hello Plugin",
             "lucide/puzzle",
-            "Hello from a HostModule",
+            "Hello from IPclNPlugin",
             "This page was registered by the example plugin.",
-            [new HostSettingsHint("The SDK is experimental.", HostSettingsHintKind.Warning)]));
+            [new PluginSettingsHintDescriptor("The SDK is experimental.", PluginSettingsHintKind.Warning)]));
+        context.Lifetime.Track(registration);
+        return ValueTask.CompletedTask;
     }
+
+    public ValueTask ShutdownAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
 }

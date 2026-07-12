@@ -1,11 +1,13 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/PCL.Plugin.Sdk/PCL.Plugin.Sdk.csproj" />
+    <Project Path="src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+    <Project Path="src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj" />
+    <Project Path="src/PCL.N.Plugin.Testing/PCL.N.Plugin.Testing.csproj" />
   </Folder>
   <Folder Name="/examples/">
     <Project Path="examples/HelloPlugin/HelloPlugin.csproj" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="test/PCL.Plugin.Sdk.Test/PCL.Plugin.Sdk.Test.csproj" />
+    <Project Path="test/PCL.N.Plugin.Sdk.Test/PCL.N.Plugin.Sdk.Test.csproj" />
   </Folder>
 </Solution>

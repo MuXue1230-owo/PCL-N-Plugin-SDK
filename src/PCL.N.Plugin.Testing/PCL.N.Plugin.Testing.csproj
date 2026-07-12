@@ -1,16 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>PCL.Plugin.Sdk</AssemblyName>
-    <RootNamespace>PCL.Plugin.Sdk</RootNamespace>
+    <AssemblyName>PCL.N.Plugin.Testing</AssemblyName>
+    <RootNamespace>PCL.N.Plugin.Testing</RootNamespace>
     <Version>0.1.0-alpha.1</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
-    <PackageId>PCL.Plugin.Sdk</PackageId>
-    <Description>Experimental public plugin contracts for PCL N.</Description>
+    <PackageId>PCL.N.Plugin.Testing</PackageId>
+    <Description>In-memory test host utilities for PCL N plugins.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</RepositoryUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

@@ -4,9 +4,9 @@ Public contracts, documentation, and samples for extending PCL N.
 
 ## Status
 
-The SDK ABI is being designed. No package published from this repository should be treated as stable yet.
+The SDK ABI is being designed. No 0.x package published from this repository should be treated as stable yet.
 
-The current first-party `PCL.Plugin` integration compiles against the host contracts on the PCL N `dev` branch. This keeps the initial HostModule integration testable while the stable, versioned SDK boundary is finalized.
+The first-party `PCL.Plugin` HostModule is deliberately not part of this public third-party ABI. Third-party plugins implement `IPclNPlugin`; the built-in HostModule uses a separate host contract owned by PCL N.
 
 ## Local validation
 
@@ -16,7 +16,7 @@ Install the .NET 10 SDK, then run:
 dotnet test PCL-N-Plugin-SDK.slnx
 ```
 
-The solution includes the contract library, a minimal HostModule example, and SDK unit tests.
+The solution includes `PCL.N.Plugin.Abstractions`, developer helpers, an in-memory test host, a minimal `IPclNPlugin` example, and SDK unit tests.
 
 ## Planned scope
 
