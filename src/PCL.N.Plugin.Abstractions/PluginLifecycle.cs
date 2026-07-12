@@ -15,9 +15,19 @@ public interface IPluginContext
 
     PluginApiVersion ApiVersion { get; }
 
+    /// <summary>Stable host services (settings store, commands, …). See design §7.7 / §9.</summary>
+    IPluginServiceProvider Services { get; }
+
+    /// <summary>Legacy/capability surface (settings pages, future UI capabilities).</summary>
     IPluginCapabilityProvider Capabilities { get; }
 
     IPluginLifetime Lifetime { get; }
+
+    IPluginLogger Logger { get; }
+
+    IPluginDispatcher Dispatcher { get; }
+
+    PluginDirectorySet Directories { get; }
 
     CancellationToken Stopping { get; }
 }

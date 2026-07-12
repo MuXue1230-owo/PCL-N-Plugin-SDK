@@ -72,30 +72,161 @@ public sealed class TestPluginLifetime : IPluginLifetime, IAsyncDisposable
     }
 }
 
+public sealed class TestPluginServiceProvider : IPluginServiceProvider
+{
+    private readonly Dictionary<Type, IPluginService> _services = [];
+    private readonly Dictionary<string, IPluginService> _byId = new(StringComparer.OrdinalIgnoreCase);
+
+    public TestPluginServiceProvider Add<TService>(TService service)
+        where TService : class, IPluginService
+    {
+        ArgumentNullException.ThrowIfNull(service);
+        if (!_services.TryAdd(typeof(TService), service))
+            throw new InvalidOperationException($"Service already registered: {typeof(TService).FullName}");
+        _byId[service.Id.Value] = service;
+        return this;
+    }
+
+    public bool TryGet<TService>(out TService? service)
+        where TService : class, IPluginService
+    {
+        if (_services.TryGetValue(typeof(TService), out IPluginService? value))
+        {
+            service = (TService)value;
+            return true;
+        }
+
+        service = null;
+        return false;
+    }
+
+    public TService Require<TService>()
+        where TService : class, IPluginService
+    {
+        if (TryGet(out TService? service) && service is not null)
+            return service;
+        throw new NotSupportedException($"Service not available: {typeof(TService).FullName}");
+    }
+
+    public bool Supports(PluginServiceId serviceId, string versionRange)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(versionRange);
+        return _byId.ContainsKey(serviceId.Value);
+    }
+}
+
+public sealed class NullPluginLogger : IPluginLogger
+{
+    public static NullPluginLogger Instance { get; } = new();
+
+    public void Trace(string message) { }
+
+    public void Debug(string message) { }
+
+    public void Info(string message) { }
+
+    public void Warn(string message) { }
+
+    public void Error(string message, Exception? exception = null) { }
+}
+
+public sealed class ImmediatePluginDispatcher : IPluginDispatcher
+{
+    public static ImmediatePluginDispatcher Instance { get; } = new();
+
+    public void Post(Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        action();
+    }
+
+    public Task InvokeAsync(Action action, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        cancellationToken.ThrowIfCancellationRequested();
+        action();
+        return Task.CompletedTask;
+    }
+
+    public Task<T> InvokeAsync<T>(Func<T> action, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(action());
+    }
+}
+
 public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
 {
-    public TestPluginContext(PluginDescriptor plugin, PluginApiVersion apiVersion)
+    public TestPluginContext(
+        PluginDescriptor plugin,
+        PluginApiVersion apiVersion,
+        PluginDirectorySet? directories = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         Plugin = plugin;
         ApiVersion = apiVersion;
+        string root = directories?.Root
+            ?? Path.Combine(Path.GetTempPath(), "pcl-n-plugin-test", plugin.Id.Value);
+        Directories = directories ?? PluginDirectorySet.CreateUnder(root);
+        Directories.EnsureCreated();
+        Services = TestServices;
+        Logger = new CollectingPluginLogger();
+        Dispatcher = ImmediatePluginDispatcher.Instance;
     }
 
     public PluginDescriptor Plugin { get; }
 
     public PluginApiVersion ApiVersion { get; }
 
+    public TestPluginServiceProvider TestServices { get; } = new();
+
     public TestPluginCapabilityProvider TestCapabilities { get; } = new();
 
     public TestPluginLifetime TestLifetime { get; } = new();
+
+    public CollectingPluginLogger Logger { get; }
+
+    public IPluginServiceProvider Services { get; }
 
     public IPluginCapabilityProvider Capabilities => TestCapabilities;
 
     public IPluginLifetime Lifetime => TestLifetime;
 
+    public IPluginDispatcher Dispatcher { get; }
+
+    public PluginDirectorySet Directories { get; }
+
     public CancellationToken Stopping => TestLifetime.Stopping;
 
+    IPluginLogger IPluginContext.Logger => Logger;
+
     public ValueTask DisposeAsync() => TestLifetime.DisposeAsync();
+}
+
+public sealed class CollectingPluginLogger : IPluginLogger
+{
+    private readonly List<string> _entries = [];
+
+    public IReadOnlyList<string> Entries => _entries;
+
+    public void Trace(string message) => Add("trace", message, null);
+
+    public void Debug(string message) => Add("debug", message, null);
+
+    public void Info(string message) => Add("info", message, null);
+
+    public void Warn(string message) => Add("warn", message, null);
+
+    public void Error(string message, Exception? exception = null) => Add("error", message, exception);
+
+    private void Add(string level, string message, Exception? exception)
+    {
+        string line = exception is null
+            ? $"[{level}] {message}"
+            : $"[{level}] {message} :: {exception.GetType().Name}: {exception.Message}";
+        _entries.Add(line);
+    }
 }
 
 public sealed class InMemoryPluginSettingsPageCapability : IPluginSettingsPageCapability
