@@ -52,7 +52,7 @@ public sealed class PluginContractTests
 
     private static TestPluginContext CreateContext() =>
         new(
-            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", new Version(0, 1, 0)),
+            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
             new PluginApiVersion(0, 1));
 
     private static PluginSettingsPageDescriptor CreatePage(string id) =>

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/schemas/plugin.schema.json",
+  "title": "PCL N Plugin Manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["formatVersion", "manifestVersion", "id", "name", "version", "publisher", "license", "entryPoint", "api", "host", "signing"],
+  "properties": {
+    "formatVersion": { "const": 1 },
+    "manifestVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "channel": { "enum": ["stable", "beta", "alpha", "nightly"] },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "namespace"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "namespace": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$" }
+      }
+    },
+    "license": { "type": "string", "minLength": 1 },
+    "entryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assembly", "type"],
+      "properties": {
+        "assembly": { "type": "string", "pattern": "^lib/net10\\.0/[A-Za-z0-9_.-]+\\.dll$" },
+        "type": { "type": "string", "minLength": 3 }
+      }
+    },
+    "api": { "$ref": "#/$defs/apiRange" },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumVersion"],
+      "properties": {
+        "minimumVersion": { "$ref": "#/$defs/semver" },
+        "maximumVersionExclusive": { "oneOf": [{ "$ref": "#/$defs/semver" }, { "type": "null" }] }
+      }
+    },
+    "signing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint"],
+      "properties": { "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" } }
+    }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "apiRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximumExclusive"],
+      "properties": {
+        "minimum": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+        "maximumExclusive": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" }
+      }
+    }
+  }
+}

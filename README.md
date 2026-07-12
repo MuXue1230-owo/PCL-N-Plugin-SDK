@@ -6,6 +6,15 @@ Public contracts, documentation, and samples for extending PCL N.
 
 The SDK ABI is being designed. No 0.x package published from this repository should be treated as stable yet.
 
+Implemented in the first platform phase:
+
+- `PCL.N.Plugin.Abstractions` lifecycle and capability ABI
+- strict plugin IDs and SemVer 2.0 versions
+- typed `plugin.json` manifest contracts
+- manifest/API/dependency/permission validation
+- `schemas/plugin.schema.json`
+- three-platform build, test, and pack CI
+
 The first-party `PCL.Plugin` HostModule is deliberately not part of this public third-party ABI. Third-party plugins implement `IPclNPlugin`; the built-in HostModule uses a separate host contract owned by PCL N.
 
 ## Local validation
@@ -20,8 +29,8 @@ The solution includes `PCL.N.Plugin.Abstractions`, developer helpers, an in-memo
 
 ## Planned scope
 
-- Versioned HostModule and host-builder contracts
-- Capability-based services instead of access to launcher internals
+- Additional capability-based services without launcher-internal access
+- `.pnp` reproducible build and OpenPGP signing targets
 - Declarative settings-page registration
 - Compatibility metadata and diagnostics
 - Minimal sample plugin and build templates
