@@ -111,7 +111,9 @@ public sealed class TestPluginServiceProvider : IPluginServiceProvider
     public bool Supports(PluginServiceId serviceId, string versionRange)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(versionRange);
-        return _byId.ContainsKey(serviceId.Value);
+        if (!_byId.TryGetValue(serviceId.Value, out IPluginService? service))
+            return false;
+        return PluginServiceVersionRanges.Matches(versionRange, service.Version);
     }
 }
 

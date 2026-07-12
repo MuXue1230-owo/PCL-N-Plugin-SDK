@@ -69,6 +69,22 @@ public sealed class PluginContractTests
         Assert.AreEqual(2, context.Logger.Entries.Count);
     }
 
+    [TestMethod]
+    public void StableServiceIds_AndVersionRanges_ArePublicContracts()
+    {
+        Assert.AreEqual("pcl.logging", PluginServiceIds.Logging.Value);
+        Assert.AreEqual("pcl.dispatcher", PluginServiceIds.Dispatcher.Value);
+        Assert.AreEqual("pcl.notifications", PluginServiceIds.Notifications.Value);
+        Assert.AreEqual("pcl.settings", PluginServiceIds.Settings.Value);
+
+        PluginApiVersion v = new(0, 1);
+        Assert.IsTrue(PluginServiceVersionRanges.Matches("*", v));
+        Assert.IsTrue(PluginServiceVersionRanges.Matches(">=0.1 <1.0", v));
+        Assert.IsFalse(PluginServiceVersionRanges.Matches(">=1.0", v));
+        Assert.IsTrue(typeof(IPluginNotificationService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(IPluginSettingsStore).IsAssignableTo(typeof(IPluginService)));
+    }
+
     private static TestPluginContext CreateContext() =>
         new(
             new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
