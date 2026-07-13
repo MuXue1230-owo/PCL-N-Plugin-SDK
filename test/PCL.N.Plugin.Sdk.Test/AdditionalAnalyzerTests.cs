@@ -14,6 +14,15 @@ namespace PCL.N.Plugin.Sdk.Test;
 public sealed class AdditionalAnalyzerTests
 {
     [TestMethod]
+    public void ManifestAnalyzer_DeclaresPNPSDK007Through009()
+    {
+        PluginManifestAdditionalFileAnalyzer analyzer = new();
+        CollectionAssert.AreEquivalent(
+            new[] { "PNPSDK007", "PNPSDK008", "PNPSDK009" },
+            analyzer.SupportedDiagnostics.Select(static diagnostic => diagnostic.Id).ToArray());
+    }
+
+    [TestMethod]
     public async Task PNPSDK006_ReportsForbiddenUsing()
     {
         ImmutableArray<Diagnostic> diagnostics = await AnalyzeAsync(
