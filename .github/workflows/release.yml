@@ -24,6 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           version=$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' Directory.Build.props)-$(sed -n 's:.*<VersionSuffix>\(.*\)</VersionSuffix>.*:\1:p' Directory.Build.props)
+          test -n "$version"
           if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
             test "${GITHUB_REF_NAME}" = "sdk-v${version}"
           fi
@@ -42,17 +43,40 @@ jobs:
             esac
           done
           test "$(find artifacts -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 5
+          test "$(find artifacts -name '*.snupkg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pcl-n-plugin-sdk-${{ env.SDK_VERSION }}-release-candidate
+          path: artifacts/*
+          if-no-files-found: error
       - name: Push NuGet packages
+        if: github.ref_type == 'tag'
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: dotnet nuget push 'artifacts/*.nupkg' --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${NUGET_API_KEY:-}" ]]; then
+            echo "NUGET_API_KEY is not configured in the nuget-production environment." >&2
+            exit 1
+          fi
+          while IFS= read -r package; do
+            dotnet nuget push "$package" \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done < <(find artifacts -maxdepth 1 -name '*.nupkg' ! -name '*.symbols.nupkg' -print | sort)
       - name: Sync GitHub Wiki
+        if: github.ref_type == 'tag'
         env:
           WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$WIKI_TOKEN"
+          if [[ -z "${WIKI_TOKEN:-}" ]]; then
+            echo "WIKI_TOKEN is not configured in the nuget-production environment." >&2
+            exit 1
+          fi
           git clone "https://x-access-token:${WIKI_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki-target
           find wiki-target -maxdepth 1 -type f -name '*.md' -delete
           cp wiki/*.md wiki-target/
@@ -63,6 +87,7 @@ jobs:
           git diff --cached --quiet || git commit -m "docs: sync SDK ${SDK_VERSION} wiki"
           git push
       - uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
           name: PCL N Plugin SDK ${{ env.SDK_VERSION }}
           prerelease: true
