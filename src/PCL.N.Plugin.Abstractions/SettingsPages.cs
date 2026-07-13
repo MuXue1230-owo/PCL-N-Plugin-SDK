@@ -29,6 +29,8 @@ public sealed record PluginSettingsPageDescriptor(
     public string? GroupId { get; init; }
 
     public int Order { get; init; } = 500;
+
+    public bool RequiresDeveloperMode { get; init; }
 }
 
 public interface IPluginSettingsPageGroupCapability : IPluginCapability

@@ -59,7 +59,7 @@ public sealed record PluginManifest
 
     public PluginUpdateManifest Update { get; init; } = new();
 
-    public required PluginSigningManifest Signing { get; init; }
+    public PluginSigningManifest? Signing { get; init; }
 
     public IReadOnlyList<string> Categories { get; init; } = [];
 
