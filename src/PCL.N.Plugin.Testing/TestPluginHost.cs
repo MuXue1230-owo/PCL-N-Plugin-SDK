@@ -129,7 +129,7 @@ public sealed class NullPluginLogger : IPluginLogger
 
     public void Warn(string message) { }
 
-    public void Error(string message, Exception? exception = null) { }
+    public void LogError(string message, Exception? exception = null) { }
 }
 
 public sealed class ImmediatePluginDispatcher : IPluginDispatcher
