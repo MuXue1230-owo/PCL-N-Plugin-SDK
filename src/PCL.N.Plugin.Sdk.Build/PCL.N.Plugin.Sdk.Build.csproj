@@ -12,15 +12,19 @@
     <Title>PCL N Plugin SDK Build</Title>
     <Description>MSBuild integration for reproducible PCL N .pnp package creation and OpenPGP signing.</Description>
     <PackageTags>$(PackageTags);msbuild;pnp;packaging;openpgp</PackageTags>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <BuildOutputTargetFolder>tools/net10.0</BuildOutputTargetFolder>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <SelfContained>false</SelfContained>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="build/**" Pack="true" PackagePath="build/%(RecursiveDir)%(Filename)%(Extension)" />
-    <None Update="buildTransitive/**" Pack="true" PackagePath="buildTransitive/%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Update="build/PCL.N.Plugin.Sdk.Build.props" Pack="true" PackagePath="build/PCL.N.Plugin.Sdk.Build.props" />
+    <None Update="build/PCL.N.Plugin.Sdk.Build.targets" Pack="true" PackagePath="build/PCL.N.Plugin.Sdk.Build.targets" />
+    <None Update="buildTransitive/PCL.N.Plugin.Sdk.Build.props" Pack="true" PackagePath="buildTransitive/PCL.N.Plugin.Sdk.Build.props" />
+    <None Update="buildTransitive/PCL.N.Plugin.Sdk.Build.targets" Pack="true" PackagePath="buildTransitive/PCL.N.Plugin.Sdk.Build.targets" />
     <None Include="../../schemas/plugin.schema.json" Pack="true" PackagePath="schemas/plugin.schema.json" Link="schemas/plugin.schema.json" />
-    <None Include="$(TargetPath)" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
+
+
     <None Include="$(TargetDir)$(AssemblyName).deps.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
     <None Include="$(TargetDir)$(AssemblyName).runtimeconfig.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
   </ItemGroup>
