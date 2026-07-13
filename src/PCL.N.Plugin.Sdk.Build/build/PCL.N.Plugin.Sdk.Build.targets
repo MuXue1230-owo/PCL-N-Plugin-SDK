@@ -1,0 +1,31 @@
+<Project>
+  <PropertyGroup>
+    <_PclNPluginBuildTool Condition="'$(PclNPluginBuildTool)' != ''">$(PclNPluginBuildTool)</_PclNPluginBuildTool>
+    <_PclNPluginBuildTool Condition="'$(_PclNPluginBuildTool)' == ''">$(MSBuildThisFileDirectory)..\tools\net10.0\PCL.N.Plugin.Sdk.Build.dll</_PclNPluginBuildTool>
+  </PropertyGroup>
+  <Target Name="BuildPclNPluginPackage"
+          AfterTargets="Build"
+          Condition="'$(PclNPluginBuildEnabled)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <Error Condition="!Exists('$(PclNPluginManifest)')" Text="PNPBUILD003: Plugin manifest not found: $(PclNPluginManifest)" />
+    <Error Condition="!Exists('$(_PclNPluginBuildTool)')" Text="PNPBUILD004: PCL N plugin build tool not found: $(_PclNPluginBuildTool)" />
+    <Error Condition="'$(PclNPluginId)' == ''" Text="PNPBUILD005: PclNPluginId is required." />
+    <Error Condition="'$(PclNPluginRuntimeIdentifier)' == '' and '$(PlatformTarget)' != '' and '$(PlatformTarget)' != 'AnyCPU'"
+           Text="PNPBUILD006: A universal plugin must target AnyCPU. Set PclNPluginRuntimeIdentifier for an architecture-specific package." />
+    <ItemGroup>
+      <_PclNPluginDependency Include="@(ReferenceCopyLocalPaths)"
+                             Condition="'%(Filename)%(Extension)' != 'PCL.N.Plugin.Abstractions.dll' and '%(Filename)%(Extension)' != 'PCL.Application.dll' and '%(Filename)%(Extension)' != 'PCL.Desktop.dll' and '%(Filename)%(Extension)' != 'PCL.Plugin.dll'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_PclNPluginDeps>$(TargetDir)$(AssemblyName).deps.json</_PclNPluginDeps>
+      <_PclNPluginOutput>$(PclNPluginOutputDirectory)$(PclNPluginId)-$(Version)$(PclNPluginRuntimeSuffix).pnp</_PclNPluginOutput>
+      <_PclNPluginDepsArgument Condition="Exists('$(_PclNPluginDeps)')"> --deps &quot;$(_PclNPluginDeps)&quot;</_PclNPluginDepsArgument>
+      <_PclNPluginContentArguments>@(PclNPluginContent->' --content &quot;%(FullPath)&quot;', '')</_PclNPluginContentArguments>
+      <_PclNPluginDependencyArguments>@(_PclNPluginDependency->' --dependency &quot;%(FullPath)&quot;', '')</_PclNPluginDependencyArguments>
+      <_PclNPluginNativeArguments>@(PclNPluginNative->' --native &quot;%(RuntimeIdentifier)|%(FullPath)&quot;', '')</_PclNPluginNativeArguments>
+    </PropertyGroup>
+    <Exec Command="dotnet &quot;$(_PclNPluginBuildTool)&quot; --manifest &quot;$(PclNPluginManifest)&quot; --assembly &quot;$(TargetPath)&quot;$(_PclNPluginDepsArgument) --output &quot;$(_PclNPluginOutput)&quot; --content-root &quot;$(PclNPluginContentRoot)&quot;$(_PclNPluginContentArguments)$(_PclNPluginDependencyArguments)$(_PclNPluginNativeArguments) --sign &quot;$(PclNPluginSign)&quot; --gpg &quot;$(PclNPluginGpgPath)&quot;" />
+    <ItemGroup>
+      <FileWrites Include="$(_PclNPluginOutput)" />
+    </ItemGroup>
+  </Target>
+</Project>
