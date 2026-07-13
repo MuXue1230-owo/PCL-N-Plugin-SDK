@@ -11,7 +11,7 @@ public sealed class TestPluginTaskService : IPluginTaskService, IAsyncDisposable
 
     public IPluginTaskRegistration SchedulePeriodic(string id, TimeSpan interval, Func<CancellationToken, Task> task)
     {
-        if (interval <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(interval));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero);
         return Add(id, task, interval);
     }
 

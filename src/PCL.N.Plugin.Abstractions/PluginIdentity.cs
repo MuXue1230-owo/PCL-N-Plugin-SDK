@@ -217,6 +217,14 @@ public readonly record struct PluginApiVersion : IComparable<PluginApiVersion>
 
     public override string ToString() => $"{Major}.{Minor}";
 
+    public static bool operator <(PluginApiVersion left, PluginApiVersion right) => left.CompareTo(right) < 0;
+
+    public static bool operator >(PluginApiVersion left, PluginApiVersion right) => left.CompareTo(right) > 0;
+
+    public static bool operator <=(PluginApiVersion left, PluginApiVersion right) => left.CompareTo(right) <= 0;
+
+    public static bool operator >=(PluginApiVersion left, PluginApiVersion right) => left.CompareTo(right) >= 0;
+
     private static bool Assign(int major, int minor, out PluginApiVersion version)
     {
         version = new PluginApiVersion(major, minor);

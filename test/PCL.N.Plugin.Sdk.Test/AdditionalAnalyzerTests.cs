@@ -13,12 +13,14 @@ namespace PCL.N.Plugin.Sdk.Test;
 [TestClass]
 public sealed class AdditionalAnalyzerTests
 {
+    private static readonly string[] ManifestDiagnosticIds = ["PNPSDK007", "PNPSDK008", "PNPSDK009"];
+
     [TestMethod]
     public void ManifestAnalyzer_DeclaresPNPSDK007Through009()
     {
         PluginManifestAdditionalFileAnalyzer analyzer = new();
         CollectionAssert.AreEquivalent(
-            new[] { "PNPSDK007", "PNPSDK008", "PNPSDK009" },
+            ManifestDiagnosticIds,
             analyzer.SupportedDiagnostics.Select(static diagnostic => diagnostic.Id).ToArray());
     }
 

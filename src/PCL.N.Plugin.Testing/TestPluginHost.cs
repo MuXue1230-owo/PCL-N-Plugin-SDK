@@ -220,7 +220,7 @@ public sealed class CollectingPluginLogger : IPluginLogger
 
     public void Warn(string message) => Add("warn", message, null);
 
-    public void Error(string message, Exception? exception = null) => Add("error", message, exception);
+    public void LogError(string message, Exception? exception = null) => Add("error", message, exception);
 
     private void Add(string level, string message, Exception? exception)
     {

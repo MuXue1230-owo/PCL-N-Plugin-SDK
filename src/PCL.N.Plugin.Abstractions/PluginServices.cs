@@ -73,7 +73,7 @@ public interface IPluginLogger
 
     void Warn(string message);
 
-    void Error(string message, Exception? exception = null);
+    void LogError(string message, Exception? exception = null);
 }
 
 /// <summary>Dispatches work onto the host UI / main thread when required.</summary>

@@ -13,7 +13,7 @@ public sealed class ReleaseAssetTests
         string root = FindRepositoryRoot();
         string wiki = Path.Combine(root, "wiki");
         HashSet<string> pages = Directory.EnumerateFiles(wiki, "*.md")
-            .Select(Path.GetFileNameWithoutExtension)
+            .Select(static file => Path.GetFileNameWithoutExtension(file)!)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         List<string> errors = [];
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
