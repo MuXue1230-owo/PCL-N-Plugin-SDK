@@ -2,10 +2,10 @@ namespace PCL.N.Plugin;
 
 /// <summary>
 /// Remote plugin marketplace client contract (design §19.2).
-/// HTTP routes are reserved for a future server; implementations may be no-op until then.
+/// Hosts may implement this contract against the public PCL.N plugin catalog.
 /// </summary>
 /// <remarks>
-/// Planned HTTP surface (server not shipped yet):
+/// Production HTTP surface:
 /// <list type="bullet">
 /// <item><c>GET /v1/plugins</c></item>
 /// <item><c>GET /v1/plugins/{pluginId}</c></item>
@@ -121,8 +121,8 @@ public sealed record PluginMarketPublisher(
     string? Namespace);
 
 /// <summary>
-/// Default remote market client: API reserved, all operations report "not configured".
-/// Replace with an HTTP implementation when the market server is available.
+/// Optional fallback client for hosts that deliberately disable online market access.
+/// All operations report "not configured".
 /// </summary>
 public sealed class UnconfiguredPluginMarketClient : IPluginMarketClient
 {

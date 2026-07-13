@@ -17,7 +17,7 @@ Implemented in the first platform phase:
 - `PCL.N.Plugin.Analyzers` **PNPSDK001–006 / 010** (host refs, entry shape, lifetime track, namespaces, untracked work)
 - Manifest validator **PNPSDK008** (API range required)
 - UI Surface + UI Patch contracts (`IPluginUiSurfaceRegistry`, `IPluginUiPatchService`, conflict plan)
-- Marketplace client ABI (`IPluginMarketClient`, `UnconfiguredPluginMarketClient`) — remote server not shipped
+- Marketplace client ABI (`IPluginMarketClient`, `UnconfiguredPluginMarketClient`) for the public PCL.N catalog
 - three-platform build, test, and pack CI
 
 The first-party `PCL.Plugin` HostModule is deliberately not part of this public third-party ABI. Third-party plugins implement `IPclNPlugin`; the built-in HostModule uses a separate host contract owned by PCL N.
