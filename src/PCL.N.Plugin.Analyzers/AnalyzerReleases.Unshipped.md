@@ -1,4 +1,1 @@
-## Unshipped
-
-Rule ID | Category | Severity | Notes
---------|----------|----------|------
+; This file intentionally contains no unshipped analyzer rules.

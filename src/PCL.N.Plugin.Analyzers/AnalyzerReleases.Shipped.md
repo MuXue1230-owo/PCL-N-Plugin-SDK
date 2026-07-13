@@ -1,4 +1,4 @@
-## Release 0.1.0-alpha.1
+## Release 0.1.0
 
 ### New Rules
 

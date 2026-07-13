@@ -6,7 +6,7 @@ internal static class CanonicalJson
 
     public static byte[] Normalize(ReadOnlySpan<byte> json)
     {
-        using JsonDocument document = JsonDocument.Parse(json);
+        using JsonDocument document = JsonDocument.Parse(json.ToArray());
         using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream, new JsonWriterOptions { Indented = false }))
             Write(writer, document.RootElement);
