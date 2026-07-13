@@ -71,7 +71,7 @@ public sealed class ForbiddenHostReferenceAnalyzerTests
         return await withAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
     }
 
-    private static MetadataReference CreateNamedReference(string assemblyName)
+    private static PortableExecutableReference CreateNamedReference(string assemblyName)
     {
         CSharpCompilation empty = CSharpCompilation.Create(
             assemblyName,

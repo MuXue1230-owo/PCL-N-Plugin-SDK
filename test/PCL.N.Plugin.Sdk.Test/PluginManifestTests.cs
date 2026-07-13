@@ -7,6 +7,8 @@ namespace PCL.N.Plugin.Sdk.Test;
 [TestClass]
 public sealed class PluginManifestTests
 {
+    private static readonly string[] ExpectedInvalidManifestCodes = ["PNPMAN005", "PNPMAN010", "PNPMAN017", "PNPMAN019"];
+
     [TestMethod]
     public void ValidManifest_ParsesAndValidates()
     {
@@ -31,7 +33,7 @@ public sealed class PluginManifestTests
 
         Assert.IsFalse(result.IsValid);
         CollectionAssert.IsSubsetOf(
-            new[] { "PNPMAN005", "PNPMAN010", "PNPMAN017", "PNPMAN019" },
+            ExpectedInvalidManifestCodes,
             result.Issues.Select(issue => issue.Code).ToArray());
     }
 
