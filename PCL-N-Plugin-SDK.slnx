@@ -3,6 +3,7 @@
     <Project Path="src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
     <Project Path="src/PCL.N.Plugin.Analyzers/PCL.N.Plugin.Analyzers.csproj" />
     <Project Path="src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj" />
+    <Project Path="src/PCL.N.Plugin.Sdk.Build/PCL.N.Plugin.Sdk.Build.csproj" />
     <Project Path="src/PCL.N.Plugin.Testing/PCL.N.Plugin.Testing.csproj" />
   </Folder>
   <Folder Name="/examples/">
