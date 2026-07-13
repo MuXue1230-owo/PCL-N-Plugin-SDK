@@ -81,6 +81,8 @@ public sealed class PluginContractTests
         Assert.AreEqual("pcl.instances.read", PluginServiceIds.InstancesRead.Value);
         Assert.AreEqual("pcl.ui", PluginServiceIds.Ui.Value);
         Assert.AreEqual("pcl.ui.patch", PluginServiceIds.UiPatch.Value);
+        Assert.AreEqual("pcl.market", PluginServiceIds.Market.Value);
+        Assert.IsFalse(UnconfiguredPluginMarketClient.Instance.IsRemoteConfigured);
 
         PluginApiVersion v = new(0, 1);
         Assert.IsTrue(PluginServiceVersionRanges.Matches("*", v));
@@ -94,6 +96,8 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginUiSurfaceRegistry).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.ListPluginsAsync)));
+        Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.GetDownloadAsync)));
     }
 
     private static TestPluginContext CreateContext() =>

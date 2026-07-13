@@ -37,6 +37,9 @@ public static class PluginServiceIds
     public static PluginServiceId Ui { get; } = new("pcl.ui");
 
     public static PluginServiceId UiPatch { get; } = new("pcl.ui.patch");
+
+    /// <summary>Reserved for host market access; remote server not shipped yet.</summary>
+    public static PluginServiceId Market { get; } = new("pcl.market");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
