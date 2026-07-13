@@ -108,12 +108,12 @@ public sealed class TestPluginServiceProvider : IPluginServiceProvider
         throw new NotSupportedException($"Service not available: {typeof(TService).FullName}");
     }
 
-    public bool Supports(PluginServiceId serviceId, string versionRange)
+    public bool Supports(PluginServiceId serviceId, PluginApiVersionRange versionRange)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(versionRange);
+        ArgumentNullException.ThrowIfNull(versionRange);
         if (!_byId.TryGetValue(serviceId.Value, out IPluginService? service))
             return false;
-        return PluginServiceVersionRanges.Matches(versionRange, service.Version);
+        return versionRange.Contains(service.Version);
     }
 }
 

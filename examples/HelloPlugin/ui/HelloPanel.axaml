@@ -1,0 +1,9 @@
+<Border xmlns="https://github.com/avaloniaui"
+        Padding="12"
+        CornerRadius="8">
+  <StackPanel Spacing="6">
+    <TextBlock FontWeight="SemiBold" Text="Hello Plugin" />
+    <TextBlock Text="This declarative AXAML resource is loaded by the PCL N plugin UI host." TextWrapping="Wrap" />
+    <Button Content="Say hello" Command="{Binding Commands[dev.muxue.hello.say-hello]}" />
+  </StackPanel>
+</Border>

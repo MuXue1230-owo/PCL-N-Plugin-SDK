@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "manifestVersion": 1,
+  "id": "dev.muxue.hello",
+  "name": "Hello Plugin",
+  "version": "0.1.0-alpha.1",
+  "channel": "alpha",
+  "summary": "PCL N Plugin SDK example.",
+  "publisher": { "id": "github:MuXue1230-owo", "namespace": "dev.muxue" },
+  "license": "Apache-2.0",
+  "entryPoint": { "assembly": "lib/net10.0/HelloPlugin.dll", "type": "HelloPlugin.HelloPlugin" },
+  "api": { "minimum": "0.1", "maximumExclusive": "1.0" },
+  "host": { "minimumVersion": "0.1.0" },
+  "services": { "required": { "pcl.commands": ">=0.1 <1.0", "pcl.ui": ">=0.1 <1.0" } },
+  "permissions": [{ "id": "ui.inject", "reason": "Display the sample panel on the launch page." }],
+  "ui": {
+    "api": { "minimum": "0.1", "maximumExclusive": "1.0" },
+    "avalonia": { "minimum": "12.0", "maximumExclusive": "13.0" },
+    "targets": [{
+      "target": "pcl.page.launch",
+      "surface": ">=3.0.0 <4.0.0",
+      "access": ["inject"],
+      "operations": [{
+        "id": "hello-panel",
+        "kind": "inject",
+        "slot": "primary-actions.after",
+        "axaml": "ui/HelloPanel.axaml",
+        "command": "dev.muxue.hello.say-hello",
+        "required": true,
+        "fallback": "disable-feature"
+      }]
+    }]
+  },
+  "signing": { "fingerprint": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+  "categories": ["tools"],
+  "tags": ["example"]
+}
