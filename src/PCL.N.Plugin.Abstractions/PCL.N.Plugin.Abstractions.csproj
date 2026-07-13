@@ -3,8 +3,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>PCL.N.Plugin.Abstractions</AssemblyName>
     <RootNamespace>PCL.N.Plugin</RootNamespace>
-    <Version>0.1.0-alpha.1</Version>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,8 +10,8 @@
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
     <PackageId>PCL.N.Plugin.Abstractions</PackageId>
-    <Description>Stable public ABI contracts for PCL N third-party plugins.</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</RepositoryUrl>
+    <Title>PCL N Plugin Abstractions</Title>
+    <Description>Public runtime ABI contracts for third-party PCL N plugins. This package contains no launcher or private host implementation.</Description>
+    <PackageTags>$(PackageTags);abstractions;contracts;abi</PackageTags>
   </PropertyGroup>
 </Project>

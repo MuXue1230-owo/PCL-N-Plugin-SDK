@@ -3,7 +3,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>PCL.N.Plugin.Analyzers</AssemblyName>
     <RootNamespace>PCL.N.Plugin.Analyzers</RootNamespace>
-    <Version>0.1.0-alpha.1</Version>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -13,10 +12,11 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
     <PackageId>PCL.N.Plugin.Analyzers</PackageId>
-    <Description>Compile-time guards for third-party PCL N plugins (PNPSDK001–003).</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</RepositoryUrl>
+    <Title>PCL N Plugin Analyzers</Title>
+    <Description>Compile-time boundary, entry-point, lifecycle, manifest, and UI declaration diagnostics for PCL N plugins (PNPSDK001–010).</Description>
+    <PackageTags>$(PackageTags);roslyn;analyzer;security</PackageTags>
     <NoWarn>$(NoWarn);RS2008</NoWarn>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
@@ -24,5 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 </Project>
