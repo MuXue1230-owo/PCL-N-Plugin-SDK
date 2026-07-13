@@ -24,5 +24,77 @@ jobs:
       - run: dotnet restore PCL-N-Plugin-SDK.slnx
       - run: dotnet build PCL-N-Plugin-SDK.slnx -c Release --no-restore -warnaserror
       - run: dotnet test PCL-N-Plugin-SDK.slnx -c Release --no-build --no-restore -warnaserror
-      - run: dotnet pack src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj -c Release --no-build -o artifacts
-      - run: dotnet pack src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj -c Release --no-build -o artifacts
+
+  package:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore PCL-N-Plugin-SDK.slnx
+      - run: dotnet build PCL-N-Plugin-SDK.slnx -c Release --no-restore -warnaserror
+      - run: dotnet test PCL-N-Plugin-SDK.slnx -c Release --no-build --no-restore -warnaserror
+      - name: Verify public API boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s PublicApiBaseline.md
+          rg -n 'IPclNPlugin|PluginManifest|IPluginUiPatchService' PublicApiBaseline.md
+      - name: Pack all public packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/nuget
+          for project in \
+            src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj \
+            src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj \
+            src/PCL.N.Plugin.Analyzers/PCL.N.Plugin.Analyzers.csproj \
+            src/PCL.N.Plugin.Testing/PCL.N.Plugin.Testing.csproj \
+            src/PCL.N.Plugin.Sdk.Build/PCL.N.Plugin.Sdk.Build.csproj; do
+            dotnet pack "$project" -c Release --no-build -o artifacts/nuget
+          done
+          test "$(find artifacts/nuget -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 5
+          test "$(find artifacts/nuget -name '*.snupkg' | wc -l)" -eq 5
+      - name: Verify packages restore in a clean project
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pcl-sdk-consumer
+          cd /tmp/pcl-sdk-consumer
+          dotnet new classlib --framework net10.0 --no-restore
+          dotnet add package PCL.N.Plugin.Abstractions --version 0.1.0-alpha.1 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCL.N.Plugin.Sdk --version 0.1.0-alpha.1 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCL.N.Plugin.Testing --version 0.1.0-alpha.1 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet build -c Release -warnaserror
+      - name: Verify reproducible example package
+        shell: bash
+        run: |
+          set -euo pipefail
+          package=examples/HelloPlugin/bin/Release/net10.0/dev.muxue.hello-0.1.0-alpha.1.pnp
+          test -s "$package"
+          first=$(sha256sum "$package" | cut -d' ' -f1)
+          rm -f "$package"
+          dotnet build examples/HelloPlugin/HelloPlugin.csproj -c Release --no-restore -warnaserror
+          second=$(sha256sum "$package" | cut -d' ' -f1)
+          test "$first" = "$second"
+          python - <<'PY'
+          import zipfile
+          p='examples/HelloPlugin/bin/Release/dev.muxue.hello-0.1.0-alpha.1.pnp'
+          with zipfile.ZipFile(p) as z:
+              names=set(z.namelist())
+              required={'plugin.json','ui/HelloPanel.axaml','META-INF/pnp.files.json','META-INF/pnp.signed.json'}
+              assert required <= names, required-names
+              forbidden={'PCL.N.Plugin.Abstractions.dll','PCL.Application.dll','PCL.Desktop.dll','PCL.Plugin.dll'}
+              assert not ({n.rsplit('/',1)[-1] for n in names} & forbidden)
+          PY
+          mkdir -p artifacts/examples
+          cp "$package" artifacts/examples/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pcl-n-plugin-sdk-0.1.0-alpha.1
+          path: |
+            artifacts/nuget/*
+            artifacts/examples/*
+          if-no-files-found: error
