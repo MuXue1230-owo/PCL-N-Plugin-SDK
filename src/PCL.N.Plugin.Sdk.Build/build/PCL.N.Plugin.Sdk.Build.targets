@@ -17,7 +17,9 @@
     </ItemGroup>
     <PropertyGroup>
       <_PclNPluginDeps>$(TargetDir)$(AssemblyName).deps.json</_PclNPluginDeps>
-      <_PclNPluginOutput>$(PclNPluginOutputDirectory)$(PclNPluginId)-$(Version)$(PclNPluginRuntimeSuffix).pnp</_PclNPluginOutput>
+      <_PclNPluginOutputDirectory Condition="'$(PclNPluginOutputDirectory)' != ''">$(PclNPluginOutputDirectory)</_PclNPluginOutputDirectory>
+      <_PclNPluginOutputDirectory Condition="'$(_PclNPluginOutputDirectory)' == ''">$(TargetDir)</_PclNPluginOutputDirectory>
+      <_PclNPluginOutput>$(_PclNPluginOutputDirectory)$(PclNPluginId)-$(Version)$(PclNPluginRuntimeSuffix).pnp</_PclNPluginOutput>
       <_PclNPluginDepsArgument Condition="Exists('$(_PclNPluginDeps)')"> --deps &quot;$(_PclNPluginDeps)&quot;</_PclNPluginDepsArgument>
       <_PclNPluginContentArguments>@(PclNPluginContent->' --content &quot;%(FullPath)&quot;', '')</_PclNPluginContentArguments>
       <_PclNPluginDependencyArguments>@(_PclNPluginDependency->' --dependency &quot;%(FullPath)&quot;', '')</_PclNPluginDependencyArguments>

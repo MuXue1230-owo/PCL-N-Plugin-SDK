@@ -4,7 +4,7 @@
     <PclNPluginSign Condition="'$(PclNPluginSign)' == ''">false</PclNPluginSign>
     <PclNPluginGpgPath Condition="'$(PclNPluginGpgPath)' == ''">gpg</PclNPluginGpgPath>
     <PclNPluginManifest Condition="'$(PclNPluginManifest)' == ''">$(MSBuildProjectDirectory)/plugin.json</PclNPluginManifest>
-    <PclNPluginOutputDirectory Condition="'$(PclNPluginOutputDirectory)' == ''">$(OutputPath)</PclNPluginOutputDirectory>
+
     <PclNPluginContentRoot Condition="'$(PclNPluginContentRoot)' == ''">$(MSBuildProjectDirectory)</PclNPluginContentRoot>
     <PlatformTarget Condition="'$(PlatformTarget)' == ''">AnyCPU</PlatformTarget>
     <PclNPluginRuntimeSuffix Condition="'$(PclNPluginRuntimeIdentifier)' != ''">-$(PclNPluginRuntimeIdentifier)</PclNPluginRuntimeSuffix>
