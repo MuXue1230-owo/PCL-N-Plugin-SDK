@@ -177,8 +177,38 @@ public readonly record struct PluginVersion : IComparable<PluginVersion>
     }
 }
 
-public readonly record struct PluginApiVersion(int Major, int Minor) : IComparable<PluginApiVersion>
+public readonly record struct PluginApiVersion : IComparable<PluginApiVersion>
 {
+    public PluginApiVersion(int major, int minor)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(major);
+        ArgumentOutOfRangeException.ThrowIfNegative(minor);
+        Major = major;
+        Minor = minor;
+    }
+
+    public int Major { get; }
+
+    public int Minor { get; }
+
+    public static PluginApiVersion Parse(string value) =>
+        TryParse(value, out PluginApiVersion version)
+            ? version
+            : throw new FormatException($"Invalid plugin API version: {value}");
+
+    public static bool TryParse(string? value, out PluginApiVersion version)
+    {
+        version = default;
+        string[] parts = value?.Split('.') ?? [];
+        return parts.Length == 2 &&
+               int.TryParse(parts[0], System.Globalization.NumberStyles.None,
+                   System.Globalization.CultureInfo.InvariantCulture, out int major) &&
+               int.TryParse(parts[1], System.Globalization.NumberStyles.None,
+                   System.Globalization.CultureInfo.InvariantCulture, out int minor) &&
+               major >= 0 && minor >= 0 &&
+               Assign(major, minor, out version);
+    }
+
     public int CompareTo(PluginApiVersion other)
     {
         int majorComparison = Major.CompareTo(other.Major);
@@ -186,6 +216,12 @@ public readonly record struct PluginApiVersion(int Major, int Minor) : IComparab
     }
 
     public override string ToString() => $"{Major}.{Minor}";
+
+    private static bool Assign(int major, int minor, out PluginApiVersion version)
+    {
+        version = new PluginApiVersion(major, minor);
+        return true;
+    }
 }
 
 public sealed record PluginDescriptor(

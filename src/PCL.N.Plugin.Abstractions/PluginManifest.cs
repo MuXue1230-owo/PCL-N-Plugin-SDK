@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PCL.N.Plugin;
@@ -51,7 +50,7 @@ public sealed record PluginManifest
 
     public IReadOnlyList<PluginPermissionManifest> Permissions { get; init; } = [];
 
-    public JsonElement? Ui { get; init; }
+    public PluginUiManifest? Ui { get; init; }
 
     public PluginDataManifest Data { get; init; } = new();
 
@@ -97,6 +96,90 @@ public sealed record PluginServiceRequirementsManifest
 }
 
 public sealed record PluginPermissionManifest(string Id, string Reason);
+
+public sealed record PluginUiManifest
+{
+    public required PluginApiRangeManifest Api { get; init; }
+
+    public PluginAvaloniaRangeManifest? Avalonia { get; init; }
+
+    public bool RequiresRestart { get; init; }
+
+    public IReadOnlyList<PluginUiTargetManifest> Targets { get; init; } = [];
+}
+
+public sealed record PluginAvaloniaRangeManifest(string Minimum, string MaximumExclusive);
+
+public sealed record PluginUiTargetManifest
+{
+    public required string Target { get; init; }
+
+    public required string Surface { get; init; }
+
+    public IReadOnlyList<string> Access { get; init; } = [];
+
+    public IReadOnlyList<PluginUiOperationManifest> Operations { get; init; } = [];
+
+    public PluginUiCompatibilityManifest Compatibility { get; init; } = new();
+}
+
+public sealed record PluginUiOperationManifest
+{
+    public required string Id { get; init; }
+
+    public required string Kind { get; init; }
+
+    public string? Slot { get; init; }
+
+    public string? Selector { get; init; }
+
+    /// <summary>
+    /// Safe package-relative path to a declarative AXAML resource, normally under <c>ui/</c>.
+    /// Code-behind and launcher-private CLR namespaces are not part of this contract.
+    /// </summary>
+    public string? Axaml { get; init; }
+
+    /// <summary>Optional public command ID used by bindings declared in the AXAML resource.</summary>
+    public string? Command { get; init; }
+
+    public int Priority { get; init; }
+
+    public bool Required { get; init; }
+
+    public string Fallback { get; init; } = "skip-patch";
+
+    public IReadOnlyList<string> Before { get; init; } = [];
+
+    public IReadOnlyList<string> After { get; init; } = [];
+
+    public string? PropertyPath { get; init; }
+
+    public string? ModifyPolicy { get; init; }
+
+    public bool AllowWrapping { get; init; }
+
+    public PluginUiPreconditionsManifest? Preconditions { get; init; }
+}
+
+public sealed record PluginUiPreconditionsManifest
+{
+    public string? Surface { get; init; }
+
+    public IReadOnlyList<string> RequiredSlots { get; init; } = [];
+
+    public IReadOnlyList<string> RequiredProperties { get; init; } = [];
+
+    public IReadOnlyList<string> RequiredEvents { get; init; } = [];
+}
+
+public sealed record PluginUiCompatibilityManifest
+{
+    public IReadOnlyDictionary<string, string> CompatibleWith { get; init; } =
+        new Dictionary<string, string>();
+
+    public IReadOnlyDictionary<string, string> IncompatibleWith { get; init; } =
+        new Dictionary<string, string>();
+}
 
 public sealed record PluginDataManifest(int SchemaVersion = 1, int MinimumReadableSchema = 1);
 

@@ -5,16 +5,16 @@ public readonly record struct PluginServiceId
 {
     public PluginServiceId(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Service ID cannot be empty.", nameof(value));
-        Value = value.Trim();
+        if (!PluginId.TryParse(value, out _))
+            throw new ArgumentException("Service ID must match ^[a-z0-9]+([.-][a-z0-9]+)*$.", nameof(value));
+        Value = value;
     }
 
     public string Value { get; }
 
-    public override string ToString() => Value;
+    public bool IsDefault => Value is null;
 
-    public static implicit operator string(PluginServiceId id) => id.Value;
+    public override string ToString() => Value ?? string.Empty;
 }
 
 /// <summary>Well-known host service IDs (design §9 Stable surface; versions still 0.x until API 1.0).</summary>
@@ -59,7 +59,7 @@ public interface IPluginServiceProvider
     TService Require<TService>()
         where TService : class, IPluginService;
 
-    bool Supports(PluginServiceId serviceId, string versionRange);
+    bool Supports(PluginServiceId serviceId, PluginApiVersionRange versionRange);
 }
 
 /// <summary>Structured plugin logger (also available as <see cref="IPluginContext.Logger"/>).</summary>
@@ -200,82 +200,71 @@ public interface IPluginInstanceReadService : IPluginService
 /// </summary>
 public static class PluginServiceVersionRanges
 {
-    public static bool Matches(string versionRange, PluginApiVersion version)
+    public static bool Matches(string versionRange, PluginApiVersion version) =>
+        PluginApiVersionRange.TryParse(versionRange, out PluginApiVersionRange? range) &&
+        range is not null &&
+        range.Contains(version);
+}
+
+public sealed class PluginApiVersionRange
+{
+    private readonly IReadOnlyList<(string Operation, PluginApiVersion Version)> _constraints;
+
+    private PluginApiVersionRange(string value, IReadOnlyList<(string, PluginApiVersion)> constraints)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(versionRange);
-        string trimmed = versionRange.Trim();
-        if (trimmed == "*")
-            return true;
-
-        foreach (string token in trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            string operation;
-            string versionText;
-            if (token.StartsWith(">=", StringComparison.Ordinal))
-            {
-                operation = ">=";
-                versionText = token[2..];
-            }
-            else if (token.StartsWith("<=", StringComparison.Ordinal))
-            {
-                operation = "<=";
-                versionText = token[2..];
-            }
-            else if (token.StartsWith('>'))
-            {
-                operation = ">";
-                versionText = token[1..];
-            }
-            else if (token.StartsWith('<'))
-            {
-                operation = "<";
-                versionText = token[1..];
-            }
-            else if (token.StartsWith('='))
-            {
-                operation = "=";
-                versionText = token[1..];
-            }
-            else
-            {
-                operation = "=";
-                versionText = token;
-            }
-
-            if (!TryParseApiVersion(versionText, out PluginApiVersion constraint))
-                return false;
-
-            int comparison = version.CompareTo(constraint);
-            bool ok = operation switch
-            {
-                ">=" => comparison >= 0,
-                ">" => comparison > 0,
-                "<=" => comparison <= 0,
-                "<" => comparison < 0,
-                _ => comparison == 0
-            };
-            if (!ok)
-                return false;
-        }
-
-        return true;
+        Value = value;
+        _constraints = constraints;
     }
 
-    private static bool TryParseApiVersion(string value, out PluginApiVersion version)
+    public string Value { get; }
+
+    public static PluginApiVersionRange Parse(string value) =>
+        TryParse(value, out PluginApiVersionRange? range) && range is not null
+            ? range
+            : throw new FormatException($"Invalid plugin API version range: {value}");
+
+    public static bool TryParse(string? value, out PluginApiVersionRange? range)
     {
-        version = default;
-        string[] parts = value.Split('.');
-        if (parts.Length != 2 ||
-            !int.TryParse(parts[0], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int major) ||
-            !int.TryParse(parts[1], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int minor) ||
-            major < 0 || minor < 0)
-        {
+        range = null;
+        if (string.IsNullOrWhiteSpace(value))
             return false;
+        string normalized = value.Trim();
+        if (normalized == "*")
+        {
+            range = new PluginApiVersionRange(normalized, []);
+            return true;
         }
 
-        version = new PluginApiVersion(major, minor);
-        return true;
+        List<(string, PluginApiVersion)> constraints = [];
+        foreach (string token in normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string operation = token.StartsWith(">=", StringComparison.Ordinal) ? ">=" :
+                token.StartsWith("<=", StringComparison.Ordinal) ? "<=" :
+                token.StartsWith('>') ? ">" : token.StartsWith('<') ? "<" :
+                token.StartsWith('=') ? "=" : "=";
+            string versionText = operation == "=" && !token.StartsWith('=') ? token : token[operation.Length..];
+            if (!PluginApiVersion.TryParse(versionText, out PluginApiVersion version))
+                return false;
+            constraints.Add((operation, version));
+        }
+        range = new PluginApiVersionRange(normalized, constraints);
+        return constraints.Count > 0;
     }
+
+    public bool Contains(PluginApiVersion version) => _constraints.All(constraint =>
+    {
+        int comparison = version.CompareTo(constraint.Version);
+        return constraint.Operation switch
+        {
+            ">=" => comparison >= 0,
+            ">" => comparison > 0,
+            "<=" => comparison <= 0,
+            "<" => comparison < 0,
+            _ => comparison == 0
+        };
+    });
+
+    public override string ToString() => Value;
 }
 
 /// <summary>Per-plugin filesystem layout under the host install root.</summary>

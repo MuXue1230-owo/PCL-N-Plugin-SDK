@@ -88,6 +88,7 @@ public static class PluginManifestValidator
         ValidatePermissions(manifest.Permissions ?? [], issues);
         ValidatePlatforms(manifest.Platforms ?? new PluginPlatformManifest(), issues);
         ValidateServiceRanges(manifest.Services ?? new PluginServiceRequirementsManifest(), issues);
+        ValidateUi(manifest.Ui, issues);
         PluginDataManifest data = manifest.Data ?? new PluginDataManifest();
         AddIf(data.MinimumReadableSchema > data.SchemaVersion,
             "PNPMAN032", "$.data", "minimumReadableSchema cannot exceed schemaVersion.");
@@ -199,6 +200,55 @@ public static class PluginManifestValidator
         }
         if (required.Keys.Intersect(optional.Keys, StringComparer.Ordinal).Any())
             issues.Add(new PluginManifestValidationIssue("PNPMAN031", "$.services", "A service cannot be both required and optional."));
+    }
+
+    private static void ValidateUi(PluginUiManifest? ui, List<PluginManifestValidationIssue> issues)
+    {
+        if (ui is null)
+            return;
+
+        ValidateApiRange(ui.Api, issues);
+        HashSet<string> targets = new(StringComparer.Ordinal);
+        HashSet<string> operationIds = new(StringComparer.Ordinal);
+        for (int targetIndex = 0; targetIndex < ui.Targets.Count; targetIndex++)
+        {
+            PluginUiTargetManifest target = ui.Targets[targetIndex];
+            string targetPath = $"$.ui.targets[{targetIndex}]";
+            if (string.IsNullOrWhiteSpace(target.Target) || !targets.Add(target.Target))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN033", targetPath + ".target", "UI target is empty or duplicated."));
+            if (!PluginVersionRange.TryParse(NormalizeServiceRange(target.Surface), out _))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN034", targetPath + ".surface", "UI surface version range is invalid."));
+
+            HashSet<string> access = new(StringComparer.Ordinal);
+            foreach (string value in target.Access)
+            {
+                if (!access.Add(value) || value is not ("observe" or "inject" or "modify" or "replace" or "wrap" or "resources" or "raw-access" or "input-intercept"))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN035", targetPath + ".access", $"UI access '{value}' is invalid or duplicated."));
+            }
+
+            for (int operationIndex = 0; operationIndex < target.Operations.Count; operationIndex++)
+            {
+                PluginUiOperationManifest operation = target.Operations[operationIndex];
+                string operationPath = $"{targetPath}.operations[{operationIndex}]";
+                if (string.IsNullOrWhiteSpace(operation.Id) || !operationIds.Add(operation.Id))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN036", operationPath + ".id", "UI operation ID is empty or duplicated."));
+                if (operation.Kind is not ("observe" or "register" or "inject" or "modify" or "replace" or "remove" or "reorder" or "override-resource" or "override-style" or "override-template" or "intercept-input" or "wrap"))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN037", operationPath + ".kind", "UI operation kind is unsupported."));
+                if (operation.Kind == "inject" && string.IsNullOrWhiteSpace(operation.Slot))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN038", operationPath + ".slot", "Inject operations require a slot."));
+                if (operation.Axaml is not null &&
+                    (!IsSafeRelativePath(operation.Axaml) ||
+                     !operation.Axaml.StartsWith("ui/", StringComparison.Ordinal) ||
+                     !operation.Axaml.EndsWith(".axaml", StringComparison.OrdinalIgnoreCase)))
+                {
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN040", operationPath + ".axaml", "AXAML must be a safe package path under ui/ ending in .axaml."));
+                }
+                if (operation.Axaml is not null && operation.Kind is not ("register" or "inject" or "replace" or "wrap"))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN041", operationPath + ".axaml", "AXAML is only supported by register, inject, replace, or wrap operations."));
+                if (operation.Kind == "modify" && string.IsNullOrWhiteSpace(operation.Selector) && string.IsNullOrWhiteSpace(operation.PropertyPath))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN039", operationPath, "Modify operations require a selector or propertyPath."));
+            }
+        }
     }
 
     private static string NormalizeServiceRange(string range) =>

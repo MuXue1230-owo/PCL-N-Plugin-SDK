@@ -3,67 +3,153 @@
   "$id": "https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/schemas/plugin.schema.json",
   "title": "PCL N Plugin Manifest",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": ["formatVersion", "manifestVersion", "id", "name", "version", "publisher", "license", "entryPoint", "api", "host", "signing"],
   "properties": {
     "formatVersion": { "const": 1 },
     "manifestVersion": { "const": 1 },
-    "id": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$" },
+    "id": { "$ref": "#/$defs/pluginId" },
     "name": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "version": {
-      "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
-    },
+    "version": { "$ref": "#/$defs/semver" },
     "channel": { "enum": ["stable", "beta", "alpha", "nightly"] },
-    "publisher": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "namespace"],
-      "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "namespace": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$" }
-      }
-    },
+    "summary": { "type": ["string", "null"], "maxLength": 256 },
+    "description": { "type": ["string", "null"] },
+    "publisher": { "$ref": "#/$defs/publisher" },
+    "authors": { "type": "array", "items": { "$ref": "#/$defs/author" }, "uniqueItems": true },
     "license": { "type": "string", "minLength": 1 },
-    "entryPoint": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["assembly", "type"],
-      "properties": {
-        "assembly": { "type": "string", "pattern": "^lib/net10\\.0/[A-Za-z0-9_.-]+\\.dll$" },
-        "type": { "type": "string", "minLength": 3 }
-      }
-    },
+    "homepage": { "$ref": "#/$defs/nullableUri" },
+    "source": { "$ref": "#/$defs/nullableUri" },
+    "issues": { "$ref": "#/$defs/nullableUri" },
+    "icon": { "$ref": "#/$defs/nullableSafePath" },
+    "entryPoint": { "$ref": "#/$defs/entryPoint" },
     "api": { "$ref": "#/$defs/apiRange" },
-    "host": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["minimumVersion"],
-      "properties": {
-        "minimumVersion": { "$ref": "#/$defs/semver" },
-        "maximumVersionExclusive": { "oneOf": [{ "$ref": "#/$defs/semver" }, { "type": "null" }] }
-      }
-    },
-    "signing": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["fingerprint"],
-      "properties": { "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" } }
-    }
+    "host": { "$ref": "#/$defs/hostRange" },
+    "platforms": { "$ref": "#/$defs/platforms" },
+    "dependencies": { "type": "array", "items": { "$ref": "#/$defs/dependency" } },
+    "incompatibilities": { "type": "array", "items": { "$ref": "#/$defs/incompatibility" } },
+    "services": { "$ref": "#/$defs/services" },
+    "permissions": { "type": "array", "items": { "$ref": "#/$defs/permission" } },
+    "ui": { "oneOf": [{ "$ref": "#/$defs/ui" }, { "type": "null" }] },
+    "data": { "$ref": "#/$defs/data" },
+    "activation": { "$ref": "#/$defs/activation" },
+    "update": { "$ref": "#/$defs/update" },
+    "signing": { "oneOf": [{ "$ref": "#/$defs/signing" }, { "type": "null" }] },
+    "categories": { "type": "array", "items": { "$ref": "#/$defs/simpleId" }, "uniqueItems": true },
+    "tags": { "type": "array", "items": { "$ref": "#/$defs/simpleId" }, "uniqueItems": true }
   },
   "$defs": {
-    "semver": {
-      "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+    "pluginId": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$" },
+    "simpleId": { "type": "string", "pattern": "^[a-z0-9]+([._-][a-z0-9]+)*$" },
+    "semver": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$" },
+    "versionRange": { "type": "string", "minLength": 1 },
+    "nullableUri": { "type": ["string", "null"], "format": "uri" },
+    "nullableSafePath": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$" }] },
+    "publisher": {
+      "type": "object", "additionalProperties": false, "required": ["id", "namespace"],
+      "properties": { "id": { "type": "string", "minLength": 1 }, "namespace": { "$ref": "#/$defs/pluginId" } }
+    },
+    "author": {
+      "type": "object", "additionalProperties": false, "required": ["name"],
+      "properties": { "name": { "type": "string", "minLength": 1 }, "id": { "type": ["string", "null"] }, "url": { "$ref": "#/$defs/nullableUri" } }
+    },
+    "entryPoint": {
+      "type": "object", "additionalProperties": false, "required": ["assembly", "type"],
+      "properties": { "assembly": { "type": "string", "pattern": "^lib/net10\\.0/[A-Za-z0-9_.-]+\\.dll$" }, "type": { "type": "string", "minLength": 3 } }
     },
     "apiRange": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["minimum", "maximumExclusive"],
+      "type": "object", "additionalProperties": false, "required": ["minimum", "maximumExclusive"],
+      "properties": { "minimum": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" }, "maximumExclusive": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" } }
+    },
+    "hostRange": {
+      "type": "object", "additionalProperties": false, "required": ["minimumVersion"],
+      "properties": { "minimumVersion": { "$ref": "#/$defs/semver" }, "maximumVersionExclusive": { "oneOf": [{ "$ref": "#/$defs/semver" }, { "type": "null" }] } }
+    },
+    "platforms": {
+      "type": "object", "additionalProperties": false,
       "properties": {
-        "minimum": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
-        "maximumExclusive": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" }
+        "operatingSystems": { "type": "array", "items": { "enum": ["windows", "linux", "macos"] }, "uniqueItems": true },
+        "architectures": { "type": "array", "items": { "enum": ["x64", "arm64"] }, "uniqueItems": true },
+        "runtimeIdentifiers": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
       }
+    },
+    "dependency": {
+      "type": "object", "additionalProperties": false, "required": ["id", "version"],
+      "properties": { "id": { "$ref": "#/$defs/pluginId" }, "version": { "$ref": "#/$defs/versionRange" }, "kind": { "enum": ["required", "optional"] } }
+    },
+    "incompatibility": {
+      "type": "object", "additionalProperties": false, "required": ["id", "version"],
+      "properties": { "id": { "$ref": "#/$defs/pluginId" }, "version": { "$ref": "#/$defs/versionRange" }, "reason": { "type": ["string", "null"] } }
+    },
+    "services": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "required": { "type": "object", "additionalProperties": { "$ref": "#/$defs/versionRange" } },
+        "optional": { "type": "object", "additionalProperties": { "$ref": "#/$defs/versionRange" } }
+      }
+    },
+    "permission": {
+      "type": "object", "additionalProperties": false, "required": ["id", "reason"],
+      "properties": { "id": { "$ref": "#/$defs/simpleId" }, "reason": { "type": "string", "minLength": 1 } }
+    },
+    "ui": {
+      "type": "object", "additionalProperties": false, "required": ["api"],
+      "properties": {
+        "api": { "$ref": "#/$defs/apiRange" },
+        "avalonia": { "oneOf": [{ "$ref": "#/$defs/apiRange" }, { "type": "null" }] },
+        "requiresRestart": { "type": "boolean" },
+        "targets": { "type": "array", "items": { "$ref": "#/$defs/uiTarget" } }
+      }
+    },
+    "uiTarget": {
+      "type": "object", "additionalProperties": false, "required": ["target", "surface"],
+      "properties": {
+        "target": { "$ref": "#/$defs/simpleId" }, "surface": { "$ref": "#/$defs/versionRange" },
+        "access": { "type": "array", "items": { "enum": ["observe", "inject", "modify", "replace", "wrap", "resources", "raw-access", "input-intercept"] }, "uniqueItems": true },
+        "operations": { "type": "array", "items": { "$ref": "#/$defs/uiOperation" } },
+        "compatibility": { "$ref": "#/$defs/uiCompatibility" }
+      }
+    },
+    "uiOperation": {
+      "type": "object", "additionalProperties": false, "required": ["id", "kind"],
+      "properties": {
+        "id": { "$ref": "#/$defs/simpleId" },
+        "kind": { "enum": ["observe", "register", "inject", "modify", "replace", "remove", "reorder", "override-resource", "override-style", "override-template", "intercept-input", "wrap"] },
+        "slot": { "type": ["string", "null"] }, "selector": { "type": ["string", "null"] },
+        "axaml": { "type": ["string", "null"], "pattern": "^ui/(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+\\.axaml$" },
+        "command": { "type": ["string", "null"] }, "priority": { "type": "integer" },
+        "required": { "type": "boolean" }, "fallback": { "enum": ["disable-feature", "skip-patch", "fail-load"] },
+        "before": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "after": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "propertyPath": { "type": ["string", "null"] }, "modifyPolicy": { "type": ["string", "null"] },
+        "allowWrapping": { "type": "boolean" }, "preconditions": { "oneOf": [{ "$ref": "#/$defs/uiPreconditions" }, { "type": "null" }] }
+      }
+    },
+    "uiPreconditions": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "surface": { "type": ["string", "null"] }, "requiredSlots": { "type": "array", "items": { "type": "string" } },
+        "requiredProperties": { "type": "array", "items": { "type": "string" } }, "requiredEvents": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "uiCompatibility": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "compatibleWith": { "type": "object", "additionalProperties": { "$ref": "#/$defs/versionRange" } },
+        "incompatibleWith": { "type": "object", "additionalProperties": { "$ref": "#/$defs/versionRange" } }
+      }
+    },
+    "data": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "schemaVersion": { "type": "integer", "minimum": 1 }, "minimumReadableSchema": { "type": "integer", "minimum": 1 } }
+    },
+    "activation": { "type": "object", "additionalProperties": false, "properties": { "mode": { "enum": ["startup", "on-demand"] } } },
+    "update": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "allowAutomaticUpdate": { "type": "boolean" }, "requiresRestart": { "type": "boolean" } }
+    },
+    "signing": {
+      "type": "object", "additionalProperties": false, "required": ["fingerprint"],
+      "properties": { "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" } }
     }
   }
 }

@@ -15,13 +15,35 @@ public sealed class PluginContractTests
         InMemoryPluginSettingsPageCapability pages = new();
         await using TestPluginContext context = CreateContext();
         context.TestCapabilities.Add<IPluginSettingsPageCapability>(pages);
+        context.TestServices.Add<IPluginCommandService>(new TestPluginCommandService());
 
         await new HelloPlugin.HelloPlugin().InitializeAsync(context, CancellationToken.None);
 
         Assert.AreEqual("example.hello.settings", pages.Pages.Single().Id);
         Assert.AreEqual(PluginSettingsHintKind.Warning, pages.Pages.Single().Hints.Single().Kind);
+        TestPluginCommandService commands = (TestPluginCommandService)context.Services.Require<IPluginCommandService>();
+        Assert.AreEqual("dev.muxue.hello.say-hello", commands.Commands.Single().Id);
+        await commands.InvokeAsync("dev.muxue.hello.say-hello");
+        Assert.IsTrue(context.Logger.Entries.Any(static entry => entry.Contains("Hello from", StringComparison.Ordinal)));
         await context.DisposeAsync();
         Assert.AreEqual(0, pages.Pages.Count);
+        Assert.AreEqual(0, commands.Commands.Count);
+    }
+
+    [TestMethod]
+    public async Task TestUiServices_TrackContributionsAndDetectExclusiveReplace()
+    {
+        TestPluginUiSurfaceCapability contributions = new();
+        await contributions.Contribute(new PluginUiSlotContributionDescriptor(
+            "pcl.page.launch", "primary-actions.after", "sample.panel")).DisposeAsync();
+        Assert.AreEqual(0, contributions.Contributions.Count);
+
+        TestPluginUiPatchService patches = new();
+        patches.Register(new PluginUiPatchDescriptor("replace-a", "pcl.page.launch", PluginUiPatchKind.Replace));
+        patches.Register(new PluginUiPatchDescriptor("replace-b", "pcl.page.launch", PluginUiPatchKind.Replace));
+        PluginUiPatchPlan plan = patches.Plan();
+        Assert.IsTrue(plan.HasBlockingConflicts);
+        Assert.AreEqual(PluginUiConflictKind.ReplaceExclusive, plan.Conflicts.Single().Kind);
     }
 
     [TestMethod]
@@ -88,6 +110,7 @@ public sealed class PluginContractTests
         Assert.IsTrue(PluginServiceVersionRanges.Matches("*", v));
         Assert.IsTrue(PluginServiceVersionRanges.Matches(">=0.1 <1.0", v));
         Assert.IsFalse(PluginServiceVersionRanges.Matches(">=1.0", v));
+        Assert.IsTrue(PluginApiVersionRange.Parse(">=0.1 <1.0").Contains(v));
         Assert.IsTrue(typeof(IPluginNotificationService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginSettingsStore).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginCommandService).IsAssignableTo(typeof(IPluginService)));
