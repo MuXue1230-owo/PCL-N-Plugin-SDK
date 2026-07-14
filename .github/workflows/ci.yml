@@ -33,6 +33,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
+      - name: Read package version
+        id: package-version
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix=$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' Directory.Build.props)
+          suffix=$(sed -n 's:.*<VersionSuffix>\(.*\)</VersionSuffix>.*:\1:p' Directory.Build.props)
+          test -n "$prefix"
+          if [ -n "$suffix" ]; then
+            echo "version=$prefix-$suffix" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$prefix" >> "$GITHUB_OUTPUT"
+          fi
       - run: dotnet restore PCL-N-Plugin-SDK.slnx
       - run: dotnet build PCL-N-Plugin-SDK.slnx -c Release --no-restore -warnaserror
       - run: dotnet test PCL-N-Plugin-SDK.slnx -c Release --no-build --no-restore -warnaserror
@@ -66,11 +79,12 @@ jobs:
           mkdir -p /tmp/pcl-sdk-consumer
           cd /tmp/pcl-sdk-consumer
           dotnet new classlib --framework net10.0 --no-restore
-          dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.UI --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.UI.Avalonia --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.Testing --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          version="${{ steps.package-version.outputs.version }}"
+          dotnet add package PCLN.Plugin.Abstractions --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.UI --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.UI.Avalonia --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.Sdk --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.Testing --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
           dotnet build -c Release -warnaserror
       - name: Verify reproducible example package
         shell: bash
@@ -99,7 +113,7 @@ jobs:
           cp "$package" artifacts/examples/
       - uses: actions/upload-artifact@v4
         with:
-          name: pcl-n-plugin-sdk-0.1.0-alpha.4
+          name: pcl-n-plugin-sdk-${{ steps.package-version.outputs.version }}
           path: |
             artifacts/nuget/*
             artifacts/examples/*
