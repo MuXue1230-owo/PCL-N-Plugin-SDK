@@ -1,11 +1,11 @@
 # 架构与边界
 
-> SDK `0.1.0-alpha.2`
+> SDK `0.1.0-alpha.3`
 
 ```text
 PCL-N（启动器核心）
   -> PCL.Plugin（私有、特权插件平台）
-  -> PCL.N.Plugin.Abstractions（公开 ABI）
+  -> PCLN.Plugin.Abstractions（NuGet 包；程序集为 PCL.N.Plugin.Abstractions）
   -> 第三方插件
 ```
 

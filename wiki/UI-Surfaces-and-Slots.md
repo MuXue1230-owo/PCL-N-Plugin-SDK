@@ -1,6 +1,6 @@
 # UI Surface 与 Slot
 
-> SDK `0.1.0-alpha.2`
+> SDK `0.1.0-alpha.3`
 
 Surface 是宿主发布的稳定 UI 边界，Target 是稳定目标，Slot 是稳定插入点。插件不能依赖控件类名、XAML Name、本地化文本或 Visual Tree 索引。
 

@@ -19,6 +19,6 @@
                       ReferenceOutputAssembly="false" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
-  <Import Project="../../src/PCL.N.Plugin.Sdk.Build/build/PCL.N.Plugin.Sdk.Build.props" />
-  <Import Project="../../src/PCL.N.Plugin.Sdk.Build/build/PCL.N.Plugin.Sdk.Build.targets" />
+  <Import Project="../../src/PCL.N.Plugin.Sdk.Build/build/PCLN.Plugin.Sdk.Build.props" />
+  <Import Project="../../src/PCL.N.Plugin.Sdk.Build/build/PCLN.Plugin.Sdk.Build.targets" />
 </Project>

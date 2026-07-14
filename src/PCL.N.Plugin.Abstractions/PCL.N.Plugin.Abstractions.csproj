@@ -9,7 +9,7 @@
     <IsPackable>true</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
-    <PackageId>PCL.N.Plugin.Abstractions</PackageId>
+    <PackageId>PCLN.Plugin.Abstractions</PackageId>
     <Title>PCL N Plugin Abstractions</Title>
     <Description>Public runtime ABI contracts for third-party PCL N plugins. This package contains no launcher or private host implementation.</Description>
     <PackageTags>$(PackageTags);abstractions;contracts;abi</PackageTags>

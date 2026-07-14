@@ -9,7 +9,7 @@
     <IsPackable>true</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
-    <PackageId>PCL.N.Plugin.Sdk</PackageId>
+    <PackageId>PCLN.Plugin.Sdk</PackageId>
     <Title>PCL N Plugin SDK</Title>
     <Description>Manifest validation, versioning, and developer helpers for building third-party PCL N plugins.</Description>
     <PackageTags>$(PackageTags);manifest;validation</PackageTags>

@@ -71,11 +71,11 @@ jobs:
         run: |
           set -euo pipefail
           packages=(
-            PCL.N.Plugin.Abstractions
-            PCL.N.Plugin.Analyzers
-            PCL.N.Plugin.Sdk
-            PCL.N.Plugin.Sdk.Build
-            PCL.N.Plugin.Testing
+            PCLN.Plugin.Abstractions
+            PCLN.Plugin.Analyzers
+            PCLN.Plugin.Sdk
+            PCLN.Plugin.Sdk.Build
+            PCLN.Plugin.Testing
           )
           for attempt in $(seq 1 60); do
             missing=()

@@ -1,6 +1,6 @@
 # 兼容与废弃
 
-> SDK `0.1.0-alpha.2`
+> SDK `0.1.0-alpha.3`
 
 0.1 alpha 允许调整公共 ABI，但变更会记录在 Release Notes。达到 1.0 后：
 

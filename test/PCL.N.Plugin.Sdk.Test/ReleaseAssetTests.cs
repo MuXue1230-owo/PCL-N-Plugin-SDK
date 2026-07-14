@@ -19,7 +19,7 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains("0.1.0-alpha.2", StringComparison.Ordinal))
+            if (!text.Contains("0.1.0-alpha.3", StringComparison.Ordinal))
                 errors.Add(Path.GetFileName(file) + ": missing SDK version");
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {
@@ -28,6 +28,27 @@ public sealed class ReleaseAssetTests
             }
         }
         Assert.AreEqual(0, errors.Count, string.Join(Environment.NewLine, errors));
+    }
+
+    [TestMethod]
+    public void Packages_UseExpectedNuGetIds()
+    {
+        string root = FindRepositoryRoot();
+        Dictionary<string, string> packages = new(StringComparer.Ordinal)
+        {
+            ["PCL.N.Plugin.Abstractions"] = "PCLN.Plugin.Abstractions",
+            ["PCL.N.Plugin.Analyzers"] = "PCLN.Plugin.Analyzers",
+            ["PCL.N.Plugin.Sdk"] = "PCLN.Plugin.Sdk",
+            ["PCL.N.Plugin.Sdk.Build"] = "PCLN.Plugin.Sdk.Build",
+            ["PCL.N.Plugin.Testing"] = "PCLN.Plugin.Testing"
+        };
+
+        foreach ((string project, string packageId) in packages)
+        {
+            string path = Path.Combine(root, "src", project, project + ".csproj");
+            string text = File.ReadAllText(path);
+            StringAssert.Contains(text, $"<PackageId>{packageId}</PackageId>");
+        }
     }
 
     [TestMethod]
@@ -58,10 +79,10 @@ public sealed class ReleaseAssetTests
         string project = Path.Combine(root, "src", "PCL.N.Plugin.Sdk.Build");
         foreach (string relative in new[]
         {
-            "build/PCL.N.Plugin.Sdk.Build.props",
-            "build/PCL.N.Plugin.Sdk.Build.targets",
-            "buildTransitive/PCL.N.Plugin.Sdk.Build.props",
-            "buildTransitive/PCL.N.Plugin.Sdk.Build.targets"
+            "build/PCLN.Plugin.Sdk.Build.props",
+            "build/PCLN.Plugin.Sdk.Build.targets",
+            "buildTransitive/PCLN.Plugin.Sdk.Build.props",
+            "buildTransitive/PCLN.Plugin.Sdk.Build.targets"
         })
             Assert.IsTrue(File.Exists(Path.Combine(project, relative)), relative);
     }

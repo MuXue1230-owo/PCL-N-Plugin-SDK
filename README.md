@@ -2,17 +2,19 @@
 
 PCL N 第三方插件的公开契约、开发工具、分析器、测试宿主和 `.pnp` 构建工具。
 
-> 当前版本：`0.1.0-alpha.2`。1.0 前公共 API 仍可能调整。
+> 当前版本：`0.1.0-alpha.3`。1.0 前公共 API 仍可能调整。
 
 ## 包
 
 | NuGet 包 | 用途 |
 |---|---|
-| `PCL.N.Plugin.Abstractions` | 插件入口、生命周期、服务、Manifest 和 UI 公共 ABI |
-| `PCL.N.Plugin.Sdk` | Manifest 验证、SemVer 范围和开发辅助 API |
-| `PCL.N.Plugin.Analyzers` | `PNPSDK001–010` 编译诊断 |
-| `PCL.N.Plugin.Testing` | 内存服务与生命周期测试宿主 |
-| `PCL.N.Plugin.Sdk.Build` | 可复现 `.pnp` 打包和 OpenPGP/GPG 签名 |
+| `PCLN.Plugin.Abstractions` | 插件入口、生命周期、服务、Manifest 和 UI 公共 ABI |
+| `PCLN.Plugin.Sdk` | Manifest 验证、SemVer 范围和开发辅助 API |
+| `PCLN.Plugin.Analyzers` | `PNPSDK001–010` 编译诊断 |
+| `PCLN.Plugin.Testing` | 内存服务与生命周期测试宿主 |
+| `PCLN.Plugin.Sdk.Build` | 可复现 `.pnp` 打包和 OpenPGP/GPG 签名 |
+
+NuGet 包 ID 使用 `PCLN.Plugin.*`；为保持源码和二进制兼容，程序集名与命名空间仍使用 `PCL.N.Plugin.*`。
 
 `PCL.Plugin` 是 PCL-N 的私有特权 Host，不属于公共 SDK。第三方插件不得引用 `PCL.Application`、`PCL.Desktop` 或 `PCL.Plugin`。
 

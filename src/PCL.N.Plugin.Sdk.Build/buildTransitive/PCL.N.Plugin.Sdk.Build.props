@@ -1,3 +1,0 @@
-<Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\build\PCL.N.Plugin.Sdk.Build.props" />
-</Project>

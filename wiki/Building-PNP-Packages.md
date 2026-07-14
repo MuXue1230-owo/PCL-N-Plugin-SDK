@@ -1,8 +1,8 @@
 # 构建 `.pnp`
 
-> SDK `0.1.0-alpha.2`
+> SDK `0.1.0-alpha.3`
 
-安装 `PCL.N.Plugin.Sdk.Build`，设置 `PclNPluginId`，然后执行：
+安装 `PCLN.Plugin.Sdk.Build`，设置 `PclNPluginId`，然后执行：
 
 ```powershell
 dotnet build -c Release

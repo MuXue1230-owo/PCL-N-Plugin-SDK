@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
-    <PackageId>PCL.N.Plugin.Testing</PackageId>
+    <PackageId>PCLN.Plugin.Testing</PackageId>
     <Title>PCL N Plugin Testing</Title>
     <Description>In-memory host services and lifecycle utilities for testing PCL N plugins without the launcher.</Description>
     <PackageTags>$(PackageTags);testing;test-host</PackageTags>

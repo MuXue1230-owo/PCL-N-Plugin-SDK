@@ -1,10 +1,10 @@
 # 故障排查
 
-> SDK `0.1.0-alpha.2`
+> SDK `0.1.0-alpha.3`
 
 ## 没有生成 `.pnp`
 
-确认已引用 `PCL.N.Plugin.Sdk.Build`、设置 `PclNPluginId`，并存在 `plugin.json`。
+确认已引用 `PCLN.Plugin.Sdk.Build`、设置 `PclNPluginId`，并存在 `plugin.json`。
 
 ## AXAML 未进入包
 

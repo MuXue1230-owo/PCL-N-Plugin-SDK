@@ -12,7 +12,7 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
-    <PackageId>PCL.N.Plugin.Analyzers</PackageId>
+    <PackageId>PCLN.Plugin.Analyzers</PackageId>
     <Title>PCL N Plugin Analyzers</Title>
     <Description>Compile-time boundary, entry-point, lifecycle, manifest, and UI declaration diagnostics for PCL N plugins (PNPSDK001–010).</Description>
     <PackageTags>$(PackageTags);roslyn;analyzer;security</PackageTags>

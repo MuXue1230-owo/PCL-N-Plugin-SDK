@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
-    <PackageId>PCL.N.Plugin.Sdk.Build</PackageId>
+    <PackageId>PCLN.Plugin.Sdk.Build</PackageId>
     <Title>PCL N Plugin SDK Build</Title>
     <Description>MSBuild integration for reproducible PCL N .pnp package creation and OpenPGP signing.</Description>
     <PackageTags>$(PackageTags);msbuild;pnp;packaging;openpgp</PackageTags>
@@ -18,10 +18,10 @@
     <SelfContained>false</SelfContained>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="build/PCL.N.Plugin.Sdk.Build.props" Pack="true" PackagePath="build/PCL.N.Plugin.Sdk.Build.props" />
-    <None Update="build/PCL.N.Plugin.Sdk.Build.targets" Pack="true" PackagePath="build/PCL.N.Plugin.Sdk.Build.targets" />
-    <None Update="buildTransitive/PCL.N.Plugin.Sdk.Build.props" Pack="true" PackagePath="buildTransitive/PCL.N.Plugin.Sdk.Build.props" />
-    <None Update="buildTransitive/PCL.N.Plugin.Sdk.Build.targets" Pack="true" PackagePath="buildTransitive/PCL.N.Plugin.Sdk.Build.targets" />
+    <None Update="build/PCLN.Plugin.Sdk.Build.props" Pack="true" PackagePath="build/PCLN.Plugin.Sdk.Build.props" />
+    <None Update="build/PCLN.Plugin.Sdk.Build.targets" Pack="true" PackagePath="build/PCLN.Plugin.Sdk.Build.targets" />
+    <None Update="buildTransitive/PCLN.Plugin.Sdk.Build.props" Pack="true" PackagePath="buildTransitive/PCLN.Plugin.Sdk.Build.props" />
+    <None Update="buildTransitive/PCLN.Plugin.Sdk.Build.targets" Pack="true" PackagePath="buildTransitive/PCLN.Plugin.Sdk.Build.targets" />
     <None Include="../../schemas/plugin.schema.json" Pack="true" PackagePath="schemas/plugin.schema.json" Link="schemas/plugin.schema.json" />
 
 
