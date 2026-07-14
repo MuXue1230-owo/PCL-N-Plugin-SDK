@@ -6,6 +6,8 @@
 
 ## 当前服务
 
+### 核心宿主服务
+
 | ID | C# 接口 | 用途 |
 |---|---|---|
 | `pcl.logging` | `IPluginLogger` | 结构化插件日志；也可直接用 `context.Logger` |
@@ -14,11 +16,54 @@
 | `pcl.settings` | `IPluginSettingsStore` | 按插件隔离的键值设置 |
 | `pcl.commands` | `IPluginCommandService` | 注册和调用命令 |
 | `pcl.tasks` | `IPluginTaskService` | 由生命周期管理的后台任务 |
-| `pcl.instances.read` | `IPluginInstanceReadService` | 只读 Minecraft 实例列表 |
-| `pcl.ui` | `IPluginUiSurfaceRegistry` | 查询宿主发布的 UI Surface 与 Slot |
-| `pcl.ui.patch` | `IPluginUiPatchService` | 注册 Patch、规划顺序并查看冲突 |
+| `pcl.instances.read` | `IPluginInstanceReadService` | 只读 Minecraft实例列表 |
+| `pcl.localization` | `IPluginLocalizationService` | 读取 Host当前语言和插件本地化字符串 |
 
-`pcl.market` 是宿主市场契约的预留 ID；第三方插件不应假设当前 Host 会通过 `context.Services` 暴露远端市场客户端。
+这些 ID定义在 `PluginServiceIds`。`IPluginLogger` 和 `IPluginDispatcher` 同时通过 `context.Logger`、`context.Dispatcher` 提供便捷入口。
+
+### UI与导航服务
+
+| ID | C# 接口 | NuGet包 | 用途 |
+|---|---|---|---|
+| `pcl.ui` | `IPluginUiSurfaceRegistry` | `PCLN.Plugin.Abstractions` | 查询宿主发布的 UI Surface与 Slot |
+| `pcl.ui.patch` | `IPluginUiPatchService` | `PCLN.Plugin.Abstractions` | 注册 Patch、规划顺序并查看冲突 |
+| `pcl.navigation` | `IPluginNavigationService` | `PCLN.Plugin.UI` | 导航到已注册或 Host公开的稳定路由 |
+| `pcl.ui.avalonia` | `IAvaloniaUiAccessService` | `PCLN.Plugin.UI.Avalonia` | 受权限控制地访问真实 Avalonia对象和公开 Target |
+| `pcl.ui.avalonia.pages` | `IAvaloniaPluginPageService` | `PCLN.Plugin.UI.Avalonia` | 注册插件拥有的完整主导航页面并执行导航 |
+| `pcl.ui.avalonia.windows` | `IAvaloniaPluginWindowService` | `PCLN.Plugin.UI.Avalonia` | 注册、显示和枚举插件拥有的窗口 |
+
+这四个适配服务 ID定义在 `PluginUiServiceIds`。`IAvaloniaPluginPageService` 继承 `IPluginNavigationService`，因此页面服务同时提供 `Register` 和 `NavigateAsync`。
+
+### 插件协作与宿主专用服务
+
+| ID | C# 接口 | 用途 |
+|---|---|---|
+| `pcl.exports` | `IPluginExportRegistry` | 在稳定共享契约上导出或导入插件间服务 |
+| `pcl.market` | Host市场契约 | 宿主管理的插件市场预留 ID |
+
+`pcl.exports` 定义在 `PluginServiceIds`。导出契约程序集必须由默认加载上下文共享；运行时会拒绝插件私有类型越过边界。
+
+`pcl.market` 是宿主市场契约的预留 ID；第三方插件不应假设当前 Host会通过 `context.Services` 暴露远端市场客户端。
+
+## 公开契约与 Host可用性
+
+NuGet包中存在接口或服务 ID，只表示插件可以针对稳定契约编译，不表示每个 PCL N或第三方 Host版本都提供实现。尤其是导航、完整 Avalonia页面、窗口、Raw Avalonia、本地化和插件导出服务，应先协商能力：
+
+```csharp
+PluginApiVersionRange uiRange = PluginApiVersionRange.Parse(">=0.1 <1.0");
+
+if (context.Services.Supports(PluginUiServiceIds.AvaloniaPages, uiRange) &&
+    context.Services.TryGet<IAvaloniaPluginPageService>(out var pages))
+{
+    // 注册完整页面。
+}
+else
+{
+    context.Logger.Warn("当前 Host 不提供完整 Avalonia 页面；核心功能继续运行。");
+}
+```
+
+默认把可降级能力写入 `services.optional`。只有插件没有该服务就无法提供任何有效功能，并且 `host.minimumVersion` 已锁定到明确提供该服务的 Host版本时，才放入 `services.required`。
 
 ## 必需服务
 
@@ -114,6 +159,56 @@ foreach (PluginInstanceInfo instance in instances.ListInstances())
 ```
 
 返回的是公开 DTO，不是 PCL N 内部对象。不要根据 DTO 反射或猜测私有宿主类型。
+
+## 导航、完整页面与窗口
+
+稳定导航接口位于 `PCLN.Plugin.UI`，完整 Avalonia页面和窗口接口位于 `PCLN.Plugin.UI.Avalonia`：
+
+```csharp
+if (context.Services.TryGet<IPluginNavigationService>(out var navigation))
+    await navigation.NavigateAsync("plugin/dev.example.toolbox", cancellationToken);
+```
+
+注册完整页面时使用 `IAvaloniaPluginPageService.Register(AvaloniaPluginPageDescriptor)`；注册独立窗口时使用 `IAvaloniaPluginWindowService.Register(AvaloniaPluginWindowDescriptor)`。两个 `Register` 返回值都必须交给 `context.Lifetime.Track`。完整示例和权限声明见 [UI扩展实战](Tutorial-UI-Extension)。
+
+Raw Avalonia使用 `IAvaloniaUiAccessService`，需要明确的 `ui.raw-access` 权限。它只应用于公开 `UiTargetId`，不能作为反射或遍历宿主私有 Visual Tree的替代通道。
+
+## 本地化
+
+```csharp
+if (context.Services.TryGet<IPluginLocalizationService>(out var localization))
+{
+    string title = localization.GetString("toolbox.title", "Toolbox");
+    context.Logger.Debug($"{localization.CurrentCulture}: {title}");
+}
+```
+
+`GetString` 的 fallback必须可直接展示，避免 Host缺少语言资源时出现空白 UI。`GetStrings` 返回的是当前 Host选择文化下的插件字符串快照，不要据此猜测宿主私有资源键。
+
+## 插件间导出
+
+导出方和导入方必须引用同一个稳定共享契约程序集，不能把插件私有实现类型作为公共 ABI：
+
+```csharp
+var descriptor = new PluginExportDescriptor(
+    "report-provider",
+    new PluginApiVersion(0, 1));
+
+context.Lifetime.Track(exports.Export<IReportProvider>(descriptor, provider));
+```
+
+导入方：
+
+```csharp
+PluginImport<IReportProvider> import = exports.Import<IReportProvider>(
+    new PluginExportId("dev.example.reports", "report-provider"),
+    PluginApiVersionRange.Parse(">=0.1 <1.0"));
+
+if (import.IsAvailable)
+    await import.Require().GenerateAsync(cancellationToken);
+```
+
+`pcl.exports` 应作为可选服务，并且插件依赖关系仍须在 Manifest中声明；Export Registry不能替代依赖解析和版本约束。
 
 ## Dispatcher
 

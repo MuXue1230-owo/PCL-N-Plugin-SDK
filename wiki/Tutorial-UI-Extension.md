@@ -2,12 +2,19 @@
 
 > 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.11.0`。本教程只使用公开 Capability、Surface 和 Slot。
 
-PCL N 插件有两类常见 UI 接入：
+PCL N 插件可按风险与耦合程度选择五类 UI 接入。优先使用能满足需求的最低层能力：
 
-- 在插件设置中注册一个描述页；
-- 通过 Manifest 把声明式 AXAML 注入宿主公开的 Slot。
+| 接入方式 | 主要契约 | 适合场景 | 额外包 |
+|---|---|---|---|
+| 设置描述页 | `IPluginSettingsPageCapability` | 展示说明、提示和宿主管理的设置入口 | `PCLN.Plugin.Abstractions` |
+| 声明式 Slot 注入 | Manifest `ui.targets` + AXAML | 在宿主公开位置加入轻量内容 | `PCLN.Plugin.Abstractions` |
+| 完整主导航页面 | `IAvaloniaPluginPageService` | 插件拥有完整页面布局和交互 | `PCLN.Plugin.UI.Avalonia` |
+| 插件窗口 | `IAvaloniaPluginWindowService` | 独立工具、编辑器或诊断窗口 | `PCLN.Plugin.UI.Avalonia` |
+| Raw Avalonia | `IAvaloniaUiAccessService` | 经审计访问真实 Avalonia对象 | `PCLN.Plugin.UI.Avalonia` |
 
-不要反射宿主控件、遍历 Visual Tree、依赖 `x:Name` 或本地化文字。那些都不是兼容契约。
+`PCLN.Plugin.UI` 提供 `UiTargetId`、`PluginPageDescriptor`、`IPluginNavigationService` 和服务 ID，不引入具体 UI框架。只有需要 `Control`、`Window`、完整页面/窗口工厂或 Raw Avalonia时，才引用 `PCLN.Plugin.UI.Avalonia`。
+
+公开契约不代表每个 Host版本都提供对应服务。完整页面、窗口和 Raw Avalonia默认应声明为可选服务，并使用 `TryGet`降级。不要反射宿主控件、遍历 Visual Tree、依赖 `x:Name` 或本地化文字；它们都不是兼容契约。
 
 ## 1. 注册插件设置页
 
@@ -155,7 +162,161 @@ if (!panelAvailable)
 
 若在代码中直接使用 `pcl.ui`，Manifest 的 required/optional 服务也要与实际降级策略一致。
 
-## 6. 当前公开 Surface
+## 6. 声明可选 UI 服务与权限
+
+完整页面、窗口和 Raw Avalonia是独立服务。除非插件明确要求只运行在已提供这些服务的 Host版本上，否则先放入 `services.optional`：
+
+```json
+"services": {
+  "required": {
+    "pcl.commands": ">=0.1 <1.0"
+  },
+  "optional": {
+    "pcl.navigation": ">=0.1 <1.0",
+    "pcl.ui.avalonia": ">=0.1 <1.0",
+    "pcl.ui.avalonia.pages": ">=0.1 <1.0",
+    "pcl.ui.avalonia.windows": ">=0.1 <1.0"
+  }
+},
+"permissions": [
+  {
+    "id": "ui.register",
+    "reason": "在主导航中注册插件拥有的工具页面。"
+  },
+  {
+    "id": "ui.window-management",
+    "reason": "按用户操作打开和管理插件工具窗口。"
+  },
+  {
+    "id": "ui.raw-access",
+    "reason": "读取宿主公开 UI Target 的尺寸以调整插件内容。"
+  }
+]
+```
+
+只声明实际使用的服务和权限。若插件没有 Raw访问代码，就删除 `pcl.ui.avalonia` 和 `ui.raw-access`；若没有独立窗口，也删除窗口服务和权限。
+
+## 7. 注册完整主导航页面
+
+完整页面需要 `PCLN.Plugin.UI.Avalonia`。页面由插件创建，但由 Host注册到主导航并管理入口：
+
+```csharp
+using Avalonia.Controls;
+using PCL.N.Plugin;
+
+if (context.Services.TryGet<IAvaloniaPluginPageService>(out var pages))
+{
+    var descriptor = new AvaloniaPluginPageDescriptor(
+        new PluginPageDescriptor(
+            "dev.example.toolbox.page",
+            "plugin/dev.example.toolbox",
+            "实例工具箱",
+            icon: "lucide/wrench",
+            order: 500),
+        static () => new StackPanel
+        {
+            Spacing = 12,
+            Children =
+            {
+                new TextBlock { Text = "实例工具箱" },
+                new TextBlock { Text = "这里是插件拥有的完整页面。" }
+            }
+        });
+
+    context.Lifetime.Track(pages.Register(descriptor));
+
+    await pages.NavigateAsync(
+        "plugin/dev.example.toolbox",
+        cancellationToken);
+}
+else
+{
+    context.Logger.Warn("当前 Host 不提供完整插件页面，保留命令行入口。");
+}
+```
+
+规则：
+
+- `operationId` 必须全局稳定，推荐以插件 ID开头；
+- `route` 同样应位于插件自己的命名空间，不要冒充宿主路由；
+- `createPage` 每次由 Host调用时都应返回新的 `Control`，不要复用已挂载实例；
+- 必须把 `Register` 返回值交给 `context.Lifetime.Track`，插件停用后导航入口才会释放；
+- `NavigateAsync` 只接受已注册或 Host公开的稳定路由，不要猜测内部页面名称。
+
+## 8. 注册和显示插件窗口
+
+独立工具窗口使用 `IAvaloniaPluginWindowService`：
+
+```csharp
+using Avalonia;
+using Avalonia.Controls;
+using PCL.N.Plugin;
+
+if (context.Services.TryGet<IAvaloniaPluginWindowService>(out var windows))
+{
+    context.Lifetime.Track(windows.Register(
+        new AvaloniaPluginWindowDescriptor(
+            "dev.example.toolbox.window-registration",
+            "dev.example.toolbox.inspector",
+            static () => new Window
+            {
+                Title = "Toolbox Inspector",
+                Width = 720,
+                Height = 480,
+                Content = new TextBlock
+                {
+                    Margin = new Thickness(20),
+                    Text = "插件诊断信息"
+                }
+            })));
+
+    await windows.ShowAsync(
+        "dev.example.toolbox.inspector",
+        cancellationToken);
+
+    context.Logger.Info($"窗口已打开；当前插件窗口数：{windows.ListOpenWindows().Count}");
+}
+else
+{
+    context.Logger.Warn("当前 Host 不支持插件窗口，改用通知或完整页面。 ");
+}
+```
+
+`Register` 注册窗口工厂，`ShowAsync` 才创建或显示窗口。不要自行把窗口塞入宿主内部集合；不要缓存已关闭窗口；插件停用时注册会随生命周期释放，窗口的关闭或回收策略由 Host实现决定。
+
+## 9. 谨慎使用 Raw Avalonia
+
+Raw访问用于无法通过页面、窗口、Slot或公开命令完成的受审计场景：
+
+```csharp
+using Avalonia.Controls;
+using PCL.N.Plugin;
+
+if (context.Services.TryGet<IAvaloniaUiAccessService>(out var avalonia))
+{
+    var target = new UiTargetId("pcl.page.launch");
+    Control? control = await avalonia.ResolveControlAsync(target, cancellationToken);
+
+    if (control is not null)
+    {
+        string targetType = await avalonia.InvokeAsync(
+            ui => ui.ResolveControl(target)?.GetType().Name ?? "unavailable",
+            cancellationToken);
+        context.Logger.Debug($"公开 Target 类型：{targetType}");
+    }
+}
+```
+
+安全和兼容边界：
+
+- 只解析 Host明确公开的 `UiTargetId`，不要遍历 Visual Tree寻找私有控件；
+- 不要长期缓存 `Control`、`TopLevel` 或 `Application`。Host重建页面后旧对象可能失效；
+- 需要跨重建访问时优先使用 Host提供的 generation-aware `IUiTargetHandle`，或每次重新解析 Target；
+- 所有 Avalonia对象访问都应在服务提供的 UI上下文中完成；
+- Raw访问不能绕过 Manifest权限、Surface版本、Safe Mode或用户审核；
+- 能用完整页面、插件窗口、声明式 Slot或公开命令完成时，不申请 `ui.raw-access`。
+
+## 10. 当前公开 Surface
 
 | Surface | 版本 | 常用 Slot | 适合场景 |
 |---|---:|---|---|
@@ -166,7 +327,7 @@ if (!panelAvailable)
 
 Surface 独立版本化，不能把 PCL N 产品版本当作 Surface 版本。最新契约以 [UI Surface 与 Slot](UI-Surfaces-and-Slots) 为准。
 
-## 7. 构建与验证
+## 11. 构建与验证
 
 ```powershell
 dotnet build -c Release
