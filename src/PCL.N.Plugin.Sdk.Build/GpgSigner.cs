@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 
 internal static class GpgSigner
 {
@@ -17,7 +18,14 @@ internal static class GpgSigner
             string signature = Path.Combine(directory, fingerprint + ".asc");
             string key = Path.Combine(directory, fingerprint + ".key.asc");
             await File.WriteAllBytesAsync(source, signedObject).ConfigureAwait(false);
-            await RunAsync(gpgPath, WithHome(gpgHome, ["--batch", "--yes", "--armor", "--detach-sign", "--local-user", fingerprint, "--output", signature, source])).ConfigureAwait(false);
+            // OpenPGP embeds its creation time in the signature. Freeze it immediately after the newest
+            // secret-key packet became valid so identical inputs and the same key produce identical packages.
+            long signatureEpoch = await GetStableSignatureEpochAsync(gpgPath, gpgHome, fingerprint).ConfigureAwait(false);
+            await RunAsync(gpgPath, WithHome(gpgHome,
+            [
+                "--batch", "--yes", "--faked-system-time", signatureEpoch.ToString(CultureInfo.InvariantCulture) + "!",
+                "--armor", "--detach-sign", "--local-user", fingerprint, "--output", signature, source
+            ])).ConfigureAwait(false);
             await RunAsync(gpgPath, WithHome(gpgHome, ["--batch", "--yes", "--armor", "--export", "--output", key, fingerprint])).ConfigureAwait(false);
             files[$"META-INF/signatures/{fingerprint}.asc"] = await File.ReadAllBytesAsync(signature).ConfigureAwait(false);
             files[$"META-INF/keys/{fingerprint}.asc"] = await File.ReadAllBytesAsync(key).ConfigureAwait(false);
@@ -60,6 +68,32 @@ internal static class GpgSigner
                 return fields[9].ToUpperInvariant();
         }
         return null;
+    }
+
+    private static async Task<long> GetStableSignatureEpochAsync(string gpgPath, string? gpgHome, string fingerprint)
+    {
+        string output = await RunCaptureAsync(
+            gpgPath,
+            WithHome(gpgHome, ["--batch", "--with-colons", "--list-secret-keys", fingerprint]),
+            allowFailure: false).ConfigureAwait(false);
+        return ReadLatestSecretKeyCreationEpoch(output) + 1;
+    }
+
+    internal static long ReadLatestSecretKeyCreationEpoch(string colonListing)
+    {
+        long latest = 0;
+        foreach (string line in colonListing.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string[] fields = line.Split(':');
+            if (fields.Length > 5 && fields[0] is "sec" or "ssb" &&
+                long.TryParse(fields[5], NumberStyles.None, CultureInfo.InvariantCulture, out long created))
+            {
+                latest = Math.Max(latest, created);
+            }
+        }
+        return latest > 0
+            ? latest
+            : throw new InvalidOperationException("gpg did not report a secret key creation time for deterministic signing.");
     }
 
     private static IReadOnlyList<string> WithHome(string? gpgHome, IReadOnlyList<string> arguments)

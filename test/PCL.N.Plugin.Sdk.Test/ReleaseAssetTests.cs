@@ -31,6 +31,17 @@ public sealed class ReleaseAssetTests
     }
 
     [TestMethod]
+    public void GpgSigning_UsesLatestSecretKeyCreationEpoch()
+    {
+        const string listing = "sec:u:255:22:PRIMARY:1700000000:::u:::scESC:::+::ed25519:::0:\n" +
+                               "fpr:::::::::AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:\n" +
+                               "ssb:u:255:18:ENCRYPT:1700000200::::::e:::+::cv25519::\n";
+
+        Assert.AreEqual(1700000200L, GpgSigner.ReadLatestSecretKeyCreationEpoch(listing));
+        Assert.ThrowsExactly<InvalidOperationException>(() => GpgSigner.ReadLatestSecretKeyCreationEpoch("fpr:::::::::missing:"));
+    }
+
+    [TestMethod]
     public void Wiki_InternalLinksResolveAndPagesAreVersioned()
     {
         string root = FindRepositoryRoot();
