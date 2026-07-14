@@ -166,7 +166,7 @@ foreach (PluginInstanceInfo instance in instances.ListInstances())
 
 ```csharp
 if (context.Services.TryGet<IPluginNavigationService>(out var navigation))
-    await navigation.NavigateAsync("plugin/dev.example.toolbox", cancellationToken);
+    await navigation.NavigateAsync("dev.example.toolbox.page", cancellationToken);
 ```
 
 注册完整页面时使用 `IAvaloniaPluginPageService.Register(AvaloniaPluginPageDescriptor)`；注册独立窗口时使用 `IAvaloniaPluginWindowService.Register(AvaloniaPluginWindowDescriptor)`。两个 `Register` 返回值都必须交给 `context.Lifetime.Track`。完整示例和权限声明见 [UI扩展实战](Tutorial-UI-Extension)。

@@ -191,7 +191,39 @@ if (!panelAvailable)
     "id": "ui.raw-access",
     "reason": "读取宿主公开 UI Target 的尺寸以调整插件内容。"
   }
-]
+],
+"ui": {
+  "api": { "minimum": "0.1", "maximumExclusive": "1.0" },
+  "avalonia": { "minimum": "12.0", "maximumExclusive": "13.0" },
+  "targets": [
+    {
+      "target": "pcl.navigation.main",
+      "surface": ">=1.0 <2.0",
+      "access": ["register"],
+      "operations": [
+        {
+          "id": "dev.example.toolbox.page-registration",
+          "kind": "register",
+          "required": false,
+          "fallback": "disable-feature"
+        }
+      ]
+    },
+    {
+      "target": "pcl.window.main",
+      "surface": ">=1.0 <2.0",
+      "access": ["window-management"],
+      "operations": [
+        {
+          "id": "dev.example.toolbox.window-registration",
+          "kind": "register",
+          "required": false,
+          "fallback": "disable-feature"
+        }
+      ]
+    }
+  ]
+}
 ```
 
 只声明实际使用的服务和权限。若插件没有 Raw访问代码，就删除 `pcl.ui.avalonia` 和 `ui.raw-access`；若没有独立窗口，也删除窗口服务和权限。
@@ -208,8 +240,8 @@ if (context.Services.TryGet<IAvaloniaPluginPageService>(out var pages))
 {
     var descriptor = new AvaloniaPluginPageDescriptor(
         new PluginPageDescriptor(
+            "dev.example.toolbox.page-registration",
             "dev.example.toolbox.page",
-            "plugin/dev.example.toolbox",
             "实例工具箱",
             icon: "lucide/wrench",
             order: 500),
@@ -226,7 +258,7 @@ if (context.Services.TryGet<IAvaloniaPluginPageService>(out var pages))
     context.Lifetime.Track(pages.Register(descriptor));
 
     await pages.NavigateAsync(
-        "plugin/dev.example.toolbox",
+        "dev.example.toolbox.page",
         cancellationToken);
 }
 else
