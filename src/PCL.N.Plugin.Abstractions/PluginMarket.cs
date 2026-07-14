@@ -67,7 +67,12 @@ public sealed record PluginMarketPluginSummary(
     string? LatestVersion,
     string? PublisherId,
     IReadOnlyList<string> Categories,
-    IReadOnlyList<string> Tags);
+    IReadOnlyList<string> Tags,
+    string? Category = null,
+    string PricingModel = "free",
+    int PriceCents = 0,
+    string Currency = "CNY",
+    bool RequiresPurchase = false);
 
 public sealed record PluginMarketPluginDetail(
     string PluginId,
@@ -83,7 +88,12 @@ public sealed record PluginMarketPluginDetail(
     IReadOnlyList<string> Tags,
     IReadOnlyList<string> Permissions,
     IReadOnlyList<string> UiTargets,
-    string? LatestVersion);
+    string? LatestVersion,
+    string? Category = null,
+    string PricingModel = "free",
+    int PriceCents = 0,
+    string Currency = "CNY",
+    bool RequiresPurchase = false);
 
 public sealed record PluginMarketVersionInfo(
     string PluginId,
@@ -119,6 +129,21 @@ public sealed record PluginMarketPublisher(
     string Name,
     string? Homepage,
     string? Namespace);
+
+public enum PluginMarketAccessFailure
+{
+    Unknown = 0,
+    AuthenticationRequired = 1,
+    PurchaseRequired = 2,
+    NotFound = 3
+}
+
+public sealed class PluginMarketAccessException(
+    PluginMarketAccessFailure failure,
+    string message) : InvalidOperationException(message)
+{
+    public PluginMarketAccessFailure Failure { get; } = failure;
+}
 
 /// <summary>
 /// Optional fallback client for hosts that deliberately disable online market access.

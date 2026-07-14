@@ -120,6 +120,10 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.ListPluginsAsync)));
+        Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.PriceCents)));
+        Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.RequiresPurchase)));
+        Assert.IsNotNull(typeof(PluginMarketPluginDetail).GetProperty(nameof(PluginMarketPluginDetail.Category)));
+        Assert.IsTrue(Enum.IsDefined(PluginMarketAccessFailure.PurchaseRequired));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.GetDownloadAsync)));
     }
 

@@ -1,6 +1,6 @@
 # FAQ
 
-> SDK `0.1.0-alpha.1`
+> SDK `0.1.0-alpha.2`
 
 ## 为什么 `PCL.Plugin` 不公开？
 

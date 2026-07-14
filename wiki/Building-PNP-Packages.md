@@ -1,6 +1,6 @@
 # 构建 `.pnp`
 
-> SDK `0.1.0-alpha.1`
+> SDK `0.1.0-alpha.2`
 
 安装 `PCL.N.Plugin.Sdk.Build`，设置 `PclNPluginId`，然后执行：
 

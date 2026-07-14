@@ -1,6 +1,6 @@
 # 测试插件
 
-> SDK `0.1.0-alpha.1`
+> SDK `0.1.0-alpha.2`
 
 测试项目引用 `PCL.N.Plugin.Testing`，通过 `TestPluginContext` 注入服务和 capability。
 

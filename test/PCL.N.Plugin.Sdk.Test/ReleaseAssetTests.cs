@@ -19,7 +19,7 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains("0.1.0-alpha.1", StringComparison.Ordinal))
+            if (!text.Contains("0.1.0-alpha.2", StringComparison.Ordinal))
                 errors.Add(Path.GetFileName(file) + ": missing SDK version");
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {

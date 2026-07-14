@@ -1,6 +1,6 @@
 # Plugin Manifest
 
-> SDK `0.1.0-alpha.1`
+> SDK `0.1.0-alpha.2`
 
 根目录 `plugin.json` 声明插件身份、入口、兼容范围、服务、权限和 UI 操作。完整 Schema 位于公开仓库 `schemas/plugin.schema.json`。
 

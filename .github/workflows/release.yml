@@ -63,9 +63,39 @@ jobs:
           while IFS= read -r package; do
             dotnet nuget push "$package" \
               --api-key "$NUGET_API_KEY" \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
+              --source https://api.nuget.org/v3/index.json
           done < <(find artifacts -maxdepth 1 -name '*.nupkg' ! -name '*.symbols.nupkg' -print | sort)
+      - name: Verify NuGet availability
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(
+            PCL.N.Plugin.Abstractions
+            PCL.N.Plugin.Analyzers
+            PCL.N.Plugin.Sdk
+            PCL.N.Plugin.Sdk.Build
+            PCL.N.Plugin.Testing
+          )
+          for attempt in $(seq 1 60); do
+            missing=()
+            for package in "${packages[@]}"; do
+              id=$(printf '%s' "$package" | tr '[:upper:]' '[:lower:]')
+              versions=$(curl --fail --silent --show-error \
+                "https://api.nuget.org/v3-flatcontainer/${id}/index.json" || true)
+              if ! grep -Fq "\"${SDK_VERSION}\"" <<<"$versions"; then
+                missing+=("$package")
+              fi
+            done
+            if [[ ${#missing[@]} -eq 0 ]]; then
+              echo "All packages are available from NuGet: ${SDK_VERSION}"
+              exit 0
+            fi
+            echo "Waiting for NuGet indexing (${attempt}/60): ${missing[*]}"
+            sleep 10
+          done
+          echo "Packages were pushed but did not become visible on NuGet: ${missing[*]}" >&2
+          exit 1
       - name: Sync GitHub Wiki
         if: github.ref_type == 'tag'
         env:
