@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   release:
@@ -49,15 +50,21 @@ jobs:
           name: pcl-n-plugin-sdk-${{ env.SDK_VERSION }}-release-candidate
           path: artifacts/*
           if-no-files-found: error
+      - name: NuGet login (trusted publishing)
+        if: github.ref_type == 'tag'
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
       - name: Push NuGet packages
         if: github.ref_type == 'tag'
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ -z "${NUGET_API_KEY:-}" ]]; then
-            echo "NUGET_API_KEY is not configured in the nuget-production environment." >&2
+            echo "NuGet trusted publishing did not return a temporary API key." >&2
             exit 1
           fi
           while IFS= read -r package; do

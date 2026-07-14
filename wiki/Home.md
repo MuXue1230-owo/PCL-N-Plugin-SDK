@@ -1,6 +1,6 @@
 # PCL N Plugin SDK
 
-> 适用于 SDK `0.1.0-alpha.3`。当前为预发布版本，1.0 前公共 API 仍可能调整。
+> 适用于 SDK `0.1.0-alpha.4`。当前为预发布版本，1.0 前公共 API 仍可能调整。
 
 PCL N Plugin SDK 是第三方插件的公开开发入口。插件运行时 `PCL.Plugin` 保持私有；插件不得引用 `PCL.Application`、`PCL.Desktop` 或 `PCL.Plugin`。
 

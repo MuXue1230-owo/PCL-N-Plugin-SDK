@@ -1,14 +1,14 @@
 # 快速开始
 
-> SDK `0.1.0-alpha.3`
+> SDK `0.1.0-alpha.4`
 
 创建 `net10.0` 类库并安装：
 
 ```powershell
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.3
-dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.3
-dotnet add package PCLN.Plugin.Analyzers --version 0.1.0-alpha.3
-dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.3
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.4
+dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.4
+dotnet add package PCLN.Plugin.Analyzers --version 0.1.0-alpha.4
+dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.4
 ```
 
 实现入口：

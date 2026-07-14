@@ -19,7 +19,7 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains("0.1.0-alpha.3", StringComparison.Ordinal))
+            if (!text.Contains("0.1.0-alpha.4", StringComparison.Ordinal))
                 errors.Add(Path.GetFileName(file) + ": missing SDK version");
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {
@@ -49,6 +49,19 @@ public sealed class ReleaseAssetTests
             string text = File.ReadAllText(path);
             StringAssert.Contains(text, $"<PackageId>{packageId}</PackageId>");
         }
+    }
+
+    [TestMethod]
+    public void ReleaseWorkflow_UsesNuGetTrustedPublishing()
+    {
+        string root = FindRepositoryRoot();
+        string workflow = File.ReadAllText(Path.Combine(root, ".github", "workflows", "release.yml"));
+
+        StringAssert.Contains(workflow, "id-token: write");
+        StringAssert.Contains(workflow, "uses: NuGet/login@v1");
+        StringAssert.Contains(workflow, "user: ${{ vars.NUGET_USER }}");
+        StringAssert.Contains(workflow, "steps.nuget-login.outputs.NUGET_API_KEY");
+        Assert.IsFalse(workflow.Contains("secrets.NUGET_API_KEY", StringComparison.Ordinal));
     }
 
     [TestMethod]

@@ -64,9 +64,9 @@ jobs:
           mkdir -p /tmp/pcl-sdk-consumer
           cd /tmp/pcl-sdk-consumer
           dotnet new classlib --framework net10.0 --no-restore
-          dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.3 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.3 --source "$GITHUB_WORKSPACE/artifacts/nuget"
-          dotnet add package PCLN.Plugin.Testing --version 0.1.0-alpha.3 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.Testing --version 0.1.0-alpha.4 --source "$GITHUB_WORKSPACE/artifacts/nuget"
           dotnet build -c Release -warnaserror
       - name: Verify reproducible example package
         shell: bash
@@ -95,7 +95,7 @@ jobs:
           cp "$package" artifacts/examples/
       - uses: actions/upload-artifact@v4
         with:
-          name: pcl-n-plugin-sdk-0.1.0-alpha.3
+          name: pcl-n-plugin-sdk-0.1.0-alpha.4
           path: |
             artifacts/nuget/*
             artifacts/examples/*

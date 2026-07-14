@@ -1,6 +1,6 @@
 # 生命周期与注册项
 
-> SDK `0.1.0-alpha.3`
+> SDK `0.1.0-alpha.4`
 
 插件实现 `IPclNPlugin.InitializeAsync` 和 `ShutdownAsync`。所有改变宿主状态的服务返回 `IPluginRegistration`，必须交给 `context.Lifetime.Track(...)`。
 

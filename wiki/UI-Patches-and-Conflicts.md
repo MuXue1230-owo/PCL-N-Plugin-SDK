@@ -1,6 +1,6 @@
 # UI Patch 与冲突
 
-> SDK `0.1.0-alpha.3`
+> SDK `0.1.0-alpha.4`
 
 支持 `observe`、`register`、`inject`、`modify`、`replace`、`remove`、`reorder`、资源/样式/模板覆写、输入拦截和 `wrap` 声明。
 
