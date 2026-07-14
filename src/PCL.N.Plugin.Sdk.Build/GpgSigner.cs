@@ -88,8 +88,9 @@ internal static class GpgSigner
             RedirectStandardOutput = true,
             CreateNoWindow = true
         };
+        bool useMsysPaths = OperatingSystem.IsWindows() && UsesMsysPathSyntax(fileName);
         foreach (string argument in arguments)
-            startInfo.ArgumentList.Add(NormalizeArgument(argument, OperatingSystem.IsWindows()));
+            startInfo.ArgumentList.Add(NormalizeArgument(argument, OperatingSystem.IsWindows(), useMsysPaths));
         using Process process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Unable to start {fileName}.");
         string error = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
         await process.WaitForExitAsync().ConfigureAwait(false);
@@ -99,6 +100,47 @@ internal static class GpgSigner
         return output;
     }
 
-    internal static string NormalizeArgument(string argument, bool isWindows) =>
-        isWindows ? argument.Replace('\\', '/') : argument;
+    internal static string NormalizeArgument(string argument, bool isWindows, bool useMsysPaths = false)
+    {
+        if (!isWindows)
+            return argument;
+        string normalized = argument.Replace('\\', '/');
+        if (useMsysPaths && normalized.Length >= 3 &&
+            char.IsAsciiLetter(normalized[0]) && normalized[1] == ':' && normalized[2] == '/')
+        {
+            return $"/{char.ToLowerInvariant(normalized[0])}{normalized[2..]}";
+        }
+        return normalized;
+    }
+
+    private static bool UsesMsysPathSyntax(string fileName)
+    {
+        string? executable = ResolveExecutable(fileName);
+        if (executable is null)
+            return false;
+        string normalized = executable.Replace('/', '\\');
+        return normalized.Contains("\\Git\\usr\\bin\\", StringComparison.OrdinalIgnoreCase) ||
+               normalized.Contains("\\msys64\\", StringComparison.OrdinalIgnoreCase) ||
+               normalized.Contains("\\mingw64\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? ResolveExecutable(string fileName)
+    {
+        if (Path.IsPathRooted(fileName) || fileName.Contains(Path.DirectorySeparatorChar) ||
+            fileName.Contains(Path.AltDirectorySeparatorChar))
+        {
+            return File.Exists(fileName) ? Path.GetFullPath(fileName) : null;
+        }
+
+        foreach (string directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string candidate = Path.Combine(directory.Trim('"'), fileName);
+            if (File.Exists(candidate))
+                return Path.GetFullPath(candidate);
+            if (!fileName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) && File.Exists(candidate + ".exe"))
+                return Path.GetFullPath(candidate + ".exe");
+        }
+        return null;
+    }
 }

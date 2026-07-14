@@ -20,6 +20,12 @@ public sealed class ReleaseAssetTests
             GpgSigner.NormalizeArgument(
                 @"C:\Users\runneradmin\AppData\Local\PCL-N\plugin-sdk\development-gpg",
                 isWindows: true));
+        Assert.AreEqual(
+            "/c/Users/runneradmin/AppData/Local/PCL-N/plugin-sdk/development-gpg",
+            GpgSigner.NormalizeArgument(
+                @"C:\Users\runneradmin\AppData\Local\PCL-N\plugin-sdk\development-gpg",
+                isWindows: true,
+                useMsysPaths: true));
         Assert.AreEqual("--batch", GpgSigner.NormalizeArgument("--batch", isWindows: true));
         Assert.AreEqual(@"C:\Users\runneradmin", GpgSigner.NormalizeArgument(@"C:\Users\runneradmin", isWindows: false));
     }
