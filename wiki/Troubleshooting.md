@@ -1,6 +1,6 @@
 # 故障排查
 
-> SDK `0.1.0-alpha.4`
+> SDK `0.1.0-alpha.5`
 
 ## NuGet 找不到包
 
@@ -8,7 +8,7 @@
 
 ```powershell
 dotnet nuget list source
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.4 --source https://api.nuget.org/v3/index.json
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.5 --source https://api.nuget.org/v3/index.json
 ```
 
 清理失败缓存：
@@ -91,7 +91,7 @@ gpg --list-secret-keys --with-subkey-fingerprint
 - required 服务不可用；
 - Manifest 不兼容另一已启用插件；
 - Plugin Safe Mode 已开启；
-- 未签名插件没有开发者模式授权；
+- 包未签名、开发签名损坏或签名指纹与公钥不一致；
 - `InitializeAsync` 抛出异常；
 - 入口类型不符合要求。
 

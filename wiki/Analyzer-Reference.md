@@ -1,6 +1,6 @@
 # Analyzer 参考
 
-> SDK `0.1.0-alpha.4`
+> SDK `0.1.0-alpha.5`
 
 `PCLN.Plugin.Analyzers` 在编译期检查宿主边界、入口类型、生命周期、Manifest 和后台工作。运行时与打包器仍会重复执行安全验证。
 

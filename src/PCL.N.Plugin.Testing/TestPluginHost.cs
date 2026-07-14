@@ -175,6 +175,25 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
         Services = TestServices;
         Logger = new CollectingPluginLogger();
         Dispatcher = ImmediatePluginDispatcher.Instance;
+        Notifications = new TestPluginNotificationService();
+        Settings = new TestPluginSettingsStore();
+        Commands = new TestPluginCommandService(TestLifetime);
+        Tasks = new TestPluginTaskService(TestLifetime);
+        Instances = new TestPluginInstanceReadService();
+        Localization = new TestPluginLocalizationService();
+        Exports = new TestPluginExportRegistry(plugin.Id.Value, TestLifetime);
+        UiSurfaces = new TestPluginUiSurfaceRegistry();
+        UiPatches = new TestPluginUiPatchService(TestLifetime);
+        TestServices
+            .Add<IPluginNotificationService>(Notifications)
+            .Add<IPluginSettingsStore>(Settings)
+            .Add<IPluginCommandService>(Commands)
+            .Add<IPluginTaskService>(Tasks)
+            .Add<IPluginInstanceReadService>(Instances)
+            .Add<IPluginLocalizationService>(Localization)
+            .Add<IPluginExportRegistry>(Exports)
+            .Add<IPluginUiSurfaceRegistry>(UiSurfaces)
+            .Add<IPluginUiPatchService>(UiPatches);
     }
 
     public PluginDescriptor Plugin { get; }
@@ -188,6 +207,24 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
     public TestPluginLifetime TestLifetime { get; } = new();
 
     public CollectingPluginLogger Logger { get; }
+
+    public TestPluginNotificationService Notifications { get; }
+
+    public TestPluginSettingsStore Settings { get; }
+
+    public TestPluginCommandService Commands { get; }
+
+    public TestPluginTaskService Tasks { get; }
+
+    public TestPluginInstanceReadService Instances { get; }
+
+    public TestPluginLocalizationService Localization { get; }
+
+    public TestPluginExportRegistry Exports { get; }
+
+    public TestPluginUiSurfaceRegistry UiSurfaces { get; }
+
+    public TestPluginUiPatchService UiPatches { get; }
 
     public IPluginServiceProvider Services { get; }
 

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>PCL.N.Plugin.UI.Avalonia</AssemblyName>
+    <RootNamespace>PCL.N.Plugin</RootNamespace>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackageId>PCLN.Plugin.UI.Avalonia</PackageId>
+    <Title>PCL N Plugin Avalonia UI</Title>
+    <Description>Opt-in raw Avalonia access and host-managed page/window contracts for trusted PCL N plugins.</Description>
+    <PackageTags>$(PackageTags);ui;avalonia;raw-access</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+    <ProjectReference Include="../PCL.N.Plugin.UI/PCL.N.Plugin.UI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.0.4" />
+  </ItemGroup>
+</Project>

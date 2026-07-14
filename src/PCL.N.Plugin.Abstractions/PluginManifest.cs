@@ -59,7 +59,11 @@ public sealed record PluginManifest
 
     public PluginUpdateManifest Update { get; init; } = new();
 
+    public PluginNativeManifest Native { get; init; } = new();
+
     public PluginSigningManifest? Signing { get; init; }
+
+    public PluginSigningPolicyManifest SigningPolicy { get; init; } = new();
 
     public IReadOnlyList<string> Categories { get; init; } = [];
 
@@ -182,13 +186,48 @@ public sealed record PluginUiCompatibilityManifest
         new Dictionary<string, string>();
 }
 
-public sealed record PluginDataManifest(int SchemaVersion = 1, int MinimumReadableSchema = 1);
+public sealed record PluginDataManifest
+{
+    public PluginDataManifest(
+        int schemaVersion = 1,
+        int minimumReadableSchema = 1,
+        IReadOnlyList<PluginDataMigrationManifest>? migrations = null)
+    {
+        SchemaVersion = schemaVersion;
+        MinimumReadableSchema = minimumReadableSchema;
+        Migrations = migrations ?? [];
+    }
+
+    public int SchemaVersion { get; init; }
+
+    public int MinimumReadableSchema { get; init; }
+
+    public IReadOnlyList<PluginDataMigrationManifest> Migrations { get; init; }
+}
+
+public sealed record PluginDataMigrationManifest(int From, int To, string Id);
 
 public sealed record PluginActivationManifest(string Mode = "startup");
 
 public sealed record PluginUpdateManifest(bool AllowAutomaticUpdate = true, bool RequiresRestart = false);
 
+public sealed record PluginNativeManifest
+{
+    public IReadOnlyList<PluginNativeLibraryManifest> Libraries { get; init; } = [];
+
+    public bool RequiresRestartForUpdate { get; init; }
+}
+
+public sealed record PluginNativeLibraryManifest(string Name, bool Unloadable = false);
+
 public sealed record PluginSigningManifest(string Fingerprint);
+
+public sealed record PluginSigningPolicyManifest
+{
+    public int MinimumValidSignatures { get; init; } = 1;
+
+    public IReadOnlyList<string> Roles { get; init; } = [];
+}
 
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,

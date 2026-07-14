@@ -1,6 +1,6 @@
 # 快速开始
 
-> 适用于 SDK `0.1.0-alpha.4`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
+> 适用于 SDK `0.1.0-alpha.5`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
 
 ## 1. 准备环境
 
@@ -9,7 +9,7 @@
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)；
 - Visual Studio、JetBrains Rider 或 VS Code；
 - 包含 PCL.Plugin 运行时的新版本 PCL N；
-- 正式发布时还需要 GnuPG 2.x，开发阶段可以先不签名。
+- 正式发布时还需要 GnuPG 2.x；开发阶段由 SDK 自动创建本机开发密钥签名。
 
 确认 SDK：
 
@@ -25,10 +25,10 @@ dotnet --version
 mkdir HelloPclN
 cd HelloPclN
 dotnet new classlib --framework net10.0
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.4
-dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.4
-dotnet add package PCLN.Plugin.Analyzers --version 0.1.0-alpha.4
-dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.4
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.5
+dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.5
+dotnet add package PCLN.Plugin.Analyzers --version 0.1.0-alpha.5
+dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.5
 ```
 
 将项目文件整理为：
@@ -42,15 +42,15 @@ dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.4
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.1.0</Version>
     <PclNPluginId>dev.example.hello</PclNPluginId>
-    <!-- 仅用于本地开发；正式发布必须改为 true 并配置 GPG。 -->
+    <!-- 仅用于本地开发：仍会自动使用本机开发密钥签名。 -->
     <PclNPluginSign>false</PclNPluginSign>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.4" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.4" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.4" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.4" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.5" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.5" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>
@@ -142,7 +142,7 @@ public sealed class HelloPlugin : IPclNPlugin
 }
 ```
 
-开发阶段可以暂用占位指纹并关闭签名。正式发布前必须替换为完整 OpenPGP 指纹并启用签名。参见 [OpenPGP 签名](OpenPGP-Signing)。
+开发阶段设置 `PclNPluginSign=false` 时，构建器会把 Manifest 指纹替换为自动生成的本机开发密钥完整指纹。正式发布前必须改用发布者 OpenPGP 完整指纹并启用正式签名。参见 [OpenPGP 签名](OpenPGP-Signing)。
 
 ## 5. 构建 `.pnp`
 
@@ -164,7 +164,7 @@ bin/Release/net10.0/dev.example.hello-0.1.0.pnp
 1. 打开 PCL N 的“设置”。
 2. 在“插件”分组进入“已安装”。
 3. 点击“安装 `.pnp`”并选择刚生成的文件。
-4. 未签名开发包需要先在“启动器 → 开发者模式”完成开发者授权，再显式允许未签名插件。
+4. 本机开发密钥签名包需要先在“启动器 → 开发者模式”完成开发者授权；未签名包始终拒绝。
 5. 启用插件，检查提示和插件日志。
 
 完整说明见 [桌面端安装与调试](Desktop-Installation-and-Debugging)。

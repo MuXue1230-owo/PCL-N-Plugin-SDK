@@ -40,11 +40,11 @@ jobs:
           mkdir -p artifacts
           for project in src/*/*.csproj; do
             case "$project" in
-              *Abstractions*|*Analyzers*|*Sdk.csproj|*Sdk.Build*|*Testing*) dotnet pack "$project" -c Release --no-build -o artifacts ;;
+              *Abstractions*|*Plugin.UI.csproj|*Plugin.UI.Avalonia.csproj|*Analyzers*|*Sdk.csproj|*Sdk.Build*|*Testing*) dotnet pack "$project" -c Release --no-build -o artifacts ;;
             esac
           done
-          test "$(find artifacts -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 5
-          test "$(find artifacts -name '*.snupkg' | wc -l)" -eq 5
+          test "$(find artifacts -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 7
+          test "$(find artifacts -name '*.snupkg' | wc -l)" -eq 7
       - uses: actions/upload-artifact@v4
         with:
           name: pcl-n-plugin-sdk-${{ env.SDK_VERSION }}-release-candidate
@@ -79,6 +79,8 @@ jobs:
           set -euo pipefail
           packages=(
             PCLN.Plugin.Abstractions
+            PCLN.Plugin.UI
+            PCLN.Plugin.UI.Avalonia
             PCLN.Plugin.Analyzers
             PCLN.Plugin.Sdk
             PCLN.Plugin.Sdk.Build

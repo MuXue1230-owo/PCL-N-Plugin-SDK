@@ -1,3 +1,8 @@
+using System.Buffers.Binary;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PCL.N.Plugin.Analyzers;
@@ -19,7 +24,7 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains("0.1.0-alpha.4", StringComparison.Ordinal))
+            if (!text.Contains("0.1.0-alpha.5", StringComparison.Ordinal))
                 errors.Add(Path.GetFileName(file) + ": missing SDK version");
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {
@@ -109,6 +114,66 @@ public sealed class ReleaseAssetTests
         Assert.IsFalse(axaml.Contains("x:Class=", StringComparison.Ordinal));
         Assert.IsFalse(axaml.Contains("clr-namespace:PCL.", StringComparison.Ordinal));
         StringAssert.Contains(manifest, "ui/HelloPanel.axaml");
+    }
+
+    [TestMethod]
+    public void ExamplePackage_PayloadRootUsesBinaryMerkleTree()
+    {
+        string root = FindRepositoryRoot();
+        string configuration = AppContext.BaseDirectory.Contains(
+            $"{Path.DirectorySeparatorChar}Release{Path.DirectorySeparatorChar}",
+            StringComparison.OrdinalIgnoreCase) ? "Release" : "Debug";
+        string package = Directory.EnumerateFiles(
+            Path.Combine(root, "examples", "HelloPlugin", "bin", configuration, "net10.0"),
+            "*.pnp").Single();
+        using ZipArchive archive = ZipFile.OpenRead(package);
+        using JsonDocument table = ReadJson(archive, "META-INF/pnp.files.json");
+        using JsonDocument signed = ReadJson(archive, "META-INF/pnp.signed.json");
+        using Stream manifestStream = archive.GetEntry("plugin.json")!.Open();
+        using StreamReader manifestReader = new(manifestStream, Encoding.UTF8);
+        string manifest = manifestReader.ReadToEnd();
+        StringAssert.Contains(manifest, ">=0.1 <1.0");
+        Assert.IsFalse(manifest.Contains("\\u003E", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(manifest.Contains("\\u003C", StringComparison.OrdinalIgnoreCase));
+        List<byte[]> level = [];
+        foreach (JsonElement file in table.RootElement.GetProperty("files").EnumerateArray())
+        {
+            byte[] path = Encoding.UTF8.GetBytes(file.GetProperty("path").GetString()!);
+            byte[] digest = Convert.FromHexString(file.GetProperty("sha256").GetString()!);
+            byte[] leaf = new byte[1 + path.Length + 1 + sizeof(long) + digest.Length];
+            leaf[0] = 0;
+            path.CopyTo(leaf, 1);
+            int offset = 1 + path.Length;
+            leaf[offset++] = 0;
+            BinaryPrimitives.WriteInt64BigEndian(leaf.AsSpan(offset, sizeof(long)), file.GetProperty("size").GetInt64());
+            digest.CopyTo(leaf, offset + sizeof(long));
+            level.Add(SHA256.HashData(leaf));
+        }
+        while (level.Count > 1)
+        {
+            List<byte[]> next = [];
+            for (int index = 0; index < level.Count; index += 2)
+            {
+                byte[] left = level[index];
+                byte[] right = index + 1 < level.Count ? level[index + 1] : left;
+                byte[] node = new byte[1 + left.Length + right.Length];
+                node[0] = 1;
+                left.CopyTo(node, 1);
+                right.CopyTo(node, 1 + left.Length);
+                next.Add(SHA256.HashData(node));
+            }
+            level = next;
+        }
+
+        Assert.AreEqual(
+            Convert.ToHexStringLower(level.Single()),
+            signed.RootElement.GetProperty("payloadRootSha256").GetString());
+    }
+
+    private static JsonDocument ReadJson(ZipArchive archive, string path)
+    {
+        using Stream stream = archive.GetEntry(path)!.Open();
+        return JsonDocument.Parse(stream);
     }
 
     private static string FindRepositoryRoot()

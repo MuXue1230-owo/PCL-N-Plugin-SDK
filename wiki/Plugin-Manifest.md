@@ -1,6 +1,6 @@
 # Plugin Manifest
 
-> SDK `0.1.0-alpha.4`
+> SDK `0.1.0-alpha.5`
 
 `.pnp` 根目录的 `plugin.json` 是插件的机器可读契约。它描述身份、入口、版本范围、依赖、服务、权限、UI、数据迁移和签名。构建器会规范化 Manifest，Analyzer、打包器和运行时会分别验证它。
 

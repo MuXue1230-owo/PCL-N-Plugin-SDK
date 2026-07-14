@@ -1,27 +1,31 @@
 using System.Collections.Concurrent;
+using System.Globalization;
+using PCL.N.Plugin;
 
 namespace PCL.N.Plugin.Testing;
 
 public sealed class TestPluginNotificationService : IPluginNotificationService
 {
-    private readonly ConcurrentQueue<string> _messages = new();
+    private readonly List<(string Level, string Message)> _messages = [];
     public PluginServiceId Id => PluginServiceIds.Notifications;
-    public PluginApiVersion Version => new(0, 1);
-    public IReadOnlyCollection<string> Messages => _messages.ToArray();
-    public void ShowInformation(string message) => _messages.Enqueue("info:" + message);
-    public void ShowWarning(string message) => _messages.Enqueue("warning:" + message);
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public IReadOnlyList<(string Level, string Message)> Messages => _messages;
+    public void ShowInformation(string message) => _messages.Add(("information", message));
+    public void ShowWarning(string message) => _messages.Add(("warning", message));
 }
 
 public sealed class TestPluginSettingsStore : IPluginSettingsStore
 {
     private readonly ConcurrentDictionary<string, object?> _values = new(StringComparer.Ordinal);
     public PluginServiceId Id => PluginServiceIds.Settings;
-    public PluginApiVersion Version => new(0, 1);
+    public PluginApiVersion Version { get; } = new(0, 1);
 
     public ValueTask<T> GetAsync<T>(PluginSettingKey<T> key, T defaultValue, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(_values.TryGetValue(key.Name, out object? value) && value is T typed ? typed : defaultValue);
+        return ValueTask.FromResult(_values.TryGetValue(key.Name, out object? value) && value is T typed
+            ? typed
+            : defaultValue);
     }
 
     public ValueTask SetAsync<T>(PluginSettingKey<T> key, T value, CancellationToken cancellationToken = default)
@@ -32,32 +36,36 @@ public sealed class TestPluginSettingsStore : IPluginSettingsStore
     }
 }
 
-public sealed class TestPluginCommandService : IPluginCommandService
+public sealed class TestPluginCommandService(TestPluginLifetime? lifetime = null) : IPluginCommandService
 {
-    private readonly Dictionary<string, PluginCommandDescriptor> _commands = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, PluginCommandDescriptor> _commands =
+        new(StringComparer.OrdinalIgnoreCase);
     public PluginServiceId Id => PluginServiceIds.Commands;
-    public PluginApiVersion Version => new(0, 1);
-    public IReadOnlyCollection<PluginCommandDescriptor> Commands => _commands.Values;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public IReadOnlyList<PluginCommandDescriptor> Commands => _commands.Values.ToArray();
 
     public IPluginRegistration Register(PluginCommandDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
         if (!_commands.TryAdd(descriptor.Id, descriptor))
             throw new InvalidOperationException($"Command already registered: {descriptor.Id}");
-        return new TestPluginRegistration(descriptor.Id, () => _commands.Remove(descriptor.Id));
+        TestDelegateRegistration registration = new(descriptor.Id, () => _commands.TryRemove(descriptor.Id, out _));
+        lifetime?.Track(registration);
+        return registration;
     }
 
     public Task InvokeAsync(string commandId, CancellationToken cancellationToken = default) =>
-        _commands.TryGetValue(commandId, out PluginCommandDescriptor? command)
-            ? command.ExecuteAsync(cancellationToken)
-            : throw new KeyNotFoundException($"Command not found: {commandId}");
+        _commands.TryGetValue(commandId, out PluginCommandDescriptor? descriptor)
+            ? descriptor.ExecuteAsync(cancellationToken)
+            : Task.FromException(new KeyNotFoundException($"Command is not registered: {commandId}"));
 }
 
-public sealed class TestPluginInstanceReadService(IEnumerable<PluginInstanceInfo>? instances = null) : IPluginInstanceReadService
+public sealed class TestPluginInstanceReadService(
+    IEnumerable<PluginInstanceInfo>? instances = null) : IPluginInstanceReadService
 {
-    private readonly IReadOnlyList<PluginInstanceInfo> _instances = instances?.ToArray() ?? [];
+    private readonly PluginInstanceInfo[] _instances = instances?.ToArray() ?? [];
     public PluginServiceId Id => PluginServiceIds.InstancesRead;
-    public PluginApiVersion Version => new(0, 1);
+    public PluginApiVersion Version { get; } = new(0, 1);
     public IReadOnlyList<PluginInstanceInfo> ListInstances() => _instances;
     public bool TryGetInstance(string id, out PluginInstanceInfo? instance)
     {
@@ -66,7 +74,53 @@ public sealed class TestPluginInstanceReadService(IEnumerable<PluginInstanceInfo
     }
 }
 
-public sealed class TestPluginRegistration(string id, Action release) : IPluginRegistration
+public sealed class TestPluginLocalizationService(
+    IReadOnlyDictionary<string, string>? strings = null,
+    string? culture = null) : IPluginLocalizationService
+{
+    private readonly IReadOnlyDictionary<string, string> _strings =
+        strings ?? new Dictionary<string, string>();
+    public PluginServiceId Id => PluginServiceIds.Localization;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public string CurrentCulture { get; } = culture ?? CultureInfo.CurrentUICulture.Name;
+    public string GetString(string key, string fallback) => _strings.TryGetValue(key, out string? value) ? value : fallback;
+    public IReadOnlyDictionary<string, string> GetStrings() => _strings;
+}
+
+public sealed class TestPluginExportRegistry(string pluginId, TestPluginLifetime lifetime) : IPluginExportRegistry
+{
+    private static readonly ConcurrentDictionary<(string PluginId, string Name, Type Contract), (PluginApiVersion Version, object Value)> Exports = new();
+    public PluginServiceId Id => PluginServiceIds.Exports;
+    public PluginApiVersion Version { get; } = new(0, 1);
+
+    public IPluginRegistration Export<TContract>(PluginExportDescriptor descriptor, TContract implementation)
+        where TContract : class
+    {
+        ArgumentNullException.ThrowIfNull(descriptor);
+        ArgumentNullException.ThrowIfNull(implementation);
+        var key = (pluginId, descriptor.Name, typeof(TContract));
+        var exported = (descriptor.Version, (object)implementation);
+        if (!Exports.TryAdd(key, exported))
+            throw new InvalidOperationException($"Export already registered: {pluginId}:{descriptor.Name}");
+        TestDelegateRegistration registration = new(
+            pluginId + ":" + descriptor.Name,
+            () => Exports.TryRemove(new KeyValuePair<(string, string, Type), (PluginApiVersion, object)>(key, exported)));
+        lifetime.Track(registration);
+        return registration;
+    }
+
+    public PluginImport<TContract> Import<TContract>(PluginExportId id, PluginApiVersionRange version)
+        where TContract : class
+    {
+        ArgumentNullException.ThrowIfNull(version);
+        return Exports.TryGetValue((id.PluginId, id.Name, typeof(TContract)), out var exported) &&
+               version.Contains(exported.Version)
+            ? new PluginImport<TContract>(id, exported.Version, (TContract)exported.Value)
+            : new PluginImport<TContract>(id, default, null);
+    }
+}
+
+internal sealed class TestDelegateRegistration(string id, Action release) : IPluginRegistration
 {
     private Action? _release = release;
     public string Id { get; } = id;

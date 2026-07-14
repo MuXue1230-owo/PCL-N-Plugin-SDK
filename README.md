@@ -2,13 +2,15 @@
 
 PCL N 第三方插件的公开契约、开发工具、分析器、测试宿主和 `.pnp` 构建工具。
 
-> 当前版本：`0.1.0-alpha.4`。1.0 前公共 API 仍可能调整。
+> 当前版本：`0.1.0-alpha.5`。1.0 前公共 API 仍可能调整。
 
 ## 包
 
 | NuGet 包 | 用途 |
 |---|---|
 | `PCLN.Plugin.Abstractions` | 插件入口、生命周期、服务、Manifest 和 UI 公共 ABI |
+| `PCLN.Plugin.UI` | UI Target、导航和页面注册的稳定契约 |
+| `PCLN.Plugin.UI.Avalonia` | 受权限控制的 Raw Avalonia、页面和窗口契约 |
 | `PCLN.Plugin.Sdk` | Manifest 验证、SemVer 范围和开发辅助 API |
 | `PCLN.Plugin.Analyzers` | `PNPSDK001–010` 编译诊断 |
 | `PCLN.Plugin.Testing` | 内存服务与生命周期测试宿主 |
@@ -40,7 +42,9 @@ dotnet test PCL-N-Plugin-SDK.slnx -c Release --no-build
 <PclNPluginSign>false</PclNPluginSign>
 ```
 
-未签名输出会产生警告，不得作为正式分发物。
+该设置不会生成未签名包：构建工具会创建并使用本机开发密钥。开发签名包可以本地安装，但不得提交插件市场；运行时不提供“允许未签名插件”开关。
+
+插件中心使用双层签名：开发者上传自己的 OpenPGP 自签名候选包；审核通过后，网站保留开发者签名并生成带 `META-INF/market/` 网站签名封套的新分发包。PCL 从市场安装时会对最终包计算 SHA-256，并向 `POST /v1/packages/verify` 在线核对发布者、命名空间、双指纹和吊销状态；验证服务不可用时拒绝首次安装。
 
 ## AXAML UI
 
@@ -71,6 +75,6 @@ Manifest Schema 位于 `schemas/plugin.schema.json`。
 
 ## CI 与发布
 
-CI 在 Windows、Linux 和 macOS 上构建与测试，并验证五个 NuGet 包、示例 `.pnp`、AXAML 资源和可复现输出。`sdk-v*` Tag 经 `nuget-production` 环境审批后发布 NuGet 并同步 Wiki。
+CI 在 Windows、Linux 和 macOS 上构建与测试，并验证七个 NuGet 包、示例 `.pnp`、AXAML 资源和可复现输出。`sdk-v*` Tag 经 `nuget-production` 环境审批后发布 NuGet 并同步 Wiki。
 
 Licensed under the Apache License 2.0.

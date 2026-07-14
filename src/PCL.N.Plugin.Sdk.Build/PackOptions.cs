@@ -8,7 +8,8 @@ internal sealed record PackOptions(
     IReadOnlyList<string> Dependencies,
     IReadOnlyList<string> NativeFiles,
     bool Sign,
-    string GpgPath)
+    string GpgPath,
+    string? DevelopmentGpgHome)
 {
     public static PackOptions Parse(string[] args)
     {
@@ -35,6 +36,7 @@ internal sealed record PackOptions(
         bool sign = values.TryGetValue("--sign", out List<string>? signValues) &&
                     bool.TryParse(signValues[^1], out bool enabled) && enabled;
         string gpg = values.TryGetValue("--gpg", out List<string>? gpgValues) ? gpgValues[^1] : "gpg";
-        return new PackOptions(manifest, Required("--assembly"), Optional("--deps"), Required("--output"), root, content, dependencies, nativeFiles, sign, gpg);
+        string? developmentGpgHome = Optional("--development-gpg-home");
+        return new PackOptions(manifest, Required("--assembly"), Optional("--deps"), Required("--output"), root, content, dependencies, nativeFiles, sign, gpg, developmentGpgHome);
     }
 }

@@ -1,6 +1,6 @@
 # 依赖与打包实战
 
-> 适用于 SDK `0.1.0-alpha.4`。本页区分插件前置、NuGet 托管依赖、内容文件和原生资产。
+> 适用于 SDK `0.1.0-alpha.5`。本页区分插件前置、NuGet 托管依赖、内容文件和原生资产。
 
 这四类依赖的安装和加载方式不同，不能混为一谈：
 
@@ -126,8 +126,8 @@ assets/default-rules.json
 runtimes/win-x64/native/example.dll
 META-INF/pnp.files.json
 META-INF/pnp.signed.json
-META-INF/pnp.signature.asc       # 启用签名时
-META-INF/pnp.public-key.asc      # 启用签名时
+META-INF/signatures/<fingerprint>.asc
+META-INF/keys/<fingerprint>.asc
 ```
 
 逐项检查：
@@ -176,4 +176,3 @@ Get-FileHash .\bin\Release\net10.0\dev.example.toolbox-0.1.0.pnp -Algorithm SHA2
 并把 Manifest 的 `signing.fingerprint` 改为正式 OpenPGP 公钥完整指纹。密钥准备和 CI 导入方式见 [OpenPGP 签名](OpenPGP-Signing)。
 
 下一步使用 [测试、调试与发布实战](Tutorial-Test-Debug-Release) 建立完整质量门槛。
-

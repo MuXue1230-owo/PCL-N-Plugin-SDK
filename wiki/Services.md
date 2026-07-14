@@ -1,6 +1,6 @@
 # 服务
 
-> SDK `0.1.0-alpha.4`。服务通过稳定 ID 和独立版本范围协商。
+> SDK `0.1.0-alpha.5`。服务通过稳定 ID 和独立版本范围协商。
 
 插件从 `context.Services` 获取宿主服务。真正不可缺少的服务写入 Manifest 的 `services.required`；增强体验但可降级的服务写入 `services.optional`。
 
@@ -132,4 +132,4 @@ PluginApiVersionRange range = PluginApiVersionRange.Parse(">=0.1 <1.0");
 bool available = context.Services.Supports(PluginServiceIds.Ui, range);
 ```
 
-服务范围使用空格分隔约束，例如 `>=0.1 <1.0`。不要把 NuGet 包版本 `0.1.0-alpha.4` 写成服务版本；两者独立演进。
+服务范围使用空格分隔约束，例如 `>=0.1 <1.0`。不要把 NuGet 包版本 `0.1.0-alpha.5` 写成服务版本；两者独立演进。

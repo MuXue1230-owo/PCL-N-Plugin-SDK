@@ -52,7 +52,12 @@ public sealed record PluginUiPatchDescriptor
         IReadOnlyList<string>? after = null,
         string? propertyPath = null,
         PluginUiModifyConflictPolicy modifyPolicy = PluginUiModifyConflictPolicy.Exclusive,
-        bool allowWrapping = false)
+        bool allowWrapping = false,
+        object? value = null,
+        PluginUiPatchPreconditions? preconditions = null,
+        string? selector = null,
+        string? resourcePath = null,
+        string? commandId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(operationId);
         ArgumentException.ThrowIfNullOrWhiteSpace(target);
@@ -70,6 +75,11 @@ public sealed record PluginUiPatchDescriptor
         PropertyPath = string.IsNullOrWhiteSpace(propertyPath) ? null : propertyPath.Trim();
         ModifyPolicy = modifyPolicy;
         AllowWrapping = allowWrapping;
+        Value = value;
+        Preconditions = preconditions;
+        Selector = string.IsNullOrWhiteSpace(selector) ? null : selector.Trim();
+        ResourcePath = string.IsNullOrWhiteSpace(resourcePath) ? null : resourcePath.Trim();
+        CommandId = string.IsNullOrWhiteSpace(commandId) ? null : commandId.Trim();
     }
 
     public string OperationId { get; init; }
@@ -101,6 +111,31 @@ public sealed record PluginUiPatchDescriptor
 
     /// <summary>When Replace is true, wrappers may still apply if peers declare wrap.</summary>
     public bool AllowWrapping { get; init; }
+
+    /// <summary>Typed value assigned by a Modify operation.</summary>
+    public object? Value { get; init; }
+
+    public PluginUiPatchPreconditions? Preconditions { get; init; }
+
+    /// <summary>Optional stable component target inside the declared surface.</summary>
+    public string? Selector { get; init; }
+
+    /// <summary>Package-relative declarative AXAML content for register/inject/replace/wrap.</summary>
+    public string? ResourcePath { get; init; }
+
+    /// <summary>Optional command exposed to declarative content through its Commands binding map.</summary>
+    public string? CommandId { get; init; }
+}
+
+public sealed record PluginUiPatchPreconditions
+{
+    public string? SurfaceVersionRange { get; init; }
+
+    public IReadOnlyList<string> RequiredSlots { get; init; } = [];
+
+    public IReadOnlyList<string> RequiredProperties { get; init; } = [];
+
+    public IReadOnlyList<string> RequiredEvents { get; init; } = [];
 }
 
 public enum PluginUiConflictSeverity
@@ -119,6 +154,8 @@ public enum PluginUiConflictKind
     OrderingCycle,
     SurfaceUnsupported,
     SlotUnsupported
+    ,MutualCompatibilityRequired
+    ,UiPreconditionFailed
 }
 
 public sealed record PluginUiConflict(

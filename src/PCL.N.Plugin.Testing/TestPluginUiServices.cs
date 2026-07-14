@@ -13,11 +13,11 @@ public sealed class TestPluginUiSurfaceCapability : IPluginUiSurfaceCapability
         if (_contributions.Any(item => string.Equals(item.ContributionId, descriptor.ContributionId, StringComparison.OrdinalIgnoreCase)))
             throw new InvalidOperationException($"UI contribution already registered: {descriptor.ContributionId}");
         _contributions.Add(descriptor);
-        return new TestPluginRegistration(descriptor.ContributionId, () => _contributions.Remove(descriptor));
+        return new TestDelegateRegistration(descriptor.ContributionId, () => _contributions.Remove(descriptor));
     }
 }
 
-public sealed class TestPluginUiPatchService : IPluginUiPatchService
+public sealed class TestPluginUiPatchService(TestPluginLifetime? lifetime = null) : IPluginUiPatchService
 {
     private readonly List<PluginUiPatchDescriptor> _patches = [];
     public PluginServiceId Id => PluginServiceIds.UiPatch;
@@ -30,7 +30,9 @@ public sealed class TestPluginUiPatchService : IPluginUiPatchService
         if (_patches.Any(item => string.Equals(item.OperationId, descriptor.OperationId, StringComparison.OrdinalIgnoreCase)))
             throw new InvalidOperationException($"UI patch already registered: {descriptor.OperationId}");
         _patches.Add(descriptor);
-        return new TestPluginRegistration(descriptor.OperationId, () => _patches.Remove(descriptor));
+        TestDelegateRegistration registration = new(descriptor.OperationId, () => _patches.Remove(descriptor));
+        lifetime?.Track(registration);
+        return registration;
     }
 
     public PluginUiPatchPlan Plan()

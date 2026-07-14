@@ -1,8 +1,10 @@
 # OpenPGP 签名
 
-> SDK `0.1.0-alpha.4`。正式分发的 `.pnp` 必须签名。
+> SDK `0.1.0-alpha.5`。正式分发的 `.pnp` 必须签名。
 
 PCL N 使用 OpenPGP detached signature 验证发布者身份和包内容。推荐 Ed25519 主密钥与签名子密钥，也支持 RSA 3072 位及以上。SHA-1、过期或吊销密钥会被拒绝。
+
+开发构建同样不会生成未签名包。`PclNPluginSign=false` 表示由 SDK 创建并使用仅限本机的开发密钥；该包可以手动安装测试，但不能作为插件中心候选包。
 
 ## 1. 安装 GnuPG
 
@@ -88,6 +90,20 @@ Get-ChildItem .\plugin-inspect\META-INF -Recurse
 ```
 
 若密钥有密码，使用支持非交互 pinentry 的安全方案，并把密码放在独立 Secret。不要使用 `--passphrase` 把明文暴露在进程列表或日志中。
+
+## 插件中心的第二层网站签名
+
+上传时，你的 `.pnp` 是“开发者自签名候选包”。插件中心会重新完成文件表、逐文件哈希、payload root、公钥完整指纹和 detached signature 验证。审核通过后，候选包不会直接分发；网站会保留原始负载与开发者签名，并追加：
+
+```text
+META-INF/market/pcln-market-v1.json
+META-INF/market/signatures/<market-fingerprint>.asc
+META-INF/market/keys/<market-fingerprint>.asc
+```
+
+网站签名封套绑定候选包 SHA-256、payload root、插件 ID/版本、开发者指纹、审核记录与时间。网站私钥只保存在服务端 Secret/HSM，不会下发到开发者后台或浏览器。
+
+从插件中心安装时，PCL 会先验证包内两层 OpenPGP 签名，再将最终分发包 SHA-256、插件 ID/版本和两个指纹发送到 `POST /v1/packages/verify`。接口必须明确返回当前状态为 `published`；包已吊销、记录不匹配、网络失败或服务不可用都会拒绝安装。手动安装开发包不会获得“市场已审核”标记。
 
 ## 密钥轮换
 

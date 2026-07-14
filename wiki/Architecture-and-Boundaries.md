@@ -1,6 +1,6 @@
 # 架构与边界
 
-> SDK `0.1.0-alpha.4`
+> SDK `0.1.0-alpha.5`
 
 ```text
 PCL N 桌面应用

@@ -13,7 +13,7 @@
            Text="PNPBUILD006: A universal plugin must target AnyCPU. Set PclNPluginRuntimeIdentifier for an architecture-specific package." />
     <ItemGroup>
       <_PclNPluginDependency Include="@(ReferenceCopyLocalPaths)"
-                             Condition="'%(Filename)%(Extension)' != 'PCL.N.Plugin.Abstractions.dll' and '%(Filename)%(Extension)' != 'PCL.Application.dll' and '%(Filename)%(Extension)' != 'PCL.Desktop.dll' and '%(Filename)%(Extension)' != 'PCL.Plugin.dll'" />
+                             Condition="'%(Filename)%(Extension)' != 'PCL.N.Plugin.Abstractions.dll' and '%(Filename)%(Extension)' != 'PCL.N.Plugin.UI.dll' and '%(Filename)%(Extension)' != 'PCL.N.Plugin.UI.Avalonia.dll' and '%(Filename)%(Extension)' != 'PCL.Application.dll' and '%(Filename)%(Extension)' != 'PCL.Desktop.dll' and '%(Filename)%(Extension)' != 'PCL.Plugin.dll'" />
     </ItemGroup>
     <PropertyGroup>
       <_PclNPluginDeps>$(TargetDir)$(AssemblyName).deps.json</_PclNPluginDeps>
@@ -25,7 +25,7 @@
       <_PclNPluginDependencyArguments>@(_PclNPluginDependency->' --dependency &quot;%(FullPath)&quot;', '')</_PclNPluginDependencyArguments>
       <_PclNPluginNativeArguments>@(PclNPluginNative->' --native &quot;%(RuntimeIdentifier)|%(FullPath)&quot;', '')</_PclNPluginNativeArguments>
     </PropertyGroup>
-    <Exec Command="dotnet &quot;$(_PclNPluginBuildTool)&quot; --manifest &quot;$(PclNPluginManifest)&quot; --assembly &quot;$(TargetPath)&quot;$(_PclNPluginDepsArgument) --output &quot;$(_PclNPluginOutput)&quot; --content-root &quot;$(PclNPluginContentRoot)&quot;$(_PclNPluginContentArguments)$(_PclNPluginDependencyArguments)$(_PclNPluginNativeArguments) --sign &quot;$(PclNPluginSign)&quot; --gpg &quot;$(PclNPluginGpgPath)&quot;" />
+    <Exec Command="dotnet &quot;$(_PclNPluginBuildTool)&quot; --manifest &quot;$(PclNPluginManifest)&quot; --assembly &quot;$(TargetPath)&quot;$(_PclNPluginDepsArgument) --output &quot;$(_PclNPluginOutput)&quot; --content-root &quot;$(PclNPluginContentRoot)&quot;$(_PclNPluginContentArguments)$(_PclNPluginDependencyArguments)$(_PclNPluginNativeArguments) --sign &quot;$(PclNPluginSign)&quot; --gpg &quot;$(PclNPluginGpgPath)&quot; --development-gpg-home &quot;$(PclNPluginDevelopmentGpgHome)&quot;" />
     <ItemGroup>
       <FileWrites Include="$(_PclNPluginOutput)" />
     </ItemGroup>

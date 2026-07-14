@@ -3,10 +3,16 @@
     <PclNPluginBuildEnabled Condition="'$(PclNPluginBuildEnabled)' == ''">true</PclNPluginBuildEnabled>
     <PclNPluginSign Condition="'$(PclNPluginSign)' == ''">false</PclNPluginSign>
     <PclNPluginGpgPath Condition="'$(PclNPluginGpgPath)' == ''">gpg</PclNPluginGpgPath>
+    <PclNPluginDevelopmentGpgHome Condition="'$(PclNPluginDevelopmentGpgHome)' == ''">$([System.Environment]::GetFolderPath(System.Environment+SpecialFolder.LocalApplicationData))/PCL-N/plugin-sdk/development-gpg</PclNPluginDevelopmentGpgHome>
     <PclNPluginManifest Condition="'$(PclNPluginManifest)' == ''">$(MSBuildProjectDirectory)/plugin.json</PclNPluginManifest>
 
     <PclNPluginContentRoot Condition="'$(PclNPluginContentRoot)' == ''">$(MSBuildProjectDirectory)</PclNPluginContentRoot>
     <PlatformTarget Condition="'$(PlatformTarget)' == ''">AnyCPU</PlatformTarget>
     <PclNPluginRuntimeSuffix Condition="'$(PclNPluginRuntimeIdentifier)' != ''">-$(PclNPluginRuntimeIdentifier)</PclNPluginRuntimeSuffix>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Manifest-declared ui/*.axaml is packaged as audited declarative content, not compiled into the plugin assembly. -->
+    <AvaloniaXaml Remove="ui/**/*.axaml" />
+    <AvaloniaResource Remove="ui/**/*.axaml" />
+  </ItemGroup>
 </Project>

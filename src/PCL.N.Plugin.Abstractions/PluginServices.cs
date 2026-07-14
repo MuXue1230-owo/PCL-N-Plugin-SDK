@@ -40,6 +40,10 @@ public static class PluginServiceIds
 
     /// <summary>Host-managed access to the PCL.N plugin market.</summary>
     public static PluginServiceId Market { get; } = new("pcl.market");
+
+    public static PluginServiceId Localization { get; } = new("pcl.localization");
+
+    public static PluginServiceId Exports { get; } = new("pcl.exports");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
@@ -192,6 +196,81 @@ public interface IPluginInstanceReadService : IPluginService
     IReadOnlyList<PluginInstanceInfo> ListInstances();
 
     bool TryGetInstance(string id, out PluginInstanceInfo? instance);
+}
+
+/// <summary>Reads plugin-owned localized strings from host-selected culture resources.</summary>
+public interface IPluginLocalizationService : IPluginService
+{
+    string CurrentCulture { get; }
+
+    string GetString(string key, string fallback);
+
+    IReadOnlyDictionary<string, string> GetStrings();
+}
+
+/// <summary>Stable identifier of a service exported by another plugin.</summary>
+public readonly record struct PluginExportId
+{
+    public PluginExportId(string pluginId, string name)
+    {
+        if (!global::PCL.N.Plugin.PluginId.TryParse(pluginId, out _))
+            throw new ArgumentException("Export plugin ID is invalid.", nameof(pluginId));
+        if (string.IsNullOrWhiteSpace(name) || name.Contains(':', StringComparison.Ordinal))
+            throw new ArgumentException("Export name must be non-empty and cannot contain ':'.", nameof(name));
+        PluginId = pluginId;
+        Name = name.Trim();
+    }
+
+    public string PluginId { get; }
+
+    public string Name { get; }
+
+    public override string ToString() => PluginId + ":" + Name;
+}
+
+/// <summary>Metadata attached to a plugin-to-plugin exported service.</summary>
+public sealed record PluginExportDescriptor
+{
+    public PluginExportDescriptor(string name, PluginApiVersion version)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Contains(':', StringComparison.Ordinal))
+            throw new ArgumentException("Export name must be non-empty and cannot contain ':'.", nameof(name));
+        Name = name.Trim();
+        Version = version;
+    }
+
+    public string Name { get; init; }
+
+    public PluginApiVersion Version { get; init; }
+}
+
+/// <summary>Result of importing a compatible shared contract from another plugin.</summary>
+public sealed record PluginImport<TContract>(
+    PluginExportId Id,
+    PluginApiVersion Version,
+    TContract? Value)
+    where TContract : class
+{
+    public bool IsAvailable => Value is not null;
+
+    public TContract Require() => Value ?? throw new InvalidOperationException($"Plugin export is unavailable: {Id}");
+}
+
+/// <summary>
+/// Controlled plugin-to-plugin service exchange. Contract assemblies must be loaded in the
+/// default context; plugin-private types are rejected by the runtime.
+/// </summary>
+public interface IPluginExportRegistry : IPluginService
+{
+    IPluginRegistration Export<TContract>(
+        PluginExportDescriptor descriptor,
+        TContract implementation)
+        where TContract : class;
+
+    PluginImport<TContract> Import<TContract>(
+        PluginExportId id,
+        PluginApiVersionRange version)
+        where TContract : class;
 }
 
 /// <summary>

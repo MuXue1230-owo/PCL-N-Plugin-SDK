@@ -1,6 +1,6 @@
 # 构建 `.pnp`
 
-> SDK `0.1.0-alpha.4`
+> SDK `0.1.0-alpha.5`
 
 安装 `PCLN.Plugin.Sdk.Build` 后，MSBuild 会在普通项目构建结束时生成 `.pnp`。
 
@@ -16,7 +16,7 @@
 
 <ItemGroup>
   <PackageReference Include="PCLN.Plugin.Sdk.Build"
-                    Version="0.1.0-alpha.4"
+                    Version="0.1.0-alpha.5"
                     PrivateAssets="all" />
   <AdditionalFiles Include="plugin.json" />
 </ItemGroup>
@@ -41,7 +41,7 @@ bin/Release/net10.0/dev.example.plugin-1.2.3.pnp
 | `PclNPluginManifest` | `$(MSBuildProjectDirectory)/plugin.json` | Manifest 路径 |
 | `PclNPluginContentRoot` | 项目目录 | 内容安全相对路径根目录 |
 | `PclNPluginOutputDirectory` | `$(TargetDir)` | 输出目录 |
-| `PclNPluginSign` | `false` | 是否调用 GPG 签名 |
+| `PclNPluginSign` | `false` | `true` 使用发布者密钥；`false` 自动使用本机开发密钥；两者都会签名 |
 | `PclNPluginGpgPath` | `gpg` | GPG 可执行文件 |
 | `PclNPluginRuntimeIdentifier` | 空 | 架构专用包的 RID |
 

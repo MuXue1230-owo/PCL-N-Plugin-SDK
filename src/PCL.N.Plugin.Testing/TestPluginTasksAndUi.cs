@@ -1,6 +1,6 @@
 namespace PCL.N.Plugin.Testing;
 
-public sealed class TestPluginTaskService : IPluginTaskService, IAsyncDisposable
+public sealed class TestPluginTaskService(TestPluginLifetime? lifetime = null) : IPluginTaskService, IAsyncDisposable
 {
     private readonly List<TestPluginTaskRegistration> _tasks = [];
     public PluginServiceId Id => PluginServiceIds.Tasks;
@@ -30,6 +30,7 @@ public sealed class TestPluginTaskService : IPluginTaskService, IAsyncDisposable
         TestPluginTaskRegistration registration = new(id, action, interval, () =>
             _tasks.RemoveAll(item => string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase)));
         _tasks.Add(registration);
+        lifetime?.Track(registration);
         return registration;
     }
 }
@@ -69,7 +70,15 @@ internal sealed class TestPluginTaskRegistration : IPluginTaskRegistration
 
 public sealed class TestPluginUiSurfaceRegistry(IEnumerable<PluginUiSurfaceDescriptor>? surfaces = null) : IPluginUiSurfaceRegistry
 {
-    private readonly IReadOnlyList<PluginUiSurfaceDescriptor> _surfaces = surfaces?.ToArray() ?? [];
+    private readonly IReadOnlyList<PluginUiSurfaceDescriptor> _surfaces = surfaces?.ToArray() ??
+    [
+        new PluginUiSurfaceDescriptor(
+            "pcl.launch.main",
+            PluginUiSurfaceKind.Page,
+            "1.0",
+            [PluginUiOperation.Inject, PluginUiOperation.Modify, PluginUiOperation.Wrap],
+            [new PluginUiSlotDescriptor("after-version-card", PluginUiSlotCardinality.Many, [PluginUiOperation.Inject])])
+    ];
     public PluginServiceId Id => PluginServiceIds.Ui;
     public PluginApiVersion Version => new(0, 1);
     public IReadOnlyList<PluginUiSurfaceDescriptor> ListSurfaces() => _surfaces;
@@ -79,7 +88,24 @@ public sealed class TestPluginUiSurfaceRegistry(IEnumerable<PluginUiSurfaceDescr
         return surface is not null;
     }
     public bool Supports(string surfaceId, string versionRange, PluginUiOperation operation) =>
-        TryGetSurface(surfaceId, out PluginUiSurfaceDescriptor? surface) && surface!.SupportedOperations.Contains(operation);
+        TryGetSurface(surfaceId, out PluginUiSurfaceDescriptor? surface) &&
+        SupportsVersion(surface!.Version, versionRange) &&
+        surface.SupportedOperations.Contains(operation);
     public bool SupportsSlot(string surfaceId, string slotId, string versionRange, PluginUiOperation operation) =>
-        TryGetSurface(surfaceId, out PluginUiSurfaceDescriptor? surface) && surface!.TryGetSlot(slotId, out PluginUiSlotDescriptor? slot) && slot!.AllowedOperations.Contains(operation);
+        TryGetSurface(surfaceId, out PluginUiSurfaceDescriptor? surface) &&
+        SupportsVersion(surface!.Version, versionRange) &&
+        surface.TryGetSlot(slotId, out PluginUiSlotDescriptor? slot) &&
+        slot!.AllowedOperations.Contains(operation);
+
+    private static bool SupportsVersion(string version, string versionRange)
+    {
+        try
+        {
+            return PluginApiVersionRange.Parse(versionRange).Contains(PluginApiVersion.Parse(version));
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
 }

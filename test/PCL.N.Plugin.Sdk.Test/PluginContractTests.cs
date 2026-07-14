@@ -15,7 +15,6 @@ public sealed class PluginContractTests
         InMemoryPluginSettingsPageCapability pages = new();
         await using TestPluginContext context = CreateContext();
         context.TestCapabilities.Add<IPluginSettingsPageCapability>(pages);
-        context.TestServices.Add<IPluginCommandService>(new TestPluginCommandService());
 
         await new HelloPlugin.HelloPlugin().InitializeAsync(context, CancellationToken.None);
 
@@ -125,6 +124,7 @@ public sealed class PluginContractTests
         Assert.IsNotNull(typeof(PluginMarketPluginDetail).GetProperty(nameof(PluginMarketPluginDetail.Category)));
         Assert.IsTrue(Enum.IsDefined(PluginMarketAccessFailure.PurchaseRequired));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.GetDownloadAsync)));
+        Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.VerifyPackageAsync)));
     }
 
     private static TestPluginContext CreateContext() =>

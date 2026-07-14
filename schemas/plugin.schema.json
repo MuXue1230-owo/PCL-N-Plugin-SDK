@@ -33,7 +33,9 @@
     "data": { "$ref": "#/$defs/data" },
     "activation": { "$ref": "#/$defs/activation" },
     "update": { "$ref": "#/$defs/update" },
+    "native": { "$ref": "#/$defs/native" },
     "signing": { "oneOf": [{ "$ref": "#/$defs/signing" }, { "type": "null" }] },
+    "signingPolicy": { "$ref": "#/$defs/signingPolicy" },
     "categories": { "type": "array", "items": { "$ref": "#/$defs/simpleId" }, "uniqueItems": true },
     "tags": { "type": "array", "items": { "$ref": "#/$defs/simpleId" }, "uniqueItems": true }
   },
@@ -104,7 +106,7 @@
       "type": "object", "additionalProperties": false, "required": ["target", "surface"],
       "properties": {
         "target": { "$ref": "#/$defs/simpleId" }, "surface": { "$ref": "#/$defs/versionRange" },
-        "access": { "type": "array", "items": { "enum": ["observe", "inject", "modify", "replace", "wrap", "resources", "raw-access", "input-intercept"] }, "uniqueItems": true },
+        "access": { "type": "array", "items": { "enum": ["register", "observe", "inject", "modify", "replace", "wrap", "resources", "global", "raw-access", "input-intercept", "window-management"] }, "uniqueItems": true },
         "operations": { "type": "array", "items": { "$ref": "#/$defs/uiOperation" } },
         "compatibility": { "$ref": "#/$defs/uiCompatibility" }
       }
@@ -140,16 +142,49 @@
     },
     "data": {
       "type": "object", "additionalProperties": false,
-      "properties": { "schemaVersion": { "type": "integer", "minimum": 1 }, "minimumReadableSchema": { "type": "integer", "minimum": 1 } }
+      "properties": {
+        "schemaVersion": { "type": "integer", "minimum": 1 },
+        "minimumReadableSchema": { "type": "integer", "minimum": 1 },
+        "migrations": { "type": "array", "items": { "$ref": "#/$defs/dataMigration" } }
+      }
+    },
+    "dataMigration": {
+      "type": "object", "additionalProperties": false, "required": ["from", "to", "id"],
+      "properties": {
+        "from": { "type": "integer", "minimum": 1 },
+        "to": { "type": "integer", "minimum": 1 },
+        "id": { "$ref": "#/$defs/simpleId" }
+      }
     },
     "activation": { "type": "object", "additionalProperties": false, "properties": { "mode": { "enum": ["startup", "on-demand"] } } },
     "update": {
       "type": "object", "additionalProperties": false,
       "properties": { "allowAutomaticUpdate": { "type": "boolean" }, "requiresRestart": { "type": "boolean" } }
     },
+    "native": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "libraries": { "type": "array", "items": { "$ref": "#/$defs/nativeLibrary" } },
+        "requiresRestartForUpdate": { "type": "boolean" }
+      }
+    },
+    "nativeLibrary": {
+      "type": "object", "additionalProperties": false, "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "unloadable": { "type": "boolean" }
+      }
+    },
     "signing": {
       "type": "object", "additionalProperties": false, "required": ["fingerprint"],
       "properties": { "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" } }
+    },
+    "signingPolicy": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "minimumValidSignatures": { "type": "integer", "minimum": 1 },
+        "roles": { "type": "array", "items": { "$ref": "#/$defs/simpleId" }, "uniqueItems": true }
+      }
     }
   }
 }

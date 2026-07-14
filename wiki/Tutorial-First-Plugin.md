@@ -1,6 +1,6 @@
 # 从零完成第一个插件
 
-> 适用于 SDK `0.1.0-alpha.4`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
+> 适用于 SDK `0.1.0-alpha.5`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
 
 本教程使用 `dev.example.toolbox` 作为插件 ID。实际项目必须换成你长期控制的反向域名式 ID；插件发布后不要再修改它。
 
@@ -29,10 +29,10 @@ dotnet sln add .\PclNToolbox.Plugin\PclNToolbox.Plugin.csproj
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.4" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.4" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.4" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.4" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.5" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.5" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>
@@ -159,7 +159,7 @@ public sealed class ToolboxPlugin : IPclNPlugin
 }
 ```
 
-开发阶段可以关闭签名并使用占位指纹。正式发布时必须替换为你自己的完整 OpenPGP 指纹，同时设置 `<PclNPluginSign>true</PclNPluginSign>`。
+开发阶段可以设置 `<PclNPluginSign>false</PclNPluginSign>`，SDK 会自动创建本机开发密钥、改写完整指纹并签名。正式发布时必须替换为你自己的完整 OpenPGP 指纹，同时设置 `<PclNPluginSign>true</PclNPluginSign>`。
 
 ## 4. 构建并检查产物
 
@@ -196,7 +196,7 @@ META-INF/pnp.signed.json
 1. 打开 PCL N 的“设置 → 启动器”，启用开发者模式并完成开发者授权。
 2. 进入“设置 → 插件 → 已安装”。
 3. 点击“安装 `.pnp`”，选择刚生成的包。
-4. 对未签名开发包确认风险并启用插件。
+4. 确认这是由本机开发密钥签名的包并启用插件；未签名包不会被接受。
 5. 在命令入口执行“Toolbox：打招呼”。
 6. 检查通知；若宿主未提供通知服务，则检查插件日志。
 
@@ -220,6 +220,6 @@ META-INF/pnp.signed.json
 | 构建没有生成 `.pnp` | 是否引用 `PCLN.Plugin.Sdk.Build`，是否设置 `PclNPluginId` |
 | Manifest Analyzer 不工作 | `plugin.json` 是否加入 `AdditionalFiles` |
 | 插件启用后命令重复 | 注册结果是否交给 `context.Lifetime.Track` |
-| 安装时提示签名无效 | 开发包是否关闭签名并通过开发者模式授权 |
+| 安装时提示签名无效 | 本机开发密钥包是否由当前 SDK 重新构建、包是否被二次修改 |
 
 下一步进入 [服务、设置与后台任务实战](Tutorial-Services-and-Settings)，把示例扩展成会保存配置和读取实例的真实功能。

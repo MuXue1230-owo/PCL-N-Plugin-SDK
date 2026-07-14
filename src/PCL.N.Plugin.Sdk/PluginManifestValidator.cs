@@ -92,6 +92,9 @@ public static class PluginManifestValidator
         PluginDataManifest data = manifest.Data ?? new PluginDataManifest();
         AddIf(data.MinimumReadableSchema > data.SchemaVersion,
             "PNPMAN032", "$.data", "minimumReadableSchema cannot exceed schemaVersion.");
+        ValidateDataMigrations(data, issues);
+        ValidateNative(manifest.Native ?? new PluginNativeManifest(), issues);
+        ValidateSigningPolicy(manifest.SigningPolicy ?? new PluginSigningPolicyManifest(), issues);
 
         return new PluginManifestValidationResult(manifest, issues);
 
@@ -222,7 +225,7 @@ public static class PluginManifestValidator
             HashSet<string> access = new(StringComparer.Ordinal);
             foreach (string value in target.Access)
             {
-                if (!access.Add(value) || value is not ("observe" or "inject" or "modify" or "replace" or "wrap" or "resources" or "raw-access" or "input-intercept"))
+                if (!access.Add(value) || value is not ("register" or "observe" or "inject" or "modify" or "replace" or "wrap" or "resources" or "global" or "raw-access" or "input-intercept" or "window-management"))
                     issues.Add(new PluginManifestValidationIssue("PNPMAN035", targetPath + ".access", $"UI access '{value}' is invalid or duplicated."));
             }
 
@@ -247,8 +250,103 @@ public static class PluginManifestValidator
                     issues.Add(new PluginManifestValidationIssue("PNPMAN041", operationPath + ".axaml", "AXAML is only supported by register, inject, replace, or wrap operations."));
                 if (operation.Kind == "modify" && string.IsNullOrWhiteSpace(operation.Selector) && string.IsNullOrWhiteSpace(operation.PropertyPath))
                     issues.Add(new PluginManifestValidationIssue("PNPMAN039", operationPath, "Modify operations require a selector or propertyPath."));
+                string requiredAccess = operation.Kind switch
+                {
+                    "register" => "register",
+                    "observe" => "observe",
+                    "inject" or "reorder" => "inject",
+                    "modify" or "wrap" => "modify",
+                    "replace" or "remove" => "replace",
+                    "override-resource" or "override-style" or "override-template" => "resources",
+                    "intercept-input" => "input-intercept",
+                    _ => string.Empty
+                };
+                if (requiredAccess.Length > 0 && !access.Contains(requiredAccess))
+                    issues.Add(new PluginManifestValidationIssue("PNPMAN042", operationPath + ".kind", $"Operation requires target access '{requiredAccess}'."));
+            }
+
+            ValidateUiCompatibility(target.Compatibility, targetPath + ".compatibility", issues);
+        }
+    }
+
+    private static void ValidateUiCompatibility(
+        PluginUiCompatibilityManifest? compatibility,
+        string path,
+        List<PluginManifestValidationIssue> issues)
+    {
+        if (compatibility is null)
+            return;
+        foreach ((string pluginId, string range) in (compatibility.CompatibleWith ?? new Dictionary<string, string>())
+                     .Concat(compatibility.IncompatibleWith ?? new Dictionary<string, string>()))
+        {
+            if (pluginId == "*" || !PluginId.TryParse(pluginId, out _) ||
+                !PluginVersionRange.TryParse(range, out _))
+            {
+                issues.Add(new PluginManifestValidationIssue(
+                    "PNPMAN043",
+                    path,
+                    $"UI compatibility entry '{pluginId}' must name a concrete plugin and valid version range."));
             }
         }
+    }
+
+    private static void ValidateDataMigrations(
+        PluginDataManifest data,
+        List<PluginManifestValidationIssue> issues)
+    {
+        IReadOnlyList<PluginDataMigrationManifest> migrations = data.Migrations ?? [];
+        HashSet<string> ids = new(StringComparer.Ordinal);
+        Dictionary<int, int> transitions = [];
+        for (int index = 0; index < migrations.Count; index++)
+        {
+            PluginDataMigrationManifest migration = migrations[index];
+            string path = $"$.data.migrations[{index}]";
+            if (string.IsNullOrWhiteSpace(migration.Id) || !ids.Add(migration.Id))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN044", path + ".id", "Migration ID is empty or duplicated."));
+            if (migration.From < data.MinimumReadableSchema || migration.To > data.SchemaVersion || migration.From >= migration.To)
+                issues.Add(new PluginManifestValidationIssue("PNPMAN045", path, "Migration transition is outside the readable schema range or does not advance."));
+            if (!transitions.TryAdd(migration.From, migration.To))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN046", path + ".from", "Only one migration may start from a schema version."));
+        }
+
+        if (data.MinimumReadableSchema < data.SchemaVersion)
+        {
+            int current = data.MinimumReadableSchema;
+            HashSet<int> visited = [];
+            while (current < data.SchemaVersion && visited.Add(current) && transitions.TryGetValue(current, out int next))
+                current = next;
+            if (current != data.SchemaVersion)
+                issues.Add(new PluginManifestValidationIssue("PNPMAN047", "$.data.migrations", "Migrations must provide a complete path from minimumReadableSchema to schemaVersion."));
+        }
+    }
+
+    private static void ValidateNative(
+        PluginNativeManifest native,
+        List<PluginManifestValidationIssue> issues)
+    {
+        HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
+        IReadOnlyList<PluginNativeLibraryManifest> libraries = native.Libraries ?? [];
+        for (int index = 0; index < libraries.Count; index++)
+        {
+            string name = libraries[index].Name;
+            if (string.IsNullOrWhiteSpace(name) || name.Contains('/') || name.Contains('\\') || !names.Add(name))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN048", $"$.native.libraries[{index}].name", "Native library name is empty, unsafe, or duplicated."));
+        }
+        if (libraries.Any(static library => !library.Unloadable) && !native.RequiresRestartForUpdate)
+            issues.Add(new PluginManifestValidationIssue("PNPMAN049", "$.native.requiresRestartForUpdate", "Non-unloadable native libraries require restart for update."));
+    }
+
+    private static void ValidateSigningPolicy(
+        PluginSigningPolicyManifest policy,
+        List<PluginManifestValidationIssue> issues)
+    {
+        if (policy.MinimumValidSignatures < 1)
+            issues.Add(new PluginManifestValidationIssue("PNPMAN050", "$.signingPolicy.minimumValidSignatures", "At least one valid signature is required."));
+        IReadOnlyList<string> roles = policy.Roles ?? [];
+        if (roles.Any(string.IsNullOrWhiteSpace) || roles.Distinct(StringComparer.Ordinal).Count() != roles.Count)
+            issues.Add(new PluginManifestValidationIssue("PNPMAN051", "$.signingPolicy.roles", "Signing roles must be non-empty and unique."));
+        if (policy.MinimumValidSignatures > Math.Max(1, roles.Count))
+            issues.Add(new PluginManifestValidationIssue("PNPMAN052", "$.signingPolicy", "minimumValidSignatures cannot exceed the declared role count."));
     }
 
     private static string NormalizeServiceRange(string range) =>

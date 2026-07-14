@@ -1,4 +1,4 @@
-# Public API baseline — 0.1.0-alpha.4
+# Public API baseline — 0.1.0-alpha.5
 
 This alpha baseline protects the public ABI from accidental changes. Intentional alpha API changes must update this file and release notes.
 
@@ -27,6 +27,14 @@ This alpha baseline protects the public ABI from accidental changes. Intentional
 - `IPluginCommandService`
 - `IPluginTaskService`
 - `IPluginInstanceReadService`
+- `IPluginLocalizationService`
+- `IPluginExportRegistry`
+- `IPluginDataMigration`
+- `IPluginMigrationContext`
+- `IPluginHealthCheck`
+- `IPluginMarketClient`
+- `PluginMarketPackageVerificationRequest`
+- `PluginMarketPackageVerification`
 
 ## Manifest and UI
 
@@ -36,5 +44,13 @@ This alpha baseline protects the public ABI from accidental changes. Intentional
 - `PluginUiOperationManifest`
 - `IPluginUiSurfaceRegistry`
 - `IPluginUiPatchService`
+- `UiTargetId`
+- `PluginPageDescriptor`
+- `IPluginNavigationService`
+- `IAvaloniaUiAccessService`
+- `IAvaloniaUiContext`
+- `IUiTargetHandle`
+- `IAvaloniaPluginPageService`
+- `IAvaloniaPluginWindowService`
 
 No type from `PCL.Application`, `PCL.Desktop`, or private `PCL.Plugin` is part of this baseline.

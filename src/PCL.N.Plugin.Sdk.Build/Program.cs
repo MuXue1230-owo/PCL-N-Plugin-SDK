@@ -1,7 +1,9 @@
 using System.IO.Compression;
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 return await PnpPackCommand.RunAsync(args).ConfigureAwait(false);
 
@@ -10,7 +12,8 @@ internal static class PnpPackCommand
     private static readonly DateTimeOffset ZipTimestamp = new(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly HashSet<string> ForbiddenAssemblies = new(StringComparer.OrdinalIgnoreCase)
     {
-        "PCL.N.Plugin.Abstractions.dll", "PCL.Application.dll", "PCL.Desktop.dll", "PCL.Plugin.dll"
+        "PCL.N.Plugin.Abstractions.dll", "PCL.N.Plugin.UI.dll", "PCL.N.Plugin.UI.Avalonia.dll",
+        "PCL.Application.dll", "PCL.Desktop.dll", "PCL.Plugin.dll"
     };
 
     public static async Task<int> RunAsync(string[] args)
@@ -29,7 +32,22 @@ internal static class PnpPackCommand
 
     private static async Task PackAsync(PackOptions options)
     {
-        byte[] manifest = CanonicalJson.Normalize(await File.ReadAllBytesAsync(options.ManifestPath).ConfigureAwait(false));
+        byte[] manifestSource = await File.ReadAllBytesAsync(options.ManifestPath).ConfigureAwait(false);
+        string? developmentGpgHome = null;
+        string? developmentFingerprint = null;
+        if (!options.Sign)
+        {
+            developmentGpgHome = options.DevelopmentGpgHome ?? GetDefaultDevelopmentGpgHome();
+            developmentFingerprint = await GpgSigner.GetOrCreateDevelopmentFingerprintAsync(
+                options.GpgPath,
+                developmentGpgHome).ConfigureAwait(false);
+            JsonObject manifestObject = JsonNode.Parse(manifestSource)?.AsObject()
+                ?? throw new InvalidOperationException("Manifest root must be a JSON object.");
+            manifestObject["signing"] = new JsonObject { ["fingerprint"] = developmentFingerprint };
+            manifestSource = JsonSerializer.SerializeToUtf8Bytes(manifestObject);
+        }
+
+        byte[] manifest = CanonicalJson.Normalize(manifestSource);
         using JsonDocument document = JsonDocument.Parse(manifest);
         JsonElement root = document.RootElement;
         string pluginId = RequiredString(root, "id");
@@ -67,7 +85,7 @@ internal static class PnpPackCommand
             hashAlgorithm = "SHA-256",
             files = records.Select(static item => new { path = item.Path, size = item.Size, sha256 = item.Sha256 }).ToArray()
         });
-        string payloadRoot = Hash(Encoding.UTF8.GetBytes(string.Join("\n", records.Select(static item => item.Path + "\0" + item.Sha256))));
+        string payloadRoot = ComputePayloadRoot(records);
         byte[] signed = CanonicalJson.Serialize(new
         {
             signatureFormat = 1,
@@ -82,16 +100,16 @@ internal static class PnpPackCommand
         files["META-INF/pnp.files.json"] = table;
         files["META-INF/pnp.signed.json"] = signed;
 
-        if (options.Sign)
-        {
-            if (fingerprint is null || fingerprint.Length < 40 || fingerprint.Any(static value => !Uri.IsHexDigit(value)))
-                throw new InvalidOperationException("A full OpenPGP fingerprint is required when signing is enabled.");
-            await GpgSigner.SignAsync(files, signed, fingerprint, options.GpgPath).ConfigureAwait(false);
-        }
-        else
-        {
-            Console.Error.WriteLine("PNPBUILD002: Package is unsigned and must not be formally distributed.");
-        }
+        if (fingerprint is null || fingerprint.Length < 40 || fingerprint.Any(static value => !Uri.IsHexDigit(value)))
+            throw new InvalidOperationException("A full OpenPGP fingerprint is required for every .pnp package.");
+        await GpgSigner.SignAsync(
+            files,
+            signed,
+            fingerprint,
+            options.GpgPath,
+            developmentGpgHome).ConfigureAwait(false);
+        if (!options.Sign)
+            Console.Error.WriteLine($"PNPBUILD002: Package signed with local development key {developmentFingerprint}; official market distribution is not allowed.");
 
         Directory.CreateDirectory(Path.GetDirectoryName(options.OutputPath)!);
         string temporary = options.OutputPath + ".tmp";
@@ -174,6 +192,48 @@ internal static class PnpPackCommand
             ? value.GetString()! : throw new InvalidOperationException($"Manifest property '{name}' is required.");
 
     private static string Hash(ReadOnlySpan<byte> value) => Convert.ToHexString(SHA256.HashData(value)).ToLowerInvariant();
+
+    private static string ComputePayloadRoot(IReadOnlyList<FileRecord> records)
+    {
+        List<byte[]> level = new(records.Count);
+        foreach (FileRecord record in records)
+        {
+            byte[] path = Encoding.UTF8.GetBytes(record.Path);
+            byte[] digest = Convert.FromHexString(record.Sha256);
+            byte[] leaf = new byte[1 + path.Length + 1 + sizeof(long) + digest.Length];
+            leaf[0] = 0;
+            path.CopyTo(leaf, 1);
+            int offset = 1 + path.Length;
+            leaf[offset++] = 0;
+            BinaryPrimitives.WriteInt64BigEndian(leaf.AsSpan(offset, sizeof(long)), record.Size);
+            digest.CopyTo(leaf, offset + sizeof(long));
+            level.Add(SHA256.HashData(leaf));
+        }
+        while (level.Count > 1)
+        {
+            List<byte[]> next = new((level.Count + 1) / 2);
+            for (int index = 0; index < level.Count; index += 2)
+            {
+                byte[] left = level[index];
+                byte[] right = index + 1 < level.Count ? level[index + 1] : left;
+                byte[] node = new byte[1 + left.Length + right.Length];
+                node[0] = 1;
+                left.CopyTo(node, 1);
+                right.CopyTo(node, 1 + left.Length);
+                next.Add(SHA256.HashData(node));
+            }
+            level = next;
+        }
+        return Convert.ToHexString(level[0]).ToLowerInvariant();
+    }
+
+    private static string GetDefaultDevelopmentGpgHome()
+    {
+        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(basePath))
+            basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share");
+        return Path.Combine(basePath, "PCL-N", "plugin-sdk", "development-gpg");
+    }
     private sealed record FileRecord(string Path, long Size, string Sha256);
 
     private sealed class Utf8PathComparer : IComparer<string>

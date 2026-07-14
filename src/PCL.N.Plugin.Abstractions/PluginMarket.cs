@@ -12,6 +12,7 @@ namespace PCL.N.Plugin;
 /// <item><c>GET /v1/plugins/{pluginId}/versions</c></item>
 /// <item><c>GET /v1/plugins/{pluginId}/versions/{version}</c></item>
 /// <item><c>GET /v1/plugins/{pluginId}/versions/{version}/download</c></item>
+/// <item><c>POST /v1/packages/verify</c></item>
 /// <item><c>GET /v1/categories</c></item>
 /// <item><c>GET /v1/publishers/{publisherId}</c></item>
 /// </list>
@@ -44,6 +45,18 @@ public interface IPluginMarketClient
         string pluginId,
         string version,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Verifies a downloaded market artifact against the authoritative publication and revocation record.
+    /// Hosts must call this after hashing the complete package and before installing it.
+    /// </summary>
+    ValueTask<PluginMarketPackageVerification?> VerifyPackageAsync(
+        PluginMarketPackageVerificationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult<PluginMarketPackageVerification?>(null);
+    }
 
     ValueTask<IReadOnlyList<PluginMarketCategory>> ListCategoriesAsync(
         CancellationToken cancellationToken = default);
@@ -105,7 +118,9 @@ public sealed record PluginMarketVersionInfo(
     string? SignatureFingerprint,
     long? PackageSizeBytes,
     IReadOnlyDictionary<string, string> RequiredServices,
-    IReadOnlyList<PluginMarketDependency> Dependencies);
+    IReadOnlyList<PluginMarketDependency> Dependencies,
+    string? MarketSignatureFingerprint = null,
+    DateTimeOffset? MarketSignedAt = null);
 
 public sealed record PluginMarketDependency(
     string PluginId,
@@ -117,7 +132,29 @@ public sealed record PluginMarketDownloadInfo(
     string Version,
     Uri DownloadUri,
     string? PackageSha256,
-    IReadOnlyDictionary<string, string> Headers);
+    IReadOnlyDictionary<string, string> Headers,
+    string? MarketSignatureFingerprint = null);
+
+public sealed record PluginMarketPackageVerificationRequest(
+    string PluginId,
+    string Version,
+    string PackageSha256,
+    string PublisherSignatureFingerprint,
+    string MarketSignatureFingerprint);
+
+public sealed record PluginMarketPackageVerification(
+    bool Valid,
+    string Status,
+    string? PluginId = null,
+    string? Version = null,
+    string? PackageSha256 = null,
+    string? PublisherId = null,
+    string? Namespace = null,
+    string? PublisherSignatureFingerprint = null,
+    string? MarketSignatureFingerprint = null,
+    DateTimeOffset? MarketSignedAt = null,
+    DateTimeOffset? RevokedAt = null,
+    string? RevocationReason = null);
 
 public sealed record PluginMarketCategory(
     string Id,
@@ -195,6 +232,14 @@ public sealed class UnconfiguredPluginMarketClient : IPluginMarketClient
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult<PluginMarketDownloadInfo?>(null);
+    }
+
+    public ValueTask<PluginMarketPackageVerification?> VerifyPackageAsync(
+        PluginMarketPackageVerificationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult<PluginMarketPackageVerification?>(null);
     }
 
     public ValueTask<IReadOnlyList<PluginMarketCategory>> ListCategoriesAsync(

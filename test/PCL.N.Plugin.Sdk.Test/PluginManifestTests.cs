@@ -131,7 +131,11 @@ public sealed class PluginManifestTests
               }]
             }]
           },
-          "data": { "schemaVersion": 4, "minimumReadableSchema": 3 },
+          "data": {
+            "schemaVersion": 4,
+            "minimumReadableSchema": 3,
+            "migrations": [{ "from": 3, "to": 4, "id": "migrate-3-to-4" }]
+          },
           "signing": { "fingerprint": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
         }
         """;

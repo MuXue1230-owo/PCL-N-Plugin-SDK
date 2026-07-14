@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>PCL.N.Plugin.UI</AssemblyName>
+    <RootNamespace>PCL.N.Plugin</RootNamespace>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>PCLN.Plugin.UI</PackageId>
+    <Title>PCL N Plugin UI Contracts</Title>
+    <Description>Stable UI target, navigation, page, window, and composition contracts for PCL N plugins.</Description>
+    <PackageTags>$(PackageTags);ui;surface;navigation</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

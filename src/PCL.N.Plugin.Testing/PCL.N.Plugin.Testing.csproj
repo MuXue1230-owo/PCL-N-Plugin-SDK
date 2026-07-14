@@ -14,5 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
+    <ProjectReference Include="../PCL.N.Plugin.UI/PCL.N.Plugin.UI.csproj" />
+    <ProjectReference Include="../PCL.N.Plugin.UI.Avalonia/PCL.N.Plugin.UI.Avalonia.csproj" />
   </ItemGroup>
 </Project>
