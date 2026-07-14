@@ -13,6 +13,18 @@ namespace PCL.N.Plugin.Sdk.Test;
 public sealed class ReleaseAssetTests
 {
     [TestMethod]
+    public void GpgArguments_NormalizeWindowsPathsForGitGpg()
+    {
+        Assert.AreEqual(
+            "C:/Users/runneradmin/AppData/Local/PCL-N/plugin-sdk/development-gpg",
+            GpgSigner.NormalizeArgument(
+                @"C:\Users\runneradmin\AppData\Local\PCL-N\plugin-sdk\development-gpg",
+                isWindows: true));
+        Assert.AreEqual("--batch", GpgSigner.NormalizeArgument("--batch", isWindows: true));
+        Assert.AreEqual(@"C:\Users\runneradmin", GpgSigner.NormalizeArgument(@"C:\Users\runneradmin", isWindows: false));
+    }
+
+    [TestMethod]
     public void Wiki_InternalLinksResolveAndPagesAreVersioned()
     {
         string root = FindRepositoryRoot();

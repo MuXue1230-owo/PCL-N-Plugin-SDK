@@ -88,7 +88,8 @@ internal static class GpgSigner
             RedirectStandardOutput = true,
             CreateNoWindow = true
         };
-        foreach (string argument in arguments) startInfo.ArgumentList.Add(argument);
+        foreach (string argument in arguments)
+            startInfo.ArgumentList.Add(NormalizeArgument(argument, OperatingSystem.IsWindows()));
         using Process process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Unable to start {fileName}.");
         string error = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
         await process.WaitForExitAsync().ConfigureAwait(false);
@@ -97,4 +98,7 @@ internal static class GpgSigner
             throw new InvalidOperationException($"{fileName} failed with exit code {process.ExitCode}: {error.Trim()}");
         return output;
     }
+
+    internal static string NormalizeArgument(string argument, bool isWindows) =>
+        isWindows ? argument.Replace('\\', '/') : argument;
 }

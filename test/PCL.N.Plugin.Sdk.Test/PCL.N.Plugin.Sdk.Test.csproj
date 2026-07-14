@@ -18,6 +18,7 @@
     <ProjectReference Include="../../src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Analyzers/PCL.N.Plugin.Analyzers.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj" />
+    <ProjectReference Include="../../src/PCL.N.Plugin.Sdk.Build/PCL.N.Plugin.Sdk.Build.csproj" />
     <ProjectReference Include="../../src/PCL.N.Plugin.Testing/PCL.N.Plugin.Testing.csproj" />
     <ProjectReference Include="../../examples/HelloPlugin/HelloPlugin.csproj" />
   </ItemGroup>
