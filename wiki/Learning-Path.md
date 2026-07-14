@@ -1,6 +1,6 @@
 # 学习路线
 
-> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.10.0`。
+> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.11.0`。
 
 本页把零散的 API 参考整理成一条可以照着完成的开发路线。第一次开发插件时，建议依次完成前四个阶段；准备公开发布时，再完成第五阶段。
 
@@ -86,4 +86,3 @@ restore → analyzer/build → test → 生成 .pnp → 检查包内容
 2. `.pnp` 生成和包内容问题查 [构建 `.pnp`](Building-PNP-Packages)。
 3. 安装、签名、兼容或启动失败查 [故障排查](Troubleshooting)。
 4. 不确定设计边界时查 [FAQ](FAQ)。
-

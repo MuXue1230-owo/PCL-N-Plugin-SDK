@@ -1,6 +1,6 @@
 # UI 扩展实战
 
-> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.10.0`。本教程只使用公开 Capability、Surface 和 Slot。
+> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.11.0`。本教程只使用公开 Capability、Surface 和 Slot。
 
 PCL N 插件有两类常见 UI 接入：
 
@@ -193,4 +193,3 @@ tar -tf .\bin\Release\net10.0\dev.example.toolbox-0.1.0.pnp
 | 布局在小窗口越界 | 移除固定尺寸，使用 `TextWrapping`、合理 Padding 和宿主 Slot 布局 |
 
 更复杂的修改、替换、包裹和冲突排序见 [UI Patch 与冲突](UI-Patches-and-Conflicts)。
-

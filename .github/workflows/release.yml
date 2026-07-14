@@ -125,6 +125,25 @@ jobs:
           git add --all
           git diff --cached --quiet || git commit -m "docs: sync SDK ${SDK_VERSION} wiki"
           git push
+      - name: Sync docs.pcln.top source
+        if: github.ref_type == 'tag'
+        env:
+          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${WIKI_TOKEN:-}" ]]; then
+            echo "WIKI_TOKEN is not configured in the nuget-production environment." >&2
+            exit 1
+          fi
+          git clone "https://x-access-token:${WIKI_TOKEN}@github.com/MuXue1230-owo/PCLN-Docs.git" docs-target
+          PCLN_PLUGIN_SDK_WIKI="$GITHUB_WORKSPACE/wiki" node docs-target/scripts/sync-plugin-sdk-docs.mjs
+          cd docs-target
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/zhHans/plugin-sdk
+          git diff --cached --quiet || git commit -m "docs: sync SDK ${SDK_VERSION} site"
+          git push
       - uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
