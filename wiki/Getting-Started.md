@@ -171,10 +171,10 @@ bin/Release/net10.0/dev.example.hello-0.1.0.pnp
 
 ## 7. 下一步
 
+- 按完整流程继续：[从零完成第一个插件](Tutorial-First-Plugin)
 - 复制更多场景：[实战案例集](Examples-Cookbook)
-- 保存设置、注册命令和后台任务：[服务](Services)
-- 添加设置页或声明式 AXAML：[UI Surface 与 Slot](UI-Surfaces-and-Slots)
-- 编写自动化测试：[测试插件](Testing-Plugins)
-- 准备正式发行：[发布插件](Publishing-a-Plugin)
+- 保存设置、注册命令和后台任务：[服务、设置与后台任务实战](Tutorial-Services-and-Settings)
+- 添加设置页或声明式 AXAML：[UI 扩展实战](Tutorial-UI-Extension)
+- 编写自动化测试并准备发行：[测试、调试与发布实战](Tutorial-Test-Debug-Release)
 
 仓库内的 [`examples/HelloPlugin`](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/tree/main/examples/HelloPlugin) 是可以直接构建的完整示例。
