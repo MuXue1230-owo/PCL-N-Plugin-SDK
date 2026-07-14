@@ -60,7 +60,14 @@ Manifest 的 UI operation 可以引用包内 `ui/*.axaml`：
 
 ## 文档
 
-版本化 Wiki 源文件位于 `wiki/`，发布工作流会同步到 GitHub Wiki。Manifest Schema 位于 `schemas/plugin.schema.json`。
+版本化 Wiki 源文件位于 `wiki/`，发布工作流会同步到 [GitHub Wiki](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/wiki)。同一套详细文档也发布到 [docs.pcln.top](https://docs.pcln.top/plugin-sdk/)。
+
+- [从零创建第一个插件](https://docs.pcln.top/plugin-sdk/Getting-Started)
+- [桌面端安装与调试](https://docs.pcln.top/plugin-sdk/Desktop-Installation-and-Debugging)
+- [十个实战案例](https://docs.pcln.top/plugin-sdk/Examples-Cookbook)
+- [完整 Manifest 参考](https://docs.pcln.top/plugin-sdk/Plugin-Manifest)
+
+Manifest Schema 位于 `schemas/plugin.schema.json`。
 
 ## CI 与发布
 

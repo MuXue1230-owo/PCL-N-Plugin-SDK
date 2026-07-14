@@ -1,22 +1,71 @@
 # PCL N Plugin SDK
 
-> 适用于 SDK `0.1.0-alpha.4`。当前为预发布版本，1.0 前公共 API 仍可能调整。
+> 适用于 SDK `0.1.0-alpha.4` 与 PCL.Plugin `v0.10.0`。当前仍是预发布版本，1.0 前公共 API 可能调整。
 
-PCL N Plugin SDK 是第三方插件的公开开发入口。插件运行时 `PCL.Plugin` 保持私有；插件不得引用 `PCL.Application`、`PCL.Desktop` 或 `PCL.Plugin`。
+PCL N Plugin SDK 是 PCL N 第三方插件的公开开发入口。你可以用它创建 `.pnp` 插件、调用稳定宿主服务、向公开 UI Surface 添加界面，并在不启动 PCL N 的情况下完成自动化测试。
 
-## 开始
+`PCL.Plugin` 是启动器内置的私有运行时，不是开发依赖。第三方插件只引用公开 NuGet 包，禁止引用 `PCL.Application`、`PCL.Desktop` 或 `PCL.Plugin`。
 
-1. 阅读 [[Getting-Started]]。
-2. 了解五个 [[NuGet-Packages]]。
-3. 编写 [[Plugin-Manifest]]。
-4. 使用 [[Building-PNP-Packages]] 生成 `.pnp`。
-5. 正式发布前完成 [[OpenPGP-Signing]]。
+## 我该从哪里开始？
 
-## 重要文档
+| 目标 | 推荐入口 |
+|---|---|
+| 第一次创建插件 | [快速开始](Getting-Started) |
+| 在 PCL N 中安装和调试 | [桌面端安装与调试](Desktop-Installation-and-Debugging) |
+| 直接查找可复制代码 | [实战案例集](Examples-Cookbook) |
+| 编写完整 `plugin.json` | [Plugin Manifest](Plugin-Manifest) |
+| 调用通知、设置、命令或后台任务 | [服务](Services) |
+| 添加设置页或启动页面板 | [UI Surface 与 Slot](UI-Surfaces-and-Slots) |
+| 编写测试 | [测试插件](Testing-Plugins) |
+| 构建、签名和发布 | [构建 `.pnp`](Building-PNP-Packages) → [OpenPGP 签名](OpenPGP-Signing) → [发布插件](Publishing-a-Plugin) |
 
-- [[Architecture-and-Boundaries]]
-- [[Services]]
-- [[UI-Surfaces-and-Slots]]
-- [[UI-Patches-and-Conflicts]]
-- [[Analyzer-Reference]]
-- [[Troubleshooting]]
+## 完整开发流程
+
+```text
+创建 net10.0 类库
+  → 安装 PCLN.Plugin.* NuGet 包
+  → 实现 IPclNPlugin
+  → 编写 plugin.json
+  → dotnet build -c Release
+  → 在 PCL N 桌面端安装并验证
+  → 使用 PCLN.Plugin.Testing 编写测试
+  → 使用 OpenPGP 正式签名
+  → 发布不可变的 SemVer 版本
+```
+
+## 文档导航
+
+### 基础
+
+- [架构与边界](Architecture-and-Boundaries)
+- [NuGet 包](NuGet-Packages)
+- [身份与版本](Plugin-Identity-and-Versioning)
+- [生命周期与注册项](Lifecycle-and-Registrations)
+- [兼容与废弃](Compatibility-and-Deprecation)
+
+### Manifest 与安全
+
+- [Plugin Manifest](Plugin-Manifest)
+- [依赖与兼容声明](Dependencies-and-Compatibility)
+- [权限与安全](Permissions-and-Security)
+- [Analyzer 参考](Analyzer-Reference)
+
+### UI
+
+- [UI Surface 与 Slot](UI-Surfaces-and-Slots)
+- [UI Patch 与冲突](UI-Patches-and-Conflicts)
+
+### 构建与发布
+
+- [构建 `.pnp`](Building-PNP-Packages)
+- [OpenPGP 签名](OpenPGP-Signing)
+- [发布插件](Publishing-a-Plugin)
+- [故障排查](Troubleshooting)
+- [FAQ](FAQ)
+
+## 官方资源
+
+- [SDK 源码与完整示例](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK)
+- [PCL N 插件商店](https://pcln.top/)
+- [NuGet 上的 PCLN.Plugin.Abstractions](https://www.nuget.org/packages/PCLN.Plugin.Abstractions)
+- [Manifest JSON Schema](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/blob/main/schemas/plugin.schema.json)
