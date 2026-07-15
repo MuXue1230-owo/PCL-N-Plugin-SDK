@@ -12,7 +12,8 @@
     <Title>PCL N Plugin SDK Build</Title>
     <Description>MSBuild integration for reproducible PCL N .pnp package creation and OpenPGP signing.</Description>
     <PackageTags>$(PackageTags);msbuild;pnp;packaging;openpgp</PackageTags>
-    <BuildOutputTargetFolder>tools/net10.0</BuildOutputTargetFolder>
+    <!-- NuGet appends the target framework to this folder for build output. -->
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <SelfContained>false</SelfContained>
@@ -23,9 +24,6 @@
     <None Update="buildTransitive/PCLN.Plugin.Sdk.Build.props" Pack="true" PackagePath="buildTransitive/PCLN.Plugin.Sdk.Build.props" />
     <None Update="buildTransitive/PCLN.Plugin.Sdk.Build.targets" Pack="true" PackagePath="buildTransitive/PCLN.Plugin.Sdk.Build.targets" />
     <None Include="../../schemas/plugin.schema.json" Pack="true" PackagePath="schemas/plugin.schema.json" Link="schemas/plugin.schema.json" />
-
-
     <None Include="$(TargetDir)$(AssemblyName).deps.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
-    <None Include="$(TargetDir)$(AssemblyName).runtimeconfig.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
   </ItemGroup>
 </Project>
