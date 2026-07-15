@@ -1,6 +1,6 @@
 # 测试、调试与发布实战
 
-> 适用于 SDK `0.1.0-alpha.5`。目标是让同一个提交可重复通过测试、生成 `.pnp` 并发布。
+> 适用于 SDK `0.1.0`。目标是让同一个提交可重复通过测试、生成 `.pnp` 并发布。
 
 推荐把验证分成三层：
 
@@ -17,7 +17,7 @@
 ```powershell
 dotnet new mstest -n PclNToolbox.Plugin.Tests --framework net10.0
 dotnet sln add .\PclNToolbox.Plugin.Tests\PclNToolbox.Plugin.Tests.csproj
-dotnet add .\PclNToolbox.Plugin.Tests package PCLN.Plugin.Testing --version 0.1.0-alpha.5
+dotnet add .\PclNToolbox.Plugin.Tests package PCLN.Plugin.Testing --version 0.1.0
 dotnet add .\PclNToolbox.Plugin.Tests reference .\PclNToolbox.Plugin\PclNToolbox.Plugin.csproj
 ```
 

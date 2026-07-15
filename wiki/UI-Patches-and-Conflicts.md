@@ -1,6 +1,6 @@
 # UI Patch 与冲突
 
-> SDK `0.1.0-alpha.5`
+> SDK `0.1.0`
 
 UI Patch 用于描述插件对稳定 Surface 的操作。支持：`observe`、`register`、`inject`、`modify`、`replace`、`remove`、`reorder`、资源/样式/模板覆写、输入拦截和 `wrap`。
 

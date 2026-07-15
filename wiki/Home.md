@@ -1,6 +1,6 @@
 # PCL N Plugin SDK
 
-> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.11.0`。当前仍是预发布版本，1.0 前公共 API 可能调整。
+> 适用于 SDK `0.1.0` 与 PCL.Plugin `v0.12.0`。当前仍是预发布版本，1.0 前公共 API 可能调整。
 
 PCL N Plugin SDK 是 PCL N 第三方插件的公开开发入口。你可以用它创建 `.pnp` 插件、调用稳定宿主服务、向公开 UI Surface 添加界面，并在不启动 PCL N 的情况下完成自动化测试。
 

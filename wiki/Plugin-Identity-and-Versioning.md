@@ -1,6 +1,6 @@
 # 身份与版本
 
-> SDK `0.1.0-alpha.5`
+> SDK `0.1.0`
 
 ## 插件 ID
 
@@ -60,9 +60,9 @@ dev.example.tools-1.2.3.pnp
 | 类型 | 示例 | 格式 |
 |---|---|---|
 | 插件版本 | `1.2.3-beta.1` | SemVer 2.0 |
-| SDK 包版本 | `0.1.0-alpha.5` | NuGet/SemVer |
+| SDK 包版本 | `0.1.0` | NuGet/SemVer |
 | Plugin API | `0.2` | `major.minor` |
 | 服务版本 | `0.1` | `major.minor` 范围 |
 | UI Surface | `3.1` | 独立 Surface 版本 |
 
-不要把 SDK `0.1.0-alpha.5` 写进 `api.minimum` 或服务范围。
+不要把 SDK `0.1.0` 写进 `api.minimum` 或服务范围。

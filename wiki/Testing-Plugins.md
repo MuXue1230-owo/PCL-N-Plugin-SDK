@@ -1,6 +1,6 @@
 # 测试插件
 
-> SDK `0.1.0-alpha.5`
+> SDK `0.1.0`
 
 `PCLN.Plugin.Testing` 提供不启动 PCL N 的内存宿主。你可以验证初始化、服务调用、命令、设置、任务、UI 注册和生命周期释放。
 
@@ -8,7 +8,7 @@
 
 ```powershell
 dotnet new mstest -n ExamplePlugin.Tests --framework net10.0
-dotnet add ExamplePlugin.Tests package PCLN.Plugin.Testing --version 0.1.0-alpha.5
+dotnet add ExamplePlugin.Tests package PCLN.Plugin.Testing --version 0.1.0
 dotnet add ExamplePlugin.Tests reference ExamplePlugin.csproj
 ```
 

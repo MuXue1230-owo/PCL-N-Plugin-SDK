@@ -1,6 +1,6 @@
 # OpenPGP 签名
 
-> SDK `0.1.0-alpha.5`。正式分发的 `.pnp` 必须签名。
+> SDK `0.1.0`。正式分发的 `.pnp` 必须签名。
 
 PCL N 使用 OpenPGP detached signature 验证发布者身份和包内容。推荐 Ed25519 主密钥与签名子密钥，也支持 RSA 3072 位及以上。SHA-1、过期或吊销密钥会被拒绝。
 

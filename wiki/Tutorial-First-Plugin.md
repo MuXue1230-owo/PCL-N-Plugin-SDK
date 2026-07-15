@@ -1,6 +1,6 @@
 # 从零完成第一个插件
 
-> 适用于 SDK `0.1.0-alpha.5`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
+> 适用于 SDK `0.1.0`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
 
 本教程使用 `dev.example.toolbox` 作为插件 ID。实际项目必须换成你长期控制的反向域名式 ID；插件发布后不要再修改它。
 
@@ -29,10 +29,10 @@ dotnet sln add .\PclNToolbox.Plugin\PclNToolbox.Plugin.csproj
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.5" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.5" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.5" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 # 构建 `.pnp`
 
-> SDK `0.1.0-alpha.5`
+> SDK `0.1.0`
 
 安装 `PCLN.Plugin.Sdk.Build` 后，MSBuild 会在普通项目构建结束时生成 `.pnp`。
 
@@ -16,7 +16,7 @@
 
 <ItemGroup>
   <PackageReference Include="PCLN.Plugin.Sdk.Build"
-                    Version="0.1.0-alpha.5"
+                    Version="0.1.0"
                     PrivateAssets="all" />
   <AdditionalFiles Include="plugin.json" />
 </ItemGroup>
