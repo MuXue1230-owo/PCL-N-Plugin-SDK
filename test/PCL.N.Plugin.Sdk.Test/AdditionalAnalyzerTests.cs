@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Reflection;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -13,7 +14,7 @@ namespace PCL.N.Plugin.Sdk.Test;
 [TestClass]
 public sealed class AdditionalAnalyzerTests
 {
-    private static readonly string[] ManifestDiagnosticIds = ["PNPSDK007", "PNPSDK008", "PNPSDK009"];
+    private static readonly string[] ManifestDiagnosticIds = ["PNPSDK007", "PNPSDK008", "PNPSDK009", "PNPSDK011"];
 
     [TestMethod]
     public void ManifestAnalyzer_DeclaresPNPSDK007Through009()
@@ -64,6 +65,33 @@ public sealed class AdditionalAnalyzerTests
         Assert.IsTrue(result.Issues.Any(i => i.Code == "PNPSDK008"));
     }
 
+    [TestMethod]
+    public async Task PNPSDK010_ReportsInconsistentSigningPolicy()
+    {
+        const string manifest = """
+            {
+              "formatVersion": 1,
+              "manifestVersion": 1,
+              "id": "dev.example.plugin",
+              "name": "Example",
+              "version": "1.0.0",
+              "publisher": { "id": "example", "namespace": "dev.example" },
+              "entryPoint": { "assembly": "lib/net10.0/Example.dll", "type": "Example.Entry" },
+              "host": { "minimumVersion": "1.0.0" },
+              "api": { "minimum": "0.1", "maximumExclusive": "1.0" },
+              "signing": {
+                "fingerprint": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "revokedFingerprints": ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
+              }
+            }
+            """;
+        ImmutableArray<Diagnostic> diagnostics = await AnalyzeAsync(
+            "class C {}",
+            [new InMemoryAdditionalText("plugin.json", manifest)],
+            new PluginManifestAdditionalFileAnalyzer());
+        Assert.IsTrue(diagnostics.Any(diagnostic => diagnostic.Id == PluginManifestAdditionalFileAnalyzer.SigningPolicyRuleId));
+    }
+
     private static PluginManifest MinimalManifest() =>
         new()
         {
@@ -80,7 +108,13 @@ public sealed class AdditionalAnalyzerTests
             Signing = new PluginSigningManifest("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         };
 
-    private static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, params DiagnosticAnalyzer[] analyzers)
+    private static Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, params DiagnosticAnalyzer[] analyzers) =>
+        AnalyzeAsync(source, [], analyzers);
+
+    private static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(
+        string source,
+        ImmutableArray<AdditionalText> additionalFiles,
+        params DiagnosticAnalyzer[] analyzers)
     {
         SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
         string runtime = typeof(object).Assembly.Location;
@@ -101,7 +135,17 @@ public sealed class AdditionalAnalyzerTests
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        CompilationWithAnalyzers withAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzers));
+        CompilationWithAnalyzers withAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create(analyzers),
+            new AnalyzerOptions(additionalFiles));
         return await withAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
+    }
+
+    private sealed class InMemoryAdditionalText(string path, string text) : AdditionalText
+    {
+        public override string Path { get; } = path;
+
+        public override SourceText GetText(CancellationToken cancellationToken = default) =>
+            SourceText.From(text);
     }
 }

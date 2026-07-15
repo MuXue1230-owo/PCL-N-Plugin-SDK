@@ -14,3 +14,4 @@ PNPSDK007 | PCL.N.Plugin.Manifest | Error | Invalid manifest
 PNPSDK008 | PCL.N.Plugin.Manifest | Error | API range missing
 PNPSDK009 | PCL.N.Plugin.Manifest | Error | Invalid AXAML declaration
 PNPSDK010 | PCL.N.Plugin.Lifecycle | Warning | Untracked background work
+PNPSDK011 | PCL.N.Plugin.Manifest | Error | Inconsistent signing policy

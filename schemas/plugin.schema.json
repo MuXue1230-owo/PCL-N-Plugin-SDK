@@ -177,7 +177,11 @@
     },
     "signing": {
       "type": "object", "additionalProperties": false, "required": ["fingerprint"],
-      "properties": { "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" } }
+      "properties": {
+        "fingerprint": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" },
+        "fingerprints": { "type": "array", "items": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" }, "uniqueItems": true },
+        "revokedFingerprints": { "type": "array", "items": { "type": "string", "pattern": "^[0-9A-Fa-f]{40,}$" }, "uniqueItems": true }
+      }
     },
     "signingPolicy": {
       "type": "object", "additionalProperties": false,

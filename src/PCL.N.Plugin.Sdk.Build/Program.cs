@@ -53,9 +53,10 @@ internal static class PnpPackCommand
         string pluginId = RequiredString(root, "id");
         string pluginVersion = RequiredString(root, "version");
         string entryPath = RequiredString(root.GetProperty("entryPoint"), "assembly");
-        string? fingerprint = root.TryGetProperty("signing", out JsonElement signing) && signing.ValueKind == JsonValueKind.Object
-            ? RequiredString(signing, "fingerprint").ToUpperInvariant()
-            : null;
+        string[] fingerprints = root.TryGetProperty("signing", out JsonElement signing) && signing.ValueKind == JsonValueKind.Object
+            ? ReadSigningFingerprints(signing)
+            : [];
+        string? fingerprint = fingerprints.FirstOrDefault();
 
         Dictionary<string, byte[]> files = new(StringComparer.Ordinal) { ["plugin.json"] = manifest };
         AddFile(files, entryPath, options.AssemblyPath);
@@ -95,19 +96,25 @@ internal static class PnpPackCommand
             manifestSha256 = Hash(manifest),
             fileTableSha256 = Hash(table),
             payloadRootSha256 = payloadRoot,
-            signingKeyFingerprint = fingerprint ?? string.Empty
+            signingKeyFingerprint = fingerprint ?? string.Empty,
+            signingKeyFingerprints = fingerprints
         });
         files["META-INF/pnp.files.json"] = table;
         files["META-INF/pnp.signed.json"] = signed;
 
-        if (fingerprint is null || fingerprint.Length < 40 || fingerprint.Any(static value => !Uri.IsHexDigit(value)))
+        if (fingerprints.Length == 0)
             throw new InvalidOperationException("A full OpenPGP fingerprint is required for every .pnp package.");
-        await GpgSigner.SignAsync(
-            files,
-            signed,
-            fingerprint,
-            options.GpgPath,
-            developmentGpgHome).ConfigureAwait(false);
+        foreach (string keyFingerprint in fingerprints)
+        {
+            if (keyFingerprint.Length < 40 || keyFingerprint.Any(static value => !Uri.IsHexDigit(value)))
+                throw new InvalidOperationException("A full OpenPGP fingerprint is required for every .pnp package.");
+            await GpgSigner.SignAsync(
+                files,
+                signed,
+                keyFingerprint,
+                options.GpgPath,
+                developmentGpgHome).ConfigureAwait(false);
+        }
         if (!options.Sign)
             Console.Error.WriteLine($"PNPBUILD002: Package signed with local development key {developmentFingerprint}; official market distribution is not allowed.");
 
@@ -128,6 +135,30 @@ internal static class PnpPackCommand
         }
         File.Move(temporary, options.OutputPath, true);
         Console.WriteLine(options.OutputPath);
+    }
+
+    private static string[] ReadSigningFingerprints(JsonElement signing)
+    {
+        string primary = RequiredString(signing, "fingerprint").ToUpperInvariant();
+        SortedSet<string> fingerprints = new(StringComparer.Ordinal) { primary };
+        if (signing.TryGetProperty("fingerprints", out JsonElement additional) && additional.ValueKind == JsonValueKind.Array)
+        {
+            foreach (JsonElement item in additional.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(item.GetString()))
+                    throw new InvalidOperationException("signing.fingerprints must contain full OpenPGP fingerprints.");
+                fingerprints.Add(item.GetString()!.ToUpperInvariant());
+            }
+        }
+        if (signing.TryGetProperty("revokedFingerprints", out JsonElement revoked) && revoked.ValueKind == JsonValueKind.Array)
+        {
+            foreach (JsonElement item in revoked.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.String && fingerprints.Contains(item.GetString()!.ToUpperInvariant()))
+                    throw new InvalidOperationException("A revoked signing fingerprint cannot be used to sign a package.");
+            }
+        }
+        return fingerprints.ToArray();
     }
 
     private static void AddManifestAxaml(IDictionary<string, byte[]> files, JsonElement root, string contentRoot)

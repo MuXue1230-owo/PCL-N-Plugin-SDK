@@ -220,7 +220,12 @@ public sealed record PluginNativeManifest
 
 public sealed record PluginNativeLibraryManifest(string Name, bool Unloadable = false);
 
-public sealed record PluginSigningManifest(string Fingerprint);
+public sealed record PluginSigningManifest(string Fingerprint)
+{
+    public IReadOnlyList<string> Fingerprints { get; init; } = [];
+
+    public IReadOnlyList<string> RevokedFingerprints { get; init; } = [];
+}
 
 public sealed record PluginSigningPolicyManifest
 {

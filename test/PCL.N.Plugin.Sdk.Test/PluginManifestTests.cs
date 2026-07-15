@@ -79,6 +79,23 @@ public sealed class PluginManifestTests
     }
 
     [TestMethod]
+    public void SigningPolicy_ValidatesMultipleFingerprintsAndRevocation()
+    {
+        string valid = ValidManifest.Replace(
+            "\"signing\": { \"fingerprint\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\" }",
+            "\"signing\": { \"fingerprint\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"fingerprints\": [\"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\"] }, \"signingPolicy\": { \"minimumValidSignatures\": 2 }",
+            StringComparison.Ordinal);
+        Assert.IsTrue(PluginManifestValidator.ParseAndValidate(Encoding.UTF8.GetBytes(valid)).IsValid);
+
+        string revoked = ValidManifest.Replace(
+            "\"signing\": { \"fingerprint\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\" }",
+            "\"signing\": { \"fingerprint\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"revokedFingerprints\": [\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"] }",
+            StringComparison.Ordinal);
+        PluginManifestValidationResult result = PluginManifestValidator.ParseAndValidate(Encoding.UTF8.GetBytes(revoked));
+        Assert.IsTrue(result.Issues.Any(issue => issue.Code == "PNPMAN056"));
+    }
+
+    [TestMethod]
     public void PluginVersionRange_EvaluatesConjunctions()
     {
         PluginVersionRange range = PluginVersionRange.Parse(">=2.0.0 <3.0.0");

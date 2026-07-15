@@ -175,6 +175,152 @@ public sealed class TestPluginExportRegistry(string pluginId, TestPluginLifetime
     }
 }
 
+public sealed class TestPluginProcessService : IPluginProcessService
+{
+    private readonly Queue<PluginProcessResult> _queuedResults = new();
+    public PluginServiceId Id => PluginServiceIds.Process;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public List<PluginProcessRequest> Requests { get; } = [];
+
+    public TestPluginProcessService EnqueueResult(PluginProcessResult result)
+    {
+        _queuedResults.Enqueue(result);
+        return this;
+    }
+
+    public Task<PluginProcessResult> RunAsync(PluginProcessRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
+        Requests.Add(request);
+        return Task.FromResult(_queuedResults.Count > 0 ? _queuedResults.Dequeue() : new PluginProcessResult(0, string.Empty, string.Empty));
+    }
+}
+
+public sealed class TestPluginClipboardService : IPluginClipboardService
+{
+    public PluginServiceId Id => PluginServiceIds.Clipboard;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public string? Text { get; private set; }
+    public ValueTask<string?> ReadTextAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(Text);
+    }
+    public ValueTask WriteTextAsync(string text, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        cancellationToken.ThrowIfCancellationRequested();
+        Text = text;
+        return ValueTask.CompletedTask;
+    }
+}
+
+public sealed class TestPluginFileService : IPluginFileService
+{
+    private readonly string _root;
+    public TestPluginFileService(PluginDirectorySet directories) => _root = directories.Data;
+    public PluginServiceId Id => PluginServiceIds.Files;
+    public PluginApiVersion Version { get; } = new(0, 1);
+
+    public async ValueTask<byte[]?> ReadAsync(string relativePath, CancellationToken cancellationToken = default)
+    {
+        string path = Resolve(relativePath);
+        return File.Exists(path) ? await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false) : null;
+    }
+
+    public async ValueTask WriteAsync(string relativePath, ReadOnlyMemory<byte> content, CancellationToken cancellationToken = default)
+    {
+        string path = Resolve(relativePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        await File.WriteAllBytesAsync(path, content.ToArray(), cancellationToken).ConfigureAwait(false);
+    }
+
+    public ValueTask DeleteAsync(string relativePath, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        string path = Resolve(relativePath);
+        if (File.Exists(path)) File.Delete(path);
+        return ValueTask.CompletedTask;
+    }
+
+    public IReadOnlyList<string> List(string relativeDirectory = "")
+    {
+        string directory = ResolveDirectory(relativeDirectory);
+        return Directory.Exists(directory)
+            ? Directory.EnumerateFiles(directory).Select(path => Path.GetRelativePath(_root, path).Replace('\\', '/')).Order(StringComparer.Ordinal).ToArray()
+            : [];
+    }
+
+    private string Resolve(string relativePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(relativePath);
+        if (Path.IsPathRooted(relativePath)) throw new ArgumentException("Path must be relative.", nameof(relativePath));
+        string path = Path.GetFullPath(Path.Combine(_root, relativePath));
+        EnsureContained(path);
+        return path;
+    }
+
+    private string ResolveDirectory(string relativePath)
+    {
+        if (Path.IsPathRooted(relativePath)) throw new ArgumentException("Path must be relative.", nameof(relativePath));
+        string path = Path.GetFullPath(Path.Combine(_root, relativePath));
+        EnsureContained(path);
+        return path;
+    }
+
+    private void EnsureContained(string path)
+    {
+        string normalizedRoot = Path.GetFullPath(_root).TrimEnd(Path.DirectorySeparatorChar);
+        string fullRoot = normalizedRoot + Path.DirectorySeparatorChar;
+        StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        if (!string.Equals(path, normalizedRoot, comparison) && !path.StartsWith(fullRoot, comparison))
+            throw new UnauthorizedAccessException("Path escaped the test plugin data directory.");
+    }
+}
+
+public sealed class TestPluginAccountReadService : IPluginAccountReadService
+{
+    private readonly List<PluginAccountProviderInfo> _providers = [];
+    public PluginServiceId Id => PluginServiceIds.AccountsRead;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public TestPluginAccountReadService AddProvider(PluginAccountProviderInfo provider) { _providers.Add(provider); return this; }
+    public IReadOnlyList<PluginAccountProviderInfo> ListProviders() => _providers.ToArray();
+}
+
+public sealed class TestPluginDownloadService : IPluginDownloadService
+{
+    private readonly List<PluginDownloadSourceInfo> _sources = [];
+    public PluginServiceId Id => PluginServiceIds.Downloads;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public TestPluginDownloadService AddSource(PluginDownloadSourceInfo source) { _sources.Add(source); return this; }
+    public IReadOnlyList<PluginDownloadSourceInfo> ListSources() => _sources.ToArray();
+}
+
+public sealed class TestPluginLaunchModificationService(TestPluginLifetime lifetime) : IPluginLaunchModificationService
+{
+    private readonly List<PluginLaunchModification> _modifications = [];
+    public PluginServiceId Id => PluginServiceIds.LaunchModify;
+    public PluginApiVersion Version { get; } = new(0, 1);
+    public IReadOnlyList<PluginLaunchModification> Modifications => _modifications;
+
+    public IPluginRegistration Register(PluginLaunchModification modification)
+    {
+        ArgumentNullException.ThrowIfNull(modification);
+        _modifications.Add(modification);
+        TestDelegateRegistration registration = new(modification.Id, () => _modifications.Remove(modification));
+        lifetime.Track(registration);
+        return registration;
+    }
+
+    public PluginLaunchRequest ApplyAll(PluginLaunchRequest request)
+    {
+        foreach (PluginLaunchModification modification in _modifications)
+            request = modification.Apply(request);
+        return request;
+    }
+}
+
 internal sealed class TestDelegateRegistration(string id, Action release) : IPluginRegistration
 {
     private Action? _release = release;

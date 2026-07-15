@@ -184,6 +184,12 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
         Exports = new TestPluginExportRegistry(plugin.Id.Value, TestLifetime);
         SecureStorage = new TestPluginSecureStorage();
         UriLauncher = new TestPluginUriLauncher();
+        Process = new TestPluginProcessService();
+        Clipboard = new TestPluginClipboardService();
+        Files = new TestPluginFileService(Directories);
+        Accounts = new TestPluginAccountReadService();
+        Downloads = new TestPluginDownloadService();
+        LaunchModifications = new TestPluginLaunchModificationService(TestLifetime);
         UiSurfaces = new TestPluginUiSurfaceRegistry();
         UiPatches = new TestPluginUiPatchService(TestLifetime);
         TestServices
@@ -196,6 +202,12 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
             .Add<IPluginExportRegistry>(Exports)
             .Add<IPluginSecureStorage>(SecureStorage)
             .Add<IPluginUriLauncher>(UriLauncher)
+            .Add<IPluginProcessService>(Process)
+            .Add<IPluginClipboardService>(Clipboard)
+            .Add<IPluginFileService>(Files)
+            .Add<IPluginAccountReadService>(Accounts)
+            .Add<IPluginDownloadService>(Downloads)
+            .Add<IPluginLaunchModificationService>(LaunchModifications)
             .Add<IPluginUiSurfaceRegistry>(UiSurfaces)
             .Add<IPluginUiPatchService>(UiPatches);
     }
@@ -229,6 +241,18 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
     public TestPluginSecureStorage SecureStorage { get; }
 
     public TestPluginUriLauncher UriLauncher { get; }
+
+    public TestPluginProcessService Process { get; }
+
+    public TestPluginClipboardService Clipboard { get; }
+
+    public TestPluginFileService Files { get; }
+
+    public TestPluginAccountReadService Accounts { get; }
+
+    public TestPluginDownloadService Downloads { get; }
+
+    public TestPluginLaunchModificationService LaunchModifications { get; }
 
     public TestPluginUiSurfaceRegistry UiSurfaces { get; }
 
