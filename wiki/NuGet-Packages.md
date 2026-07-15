@@ -1,6 +1,6 @@
 # NuGet 包
 
-> 当前公开版本：`0.1.0-alpha.5`
+> 当前公开版本：`0.1.0`
 
 所有包 ID 使用 `PCLN.Plugin.*`。为保持源码和二进制兼容，程序集名与命名空间仍使用 `PCL.N.Plugin.*`，因此 C# 代码继续写 `using PCL.N.Plugin;`。
 
@@ -27,10 +27,10 @@
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.5" />
-  <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.5" PrivateAssets="all" />
-  <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.5" PrivateAssets="all" />
-  <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.5" PrivateAssets="all" />
+  <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0" />
+  <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0" PrivateAssets="all" />
+  <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0" PrivateAssets="all" />
+  <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0" PrivateAssets="all" />
   <AdditionalFiles Include="plugin.json" />
 </ItemGroup>
 ```
@@ -38,13 +38,13 @@
 需要稳定 UI Target、导航或页面元数据时，再加入：
 
 ```xml
-<PackageReference Include="PCLN.Plugin.UI" Version="0.1.0-alpha.5" />
+<PackageReference Include="PCLN.Plugin.UI" Version="0.1.0" />
 ```
 
 需要创建完整 Avalonia 页面、窗口或申请 Raw Avalonia访问时，再加入：
 
 ```xml
-<PackageReference Include="PCLN.Plugin.UI.Avalonia" Version="0.1.0-alpha.5" />
+<PackageReference Include="PCLN.Plugin.UI.Avalonia" Version="0.1.0" />
 ```
 
 `PCLN.Plugin.UI.Avalonia` 会传递所需的 UI契约和 Avalonia依赖，不要仅为了声明式 AXAML注入而引用它。
@@ -52,7 +52,7 @@
 测试项目：
 
 ```xml
-<PackageReference Include="PCLN.Plugin.Testing" Version="0.1.0-alpha.5" />
+<PackageReference Include="PCLN.Plugin.Testing" Version="0.1.0" />
 ```
 
 ## 为什么不能引用 PCL.Plugin？
@@ -71,7 +71,7 @@ Analyzer 会阻止引用：
 alpha 阶段建议在仓库中显式固定完整版本，并让依赖更新通过单独提交进入：
 
 ```xml
-<PclNPluginSdkVersion>0.1.0-alpha.5</PclNPluginSdkVersion>
+<PclNPluginSdkVersion>0.1.0</PclNPluginSdkVersion>
 ```
 
 ```xml

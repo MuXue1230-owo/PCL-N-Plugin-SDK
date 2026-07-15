@@ -1,6 +1,6 @@
 # 快速开始
 
-> 适用于 SDK `0.1.0-alpha.5`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
+> 适用于 SDK `0.1.0`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
 
 ## 1. 准备环境
 
@@ -25,10 +25,10 @@ dotnet --version
 mkdir HelloPclN
 cd HelloPclN
 dotnet new classlib --framework net10.0
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.0-alpha.5
-dotnet add package PCLN.Plugin.Sdk --version 0.1.0-alpha.5
-dotnet add package PCLN.Plugin.Analyzers --version 0.1.0-alpha.5
-dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.5
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.0
+dotnet add package PCLN.Plugin.Sdk --version 0.1.0
+dotnet add package PCLN.Plugin.Analyzers --version 0.1.0
+dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0
 ```
 
 将项目文件整理为：
@@ -47,10 +47,10 @@ dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0-alpha.5
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0-alpha.5" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0-alpha.5" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0-alpha.5" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0-alpha.5" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>

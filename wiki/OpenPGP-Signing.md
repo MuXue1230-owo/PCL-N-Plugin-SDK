@@ -1,6 +1,6 @@
 # OpenPGP 签名
 
-> SDK `0.1.0-alpha.5`。正式分发的 `.pnp` 必须签名。
+> SDK `0.1.0`。正式分发的 `.pnp` 必须签名。
 
 PCL N 使用 OpenPGP detached signature 验证发布者身份和包内容。推荐 Ed25519 主密钥与签名子密钥，也支持 RSA 3072 位及以上。SHA-1、过期或吊销密钥会被拒绝。
 
@@ -30,7 +30,7 @@ gpg --full-generate-key
 gpg --list-secret-keys --with-subkey-fingerprint --keyid-format long
 ```
 
-把主密钥完整指纹写进 Manifest：
+把主密钥完整指纹写进 Manifest。单签插件只需要 `fingerprint`：
 
 ```json
 "signing": {
@@ -38,7 +38,23 @@ gpg --list-secret-keys --with-subkey-fingerprint --keyid-format long
 }
 ```
 
-不要使用 8/16 位短 Key ID，也不要写空格。
+团队多签或轮换期间可以同时声明多个 active key，并用 `minimumValidSignatures` 要求至少多少个签名通过：
+
+```json
+"signing": {
+  "fingerprint": "0123456789ABCDEF0123456789ABCDEF01234567",
+  "fingerprints": [
+    "89ABCDEF0123456789ABCDEF0123456789ABCDEF"
+  ],
+  "revokedFingerprints": []
+},
+"signingPolicy": {
+  "minimumValidSignatures": 2,
+  "roles": ["maintainer", "release"]
+}
+```
+
+不要使用 8/16 位短 Key ID，也不要写空格。`revokedFingerprints` 中的 key 会被运行时和插件中心拒绝，即使包内仍带有对应签名。
 
 ## 4. 启用构建签名
 
@@ -56,8 +72,9 @@ dotnet build -c Release
 构建器会：
 
 - 对 `META-INF/pnp.signed.json` 创建 armored detached signature；
-- 写入 `META-INF/signatures/<fingerprint>.asc`；
-- 导出公钥到 `META-INF/keys/<fingerprint>.asc`；
+- 为 Manifest 中每个 active signing fingerprint 写入 `META-INF/signatures/<fingerprint>.asc`；
+- 导出对应公钥到 `META-INF/keys/<fingerprint>.asc`；
+- 在 signed payload 中写入 `signingKeyFingerprints`；
 - 让文件表和 payload root 覆盖包内容。
 
 ## 5. 检查包内容

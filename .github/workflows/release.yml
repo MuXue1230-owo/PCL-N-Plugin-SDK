@@ -24,8 +24,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version=$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' Directory.Build.props)-$(sed -n 's:.*<VersionSuffix>\(.*\)</VersionSuffix>.*:\1:p' Directory.Build.props)
-          test -n "$version"
+          prefix=$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' Directory.Build.props)
+          suffix=$(sed -n 's:.*<VersionSuffix>\(.*\)</VersionSuffix>.*:\1:p' Directory.Build.props)
+          test -n "$prefix"
+          if [[ -n "$suffix" ]]; then
+            version="$prefix-$suffix"
+          else
+            version="$prefix"
+          fi
           if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
             test "${GITHUB_REF_NAME}" = "sdk-v${version}"
           fi

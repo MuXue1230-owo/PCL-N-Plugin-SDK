@@ -1,6 +1,6 @@
 # UI 扩展实战
 
-> 适用于 SDK `0.1.0-alpha.5` 与 PCL.Plugin `v0.11.0`。本教程只使用公开 Capability、Surface 和 Slot。
+> 适用于 SDK `0.1.0` 与 PCL.Plugin `v0.12.0`。本教程只使用公开 Capability、Surface 和 Slot。
 
 PCL N 插件可按风险与耦合程度选择五类 UI 接入。优先使用能满足需求的最低层能力：
 

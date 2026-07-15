@@ -1,4 +1,4 @@
-# Public API baseline — 0.1.0-alpha.6
+# Public API baseline — 0.1.0
 
 This alpha baseline protects the public ABI from accidental changes. Intentional alpha API changes must update this file and release notes.
 
