@@ -182,6 +182,8 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
         Instances = new TestPluginInstanceReadService();
         Localization = new TestPluginLocalizationService();
         Exports = new TestPluginExportRegistry(plugin.Id.Value, TestLifetime);
+        SecureStorage = new TestPluginSecureStorage();
+        UriLauncher = new TestPluginUriLauncher();
         UiSurfaces = new TestPluginUiSurfaceRegistry();
         UiPatches = new TestPluginUiPatchService(TestLifetime);
         TestServices
@@ -192,6 +194,8 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
             .Add<IPluginInstanceReadService>(Instances)
             .Add<IPluginLocalizationService>(Localization)
             .Add<IPluginExportRegistry>(Exports)
+            .Add<IPluginSecureStorage>(SecureStorage)
+            .Add<IPluginUriLauncher>(UriLauncher)
             .Add<IPluginUiSurfaceRegistry>(UiSurfaces)
             .Add<IPluginUiPatchService>(UiPatches);
     }
@@ -221,6 +225,10 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
     public TestPluginLocalizationService Localization { get; }
 
     public TestPluginExportRegistry Exports { get; }
+
+    public TestPluginSecureStorage SecureStorage { get; }
+
+    public TestPluginUriLauncher UriLauncher { get; }
 
     public TestPluginUiSurfaceRegistry UiSurfaces { get; }
 

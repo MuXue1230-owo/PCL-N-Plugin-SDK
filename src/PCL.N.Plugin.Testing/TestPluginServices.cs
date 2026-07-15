@@ -87,6 +87,61 @@ public sealed class TestPluginLocalizationService(
     public IReadOnlyDictionary<string, string> GetStrings() => _strings;
 }
 
+public sealed class TestPluginSecureStorage : IPluginSecureStorage
+{
+    private readonly ConcurrentDictionary<string, byte[]> _values = new(StringComparer.Ordinal);
+
+    public PluginServiceId Id => PluginServiceIds.SecureStorage;
+
+    public PluginApiVersion Version { get; } = new(0, 1);
+
+    public ValueTask<PluginSecretReadResult> ReadAsync(PluginSecretKey key, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(_values.TryGetValue(key.Name, out byte[]? value)
+            ? new PluginSecretReadResult(PluginSecureStorageStatus.Success, value.ToArray())
+            : new PluginSecretReadResult(PluginSecureStorageStatus.NotFound));
+    }
+
+    public ValueTask<PluginSecretOperationResult> WriteAsync(
+        PluginSecretKey key,
+        ReadOnlyMemory<byte> value,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _values[key.Name] = value.ToArray();
+        return ValueTask.FromResult(new PluginSecretOperationResult(PluginSecureStorageStatus.Success));
+    }
+
+    public ValueTask<PluginSecretOperationResult> DeleteAsync(PluginSecretKey key, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _values.TryRemove(key.Name, out _);
+        return ValueTask.FromResult(new PluginSecretOperationResult(PluginSecureStorageStatus.Success));
+    }
+}
+
+public sealed class TestPluginUriLauncher : IPluginUriLauncher
+{
+    private readonly List<Uri> _openedUris = [];
+
+    public PluginServiceId Id => PluginServiceIds.UriLauncher;
+
+    public PluginApiVersion Version { get; } = new(0, 1);
+
+    public IReadOnlyList<Uri> OpenedUris => _openedUris;
+
+    public ValueTask<bool> OpenAsync(Uri uri, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!uri.IsAbsoluteUri || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+            throw new ArgumentException("Only absolute HTTP and HTTPS URIs can be opened.", nameof(uri));
+        _openedUris.Add(uri);
+        return ValueTask.FromResult(true);
+    }
+}
+
 public sealed class TestPluginExportRegistry(string pluginId, TestPluginLifetime lifetime) : IPluginExportRegistry
 {
     private static readonly ConcurrentDictionary<(string PluginId, string Name, Type Contract), (PluginApiVersion Version, object Value)> Exports = new();

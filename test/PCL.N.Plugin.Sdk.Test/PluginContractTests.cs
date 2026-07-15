@@ -103,6 +103,8 @@ public sealed class PluginContractTests
         Assert.AreEqual("pcl.ui", PluginServiceIds.Ui.Value);
         Assert.AreEqual("pcl.ui.patch", PluginServiceIds.UiPatch.Value);
         Assert.AreEqual("pcl.market", PluginServiceIds.Market.Value);
+        Assert.AreEqual("pcl.secure-storage", PluginServiceIds.SecureStorage.Value);
+        Assert.AreEqual("pcl.uri-launcher", PluginServiceIds.UriLauncher.Value);
         Assert.IsFalse(UnconfiguredPluginMarketClient.Instance.IsRemoteConfigured);
 
         PluginApiVersion v = new(0, 1);
@@ -115,6 +117,8 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginCommandService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginTaskService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginInstanceReadService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(IPluginSecureStorage).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(IPluginUriLauncher).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceRegistry).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));

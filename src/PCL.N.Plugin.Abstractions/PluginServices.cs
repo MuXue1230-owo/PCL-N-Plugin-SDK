@@ -44,6 +44,12 @@ public static class PluginServiceIds
     public static PluginServiceId Localization { get; } = new("pcl.localization");
 
     public static PluginServiceId Exports { get; } = new("pcl.exports");
+
+    /// <summary>Host-managed, per-plugin isolated operating-system credential storage.</summary>
+    public static PluginServiceId SecureStorage { get; } = new("pcl.secure-storage");
+
+    /// <summary>Host-mediated opener for external HTTP/HTTPS links.</summary>
+    public static PluginServiceId UriLauncher { get; } = new("pcl.uri-launcher");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
@@ -127,6 +133,64 @@ public interface IPluginSettingsStore : IPluginService
         PluginSettingKey<T> key,
         T value,
         CancellationToken cancellationToken = default);
+}
+
+/// <summary>Typed key in a plugin-owned operating-system credential namespace.</summary>
+public readonly record struct PluginSecretKey
+{
+    public PluginSecretKey(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 128)
+            throw new ArgumentException("Secret key must contain between 1 and 128 characters.", nameof(name));
+        if (name.Any(static character => !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')))
+            throw new ArgumentException("Secret key may contain only ASCII letters, digits, '.', '-' and '_'.", nameof(name));
+        Name = name;
+    }
+
+    public string Name { get; }
+
+    public override string ToString() => Name ?? string.Empty;
+}
+
+public enum PluginSecureStorageStatus
+{
+    Success,
+    NotFound,
+    Unavailable,
+    QuotaExceeded,
+    Failed
+}
+
+public sealed record PluginSecretReadResult(PluginSecureStorageStatus Status, byte[]? Value = null, string? Message = null);
+
+public sealed record PluginSecretOperationResult(PluginSecureStorageStatus Status, string? Message = null)
+{
+    public bool IsSuccess => Status is PluginSecureStorageStatus.Success or PluginSecureStorageStatus.NotFound;
+}
+
+/// <summary>
+/// Host-managed secure storage isolated to the calling plugin. Requires manifest permission
+/// <c>secure-storage</c>. Implementations never fall back to plaintext persistence.
+/// </summary>
+public interface IPluginSecureStorage : IPluginService
+{
+    ValueTask<PluginSecretReadResult> ReadAsync(PluginSecretKey key, CancellationToken cancellationToken = default);
+
+    ValueTask<PluginSecretOperationResult> WriteAsync(
+        PluginSecretKey key,
+        ReadOnlyMemory<byte> value,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<PluginSecretOperationResult> DeleteAsync(PluginSecretKey key, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Host-mediated external URI launcher. Requires absolute HTTP/HTTPS URIs; Host implementations may
+/// show confirmation UI or deny unsupported links.
+/// </summary>
+public interface IPluginUriLauncher : IPluginService
+{
+    ValueTask<bool> OpenAsync(Uri uri, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Host command palette / action registration (design §9.3).</summary>

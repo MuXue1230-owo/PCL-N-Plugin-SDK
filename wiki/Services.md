@@ -18,6 +18,8 @@
 | `pcl.tasks` | `IPluginTaskService` | 由生命周期管理的后台任务 |
 | `pcl.instances.read` | `IPluginInstanceReadService` | 只读 Minecraft实例列表 |
 | `pcl.localization` | `IPluginLocalizationService` | 读取 Host当前语言和插件本地化字符串 |
+| `pcl.secure-storage` | `IPluginSecureStorage` | Host托管的插件隔离凭据存储 |
+| `pcl.uri-launcher` | `IPluginUriLauncher` | 通过 Host 打开外部 HTTP/HTTPS 链接 |
 
 这些 ID定义在 `PluginServiceIds`。`IPluginLogger` 和 `IPluginDispatcher` 同时通过 `context.Logger`、`context.Dispatcher` 提供便捷入口。
 
@@ -114,6 +116,29 @@ await settings.SetAsync(ModeKey, "fast", cancellationToken);
 ```
 
 Key 是当前插件命名空间内的简单名称，不得包含目录分隔符或 `..`。设置存储适合 JSON 可序列化的小型配置；大文件使用 `context.Directories.Data`。
+
+## 安全存储与外部链接
+
+安全存储适合保存访问令牌、刷新令牌等不能落入明文设置文件的插件私密数据。Key 位于当前插件命名空间内，Host 必须使用系统级安全设施或返回 `Unavailable`，不能静默降级为明文持久化。
+
+```csharp
+IPluginSecureStorage secureStorage = context.Services.Require<IPluginSecureStorage>();
+PluginSecretKey tokenKey = new("auth.token");
+
+await secureStorage.WriteAsync(tokenKey, tokenBytes, cancellationToken);
+PluginSecretReadResult read = await secureStorage.ReadAsync(tokenKey, cancellationToken);
+if (read.Status == PluginSecureStorageStatus.Success && read.Value is not null)
+{
+    // 使用 read.Value 后尽快清零敏感缓冲区。
+}
+```
+
+外部链接应通过 `IPluginUriLauncher` 交给 Host 打开，避免插件直接启动进程或绕过 Host 的确认、审计与协议限制。契约只接受绝对 `http` / `https` URI。
+
+```csharp
+if (context.Services.TryGet<IPluginUriLauncher>(out var launcher))
+    await launcher.OpenAsync(new Uri("https://example.com/help"), cancellationToken);
+```
 
 ## 命令
 

@@ -23,6 +23,8 @@ public sealed class TestHostServiceTests
             }));
         await context.Commands.InvokeAsync("dev.muxue.test.run");
         await context.Settings.SetAsync(new PluginSettingKey<int>("count"), 42);
+        await context.SecureStorage.WriteAsync(new PluginSecretKey("token"), "secret"u8.ToArray());
+        await context.UriLauncher.OpenAsync(new Uri("https://pcl.example/plugin"));
         context.Notifications.ShowInformation("ready");
         context.UiPatches.Register(new PluginUiPatchDescriptor(
             "inject",
@@ -32,6 +34,8 @@ public sealed class TestHostServiceTests
 
         Assert.AreEqual(1, invoked);
         Assert.AreEqual(42, await context.Settings.GetAsync(new PluginSettingKey<int>("count"), 0));
+        CollectionAssert.AreEqual("secret"u8.ToArray(), (await context.SecureStorage.ReadAsync(new PluginSecretKey("token"))).Value);
+        Assert.AreEqual("https://pcl.example/plugin", context.UriLauncher.OpenedUris.Single().AbsoluteUri);
         Assert.AreEqual(1, context.Notifications.Messages.Count);
         Assert.AreEqual(1, context.UiPatches.ListPatches().Count);
         Assert.IsTrue(context.Services.Supports(PluginServiceIds.Exports, PluginApiVersionRange.Parse(">=0.1 <1.0")));
