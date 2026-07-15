@@ -82,6 +82,7 @@ public static class PluginManifestValidator
             "PNPMAN017", "$.publisher.namespace", "Publisher namespace must be a valid prefix of the plugin ID.");
         AddIf(string.IsNullOrWhiteSpace(publisher.Id), "PNPMAN018", "$.publisher.id", "Publisher ID is required.");
         AddIf(!IsFullFingerprint(signing.Fingerprint), "PNPMAN019", "$.signing.fingerprint", "A full hexadecimal OpenPGP fingerprint is required.");
+        ValidateSigning(signing, manifest.SigningPolicy ?? new PluginSigningPolicyManifest(), issues);
         AddIf(manifest.Icon is not null && !IsSafeRelativePath(manifest.Icon), "PNPMAN020", "$.icon", "Icon path is unsafe.");
 
         ValidateUniqueDependencies(manifest, pluginId, issues);
@@ -94,7 +95,6 @@ public static class PluginManifestValidator
             "PNPMAN032", "$.data", "minimumReadableSchema cannot exceed schemaVersion.");
         ValidateDataMigrations(data, issues);
         ValidateNative(manifest.Native ?? new PluginNativeManifest(), issues);
-        ValidateSigningPolicy(manifest.SigningPolicy ?? new PluginSigningPolicyManifest(), issues);
 
         return new PluginManifestValidationResult(manifest, issues);
 
@@ -336,17 +336,40 @@ public static class PluginManifestValidator
             issues.Add(new PluginManifestValidationIssue("PNPMAN049", "$.native.requiresRestartForUpdate", "Non-unloadable native libraries require restart for update."));
     }
 
-    private static void ValidateSigningPolicy(
+    private static void ValidateSigning(
+        PluginSigningManifest signing,
         PluginSigningPolicyManifest policy,
         List<PluginManifestValidationIssue> issues)
     {
+        HashSet<string> fingerprints = new(StringComparer.OrdinalIgnoreCase);
+        if (IsFullFingerprint(signing.Fingerprint))
+            fingerprints.Add(signing.Fingerprint);
+        IReadOnlyList<string> additional = signing.Fingerprints ?? [];
+        for (int index = 0; index < additional.Count; index++)
+        {
+            string fingerprint = additional[index];
+            if (!IsFullFingerprint(fingerprint))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN053", $"$.signing.fingerprints[{index}]", "A full hexadecimal OpenPGP fingerprint is required."));
+            else if (!fingerprints.Add(fingerprint))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN054", $"$.signing.fingerprints[{index}]", "Signing fingerprints must be unique."));
+        }
+        IReadOnlyList<string> revoked = signing.RevokedFingerprints ?? [];
+        for (int index = 0; index < revoked.Count; index++)
+        {
+            string fingerprint = revoked[index];
+            if (!IsFullFingerprint(fingerprint))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN055", $"$.signing.revokedFingerprints[{index}]", "A full hexadecimal OpenPGP fingerprint is required."));
+            else if (fingerprints.Contains(fingerprint))
+                issues.Add(new PluginManifestValidationIssue("PNPMAN056", $"$.signing.revokedFingerprints[{index}]", "A revoked fingerprint cannot be used for package signing."));
+        }
+
         if (policy.MinimumValidSignatures < 1)
             issues.Add(new PluginManifestValidationIssue("PNPMAN050", "$.signingPolicy.minimumValidSignatures", "At least one valid signature is required."));
         IReadOnlyList<string> roles = policy.Roles ?? [];
         if (roles.Any(string.IsNullOrWhiteSpace) || roles.Distinct(StringComparer.Ordinal).Count() != roles.Count)
             issues.Add(new PluginManifestValidationIssue("PNPMAN051", "$.signingPolicy.roles", "Signing roles must be non-empty and unique."));
-        if (policy.MinimumValidSignatures > Math.Max(1, roles.Count))
-            issues.Add(new PluginManifestValidationIssue("PNPMAN052", "$.signingPolicy", "minimumValidSignatures cannot exceed the declared role count."));
+        if (policy.MinimumValidSignatures > Math.Max(1, fingerprints.Count))
+            issues.Add(new PluginManifestValidationIssue("PNPMAN052", "$.signingPolicy", "minimumValidSignatures cannot exceed the declared signing key count."));
     }
 
     private static string NormalizeServiceRange(string range) =>

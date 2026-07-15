@@ -34,6 +34,24 @@ public static class PluginServiceIds
 
     public static PluginServiceId InstancesRead { get; } = new("pcl.instances.read");
 
+    public static PluginServiceId GameSessions { get; } = new("pcl.game.sessions");
+
+    public static PluginServiceId GameOutput { get; } = new("pcl.game.output");
+
+    public static PluginServiceId LaunchEvents { get; } = new("pcl.launch.events");
+
+    public static PluginServiceId Process { get; } = new("pcl.process");
+
+    public static PluginServiceId Clipboard { get; } = new("pcl.clipboard");
+
+    public static PluginServiceId Files { get; } = new("pcl.files");
+
+    public static PluginServiceId AccountsRead { get; } = new("pcl.accounts.read");
+
+    public static PluginServiceId Downloads { get; } = new("pcl.downloads");
+
+    public static PluginServiceId LaunchModify { get; } = new("pcl.launch.modify");
+
     public static PluginServiceId Ui { get; } = new("pcl.ui");
 
     public static PluginServiceId UiPatch { get; } = new("pcl.ui.patch");
