@@ -46,6 +46,12 @@ public sealed class ReleaseAssetTests
     {
         string root = FindRepositoryRoot();
         string wiki = Path.Combine(root, "wiki");
+        Match versionMatch = Regex.Match(
+            File.ReadAllText(Path.Combine(root, "Directory.Build.props")),
+            "<VersionPrefix>([^<]+)</VersionPrefix>",
+            RegexOptions.CultureInvariant);
+        Assert.IsTrue(versionMatch.Success, "Directory.Build.props is missing VersionPrefix.");
+        string sdkVersion = versionMatch.Groups[1].Value;
         HashSet<string> pages = Directory.EnumerateFiles(wiki, "*.md")
             .Select(static file => Path.GetFileNameWithoutExtension(file)!)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -53,8 +59,8 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains("0.1.0-alpha.5", StringComparison.Ordinal))
-                errors.Add(Path.GetFileName(file) + ": missing SDK version");
+            if (!text.Contains(sdkVersion, StringComparison.Ordinal))
+                errors.Add(Path.GetFileName(file) + $": missing SDK version {sdkVersion}");
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {
                 if (!pages.Contains(link.Groups[1].Value))
@@ -132,6 +138,37 @@ public sealed class ReleaseAssetTests
             "buildTransitive/PCLN.Plugin.Sdk.Build.targets"
         })
             Assert.IsTrue(File.Exists(Path.Combine(project, relative)), relative);
+    }
+
+    [TestMethod]
+    public void BuildPackage_ToolOutputFolderDoesNotRepeatTargetFramework()
+    {
+        string root = FindRepositoryRoot();
+        string project = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "PCL.N.Plugin.Sdk.Build",
+            "PCL.N.Plugin.Sdk.Build.csproj"));
+
+        StringAssert.Contains(project, "<BuildOutputTargetFolder>tools</BuildOutputTargetFolder>");
+        StringAssert.Contains(project, "$(AssemblyName).deps.json");
+        Assert.IsFalse(project.Contains(
+            "<BuildOutputTargetFolder>tools/net10.0</BuildOutputTargetFolder>",
+            StringComparison.Ordinal));
+        Assert.IsFalse(project.Contains(
+            "<None Include=\"$(TargetDir)$(AssemblyName).runtimeconfig.json\"",
+            StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void BuildPackage_MarksNativeAssetsExecutable()
+    {
+        Assert.AreEqual(
+            Convert.ToInt32("100755", 8) << 16,
+            PnpPackCommand.GetExternalAttributes("runtimes/linux-x64/native/terracotta-helper"));
+        Assert.AreEqual(
+            Convert.ToInt32("100644", 8) << 16,
+            PnpPackCommand.GetExternalAttributes("lib/net10.0/Plugin.dll"));
     }
 
     [TestMethod]

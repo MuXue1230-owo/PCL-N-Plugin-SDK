@@ -128,13 +128,20 @@ internal static class PnpPackCommand
             {
                 ZipArchiveEntry entry = archive.CreateEntry(path, CompressionLevel.Optimal);
                 entry.LastWriteTime = ZipTimestamp;
-                entry.ExternalAttributes = 0;
+                entry.ExternalAttributes = GetExternalAttributes(path);
                 using Stream destination = entry.Open();
                 await destination.WriteAsync(content).ConfigureAwait(false);
             }
         }
         File.Move(temporary, options.OutputPath, true);
         Console.WriteLine(options.OutputPath);
+    }
+
+    internal static int GetExternalAttributes(string path)
+    {
+        bool executable = path.StartsWith("runtimes/", StringComparison.Ordinal) &&
+                          path.Contains("/native/", StringComparison.Ordinal);
+        return Convert.ToInt32(executable ? "100755" : "100644", 8) << 16;
     }
 
     private static string[] ReadSigningFingerprints(JsonElement signing)

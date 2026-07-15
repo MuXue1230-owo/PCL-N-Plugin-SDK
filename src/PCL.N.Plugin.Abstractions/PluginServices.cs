@@ -68,6 +68,9 @@ public static class PluginServiceIds
 
     /// <summary>Host-mediated opener for external HTTP/HTTPS links.</summary>
     public static PluginServiceId UriLauncher { get; } = new("pcl.uri-launcher");
+
+    /// <summary>Verified, read-only access to files carried by the signed plugin package.</summary>
+    public static PluginServiceId PackageAssets { get; } = new("pcl.package-assets");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
