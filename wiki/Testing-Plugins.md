@@ -88,6 +88,42 @@ context.TestServices.Add<IPluginInstanceReadService>(instances);
 
 测试不要依赖该示例 Windows 路径真实存在；它只是 DTO 数据。
 
+## 测试扩展服务
+
+`TestPluginContext` 默认提供 0.1.0 的 Stable 服务替身，可直接验证进程、文件、剪贴板、账户、下载源和启动修改逻辑：
+
+```csharp
+await using TestPluginContext context = new(descriptor, new PluginApiVersion(0, 2));
+
+context.Process.EnqueueResult(new PluginProcessResult(0, "ok", ""));
+PluginProcessResult process = await context.Process.RunAsync(new PluginProcessRequest
+{
+    FileName = "tool",
+    Arguments = ["--version"],
+    CaptureOutput = true
+});
+Assert.AreEqual("ok", process.StandardOutput);
+
+await context.Clipboard.WriteTextAsync("copied");
+Assert.AreEqual("copied", await context.Clipboard.ReadTextAsync());
+
+await context.Files.WriteAsync("reports/latest.txt", "done"u8.ToArray());
+CollectionAssert.AreEqual("done"u8.ToArray(), await context.Files.ReadAsync("reports/latest.txt"));
+
+context.Accounts.AddProvider(new PluginAccountProviderInfo("offline", "离线账户", null));
+context.Downloads.AddSource(new PluginDownloadSourceInfo(
+    "official",
+    "官方源",
+    new Uri("https://example.invalid/"),
+    "Metadata"));
+
+context.LaunchModifications.Register(new PluginLaunchModification(
+    "add-demo-flag",
+    request => request with { GameArguments = request.GameArguments.Concat(["--demo"]).ToArray() }));
+```
+
+这些测试替身不会启动真实进程、访问系统剪贴板或读取真实账户；它们只记录请求并返回内存数据，适合做插件逻辑回归。文件服务会把路径限制在测试插件数据目录内。
+
 ## 测试设置页 Capability
 
 ```csharp

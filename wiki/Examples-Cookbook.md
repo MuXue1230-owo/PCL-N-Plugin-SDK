@@ -255,7 +255,63 @@ public async Task Initialize_registers_and_executes_command()
 
 更多测试模式见 [测试插件](Testing-Plugins)。
 
-## 案例 10：携带多平台原生库
+## 案例 10：读取游戏会话并订阅输出
+
+```csharp
+if (context.Services.TryGet<IPluginGameSessionService>(out var sessions))
+{
+    foreach (PluginGameSessionSnapshot session in sessions.ListSessions())
+        context.Logger.Info($"{session.InstanceId}: {session.State}");
+}
+
+if (context.Services.TryGet<IPluginGameOutputService>(out var output))
+{
+    context.Lifetime.Track(output.Subscribe(line =>
+        context.Logger.Debug($"[{line.Stream}] {line.Text}")));
+}
+```
+
+Manifest 通常把它们声明为 optional，并给 `pcl.game.output` 明确权限原因。
+
+## 案例 11：受控进程、隔离文件和剪贴板
+
+```csharp
+IPluginProcessService processes = context.Services.Require<IPluginProcessService>();
+IPluginFileService files = context.Services.Require<IPluginFileService>();
+
+PluginProcessResult result = await processes.RunAsync(new PluginProcessRequest
+{
+    FileName = "java",
+    Arguments = ["-version"],
+    CaptureOutput = true,
+    Timeout = TimeSpan.FromSeconds(10)
+}, cancellationToken);
+
+await files.WriteAsync("reports/java-version.txt", Encoding.UTF8.GetBytes(result.StandardError), cancellationToken);
+
+if (context.Services.TryGet<IPluginClipboardService>(out var clipboard))
+    await clipboard.WriteTextAsync(result.StandardError, cancellationToken);
+```
+
+不要直接调用 `Process.Start` 或自行拼接宿主目录；通过 Host 服务才能获得权限提示、审计和路径隔离。
+
+## 案例 12：注册启动参数修改器
+
+```csharp
+IPluginLaunchModificationService launchModify =
+    context.Services.Require<IPluginLaunchModificationService>();
+
+context.Lifetime.Track(launchModify.Register(new PluginLaunchModification(
+    "dev.example.tools.add-launch-flag",
+    request => request with
+    {
+        GameArguments = request.GameArguments.Concat(["--example-flag"]).ToArray()
+    })));
+```
+
+启动修改器应是可重复的纯函数，不要在 `Apply` 委托里写文件、弹窗或启动后台任务。
+
+## 案例 13：携带多平台原生库
 
 ```xml
 <ItemGroup>

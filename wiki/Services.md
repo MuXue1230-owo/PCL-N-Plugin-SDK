@@ -17,6 +17,15 @@
 | `pcl.commands` | `IPluginCommandService` | 注册和调用命令 |
 | `pcl.tasks` | `IPluginTaskService` | 由生命周期管理的后台任务 |
 | `pcl.instances.read` | `IPluginInstanceReadService` | 只读 Minecraft实例列表 |
+| `pcl.game.sessions` | `IPluginGameSessionService` | 只读游戏会话快照 |
+| `pcl.game.output` | `IPluginGameOutputService` | 读取并订阅游戏进程输出 |
+| `pcl.launch.events` | `IPluginLaunchEventService` | 订阅启动生命周期事件 |
+| `pcl.process` | `IPluginProcessService` | 受控启动子进程并获取退出码/输出 |
+| `pcl.clipboard` | `IPluginClipboardService` | 通过 Host 读写文本剪贴板 |
+| `pcl.files` | `IPluginFileService` | 在插件隔离数据目录内读写文件 |
+| `pcl.accounts.read` | `IPluginAccountReadService` | 只读账户提供者列表 |
+| `pcl.downloads` | `IPluginDownloadService` | 只读下载源列表 |
+| `pcl.launch.modify` | `IPluginLaunchModificationService` | 注册启动参数/环境变量修改器 |
 | `pcl.localization` | `IPluginLocalizationService` | 读取 Host当前语言和插件本地化字符串 |
 | `pcl.secure-storage` | `IPluginSecureStorage` | Host托管的插件隔离凭据存储 |
 | `pcl.uri-launcher` | `IPluginUriLauncher` | 通过 Host 打开外部 HTTP/HTTPS 链接 |
@@ -184,6 +193,96 @@ foreach (PluginInstanceInfo instance in instances.ListInstances())
 ```
 
 返回的是公开 DTO，不是 PCL N 内部对象。不要根据 DTO 反射或猜测私有宿主类型。
+
+## 游戏会话、输出与启动事件
+
+这些服务是只读观察面，适合日志面板、统计、自动诊断和联机状态提示。它们不会暴露 PCL N 内部对象。
+
+```csharp
+if (context.Services.TryGet<IPluginGameSessionService>(out var sessions))
+{
+    foreach (PluginGameSessionSnapshot session in sessions.ListSessions())
+        context.Logger.Info($"{session.InstanceId}: {session.State}");
+}
+
+if (context.Services.TryGet<IPluginGameOutputService>(out var output))
+{
+    context.Lifetime.Track(output.Subscribe(line =>
+        context.Logger.Debug($"[{line.Stream}] {line.Text}")));
+}
+
+if (context.Services.TryGet<IPluginLaunchEventService>(out var launches))
+{
+    context.Lifetime.Track(launches.Subscribe(evt =>
+        context.Logger.Info($"Launch event: {evt.Kind} / {evt.Session.InstanceId}")));
+}
+```
+
+Manifest 中通常把它们声明为 optional；如果插件的核心功能就是会话监控，才放入 required。需要给出面向用户的权限原因，例如“读取游戏输出以生成崩溃报告”。
+
+## 受控进程、文件与剪贴板
+
+`IPluginProcessService` 通过 Host 策略启动子进程。插件不应直接调用 `Process.Start`；受控服务可以记录审计、限制工作目录、超时和输出大小。
+
+```csharp
+IPluginProcessService processes = context.Services.Require<IPluginProcessService>();
+PluginProcessResult result = await processes.RunAsync(new PluginProcessRequest
+{
+    FileName = "java",
+    Arguments = ["-version"],
+    CaptureOutput = true,
+    Timeout = TimeSpan.FromSeconds(10)
+}, cancellationToken);
+
+context.Logger.Info(result.StandardError);
+```
+
+`IPluginFileService` 只允许访问插件隔离数据目录内的相对路径，适合保存插件生成的报告、索引和导出文件：
+
+```csharp
+IPluginFileService files = context.Services.Require<IPluginFileService>();
+await files.WriteAsync("reports/latest.txt", Encoding.UTF8.GetBytes("ok"), cancellationToken);
+byte[]? content = await files.ReadAsync("reports/latest.txt", cancellationToken);
+```
+
+剪贴板读写必须通过 `IPluginClipboardService`，避免插件绕过 Host 的用户确认或隐私策略：
+
+```csharp
+if (context.Services.TryGet<IPluginClipboardService>(out var clipboard))
+    await clipboard.WriteTextAsync("诊断报告已生成", cancellationToken);
+```
+
+## 账户、下载源与启动修改
+
+`IPluginAccountReadService` 和 `IPluginDownloadService` 是只读目录服务，只返回公开 DTO：
+
+```csharp
+if (context.Services.TryGet<IPluginAccountReadService>(out var accounts))
+{
+    foreach (PluginAccountProviderInfo provider in accounts.ListProviders())
+        context.Logger.Info($"Account provider: {provider.DisplayName}");
+}
+
+if (context.Services.TryGet<IPluginDownloadService>(out var downloads))
+{
+    foreach (PluginDownloadSourceInfo source in downloads.ListSources())
+        context.Logger.Info($"Download source: {source.DisplayName} ({source.Kind})");
+}
+```
+
+启动修改通过 `IPluginLaunchModificationService` 注册纯函数，返回新的 `PluginLaunchRequest`。修改器必须可重复、无副作用，并把注册项交给 Lifetime：
+
+```csharp
+IPluginLaunchModificationService launchModify =
+    context.Services.Require<IPluginLaunchModificationService>();
+
+context.Lifetime.Track(launchModify.Register(new PluginLaunchModification(
+    "dev.example.add-demo-flag",
+    request => request with
+    {
+        GameArguments = request.GameArguments.Concat(["--demo"]).ToArray()
+    })));
+```
 
 ## 导航、完整页面与窗口
 

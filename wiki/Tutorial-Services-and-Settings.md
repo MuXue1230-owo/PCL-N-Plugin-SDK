@@ -186,6 +186,130 @@ context.Lifetime.Track(commands.Register(
 
 `PCLN.Plugin.Testing` 已提供内存版命令、通知、设置和实例服务。详细测试代码见 [测试、调试与发布实战](Tutorial-Test-Debug-Release)。
 
+## 6. 完整应用实例：启动诊断助手
+
+下面的插件组合了实例读取、游戏会话、输出订阅、受控进程、文件、剪贴板、账户/下载源枚举和启动修改。它适合做“启动诊断助手”：启动前添加诊断参数，运行中收集输出，用户可一键导出报告。
+
+Manifest 片段：
+
+```json
+"services": {
+  "required": {
+    "pcl.commands": ">=0.1 <1.0",
+    "pcl.files": ">=0.1 <1.0",
+    "pcl.launch.modify": ">=0.1 <1.0"
+  },
+  "optional": {
+    "pcl.instances.read": ">=0.1 <1.0",
+    "pcl.game.sessions": ">=0.1 <1.0",
+    "pcl.game.output": ">=0.1 <1.0",
+    "pcl.launch.events": ">=0.1 <1.0",
+    "pcl.process": ">=0.1 <1.0",
+    "pcl.clipboard": ">=0.1 <1.0",
+    "pcl.accounts.read": ">=0.1 <1.0",
+    "pcl.downloads": ">=0.1 <1.0",
+    "pcl.notifications": ">=0.1 <1.0"
+  }
+},
+"permissions": [
+  { "id": "pcl.files", "reason": "保存启动诊断报告。" },
+  { "id": "pcl.launch.modify", "reason": "为启动参数追加诊断标记。" },
+  { "id": "pcl.game.output", "reason": "收集游戏输出以定位启动失败。" },
+  { "id": "pcl.process", "reason": "运行受控诊断命令。" },
+  { "id": "pcl.clipboard", "reason": "把报告摘要复制给用户。" }
+]
+```
+
+核心实现：
+
+```csharp
+public sealed class LaunchDoctorPlugin : IPclNPlugin
+{
+    public ValueTask InitializeAsync(IPluginContext context, CancellationToken cancellationToken)
+    {
+        IPluginCommandService commands = context.Services.Require<IPluginCommandService>();
+        IPluginFileService files = context.Services.Require<IPluginFileService>();
+        IPluginLaunchModificationService launchModify =
+            context.Services.Require<IPluginLaunchModificationService>();
+
+        context.Lifetime.Track(launchModify.Register(new PluginLaunchModification(
+            "dev.example.launch-doctor.add-flag",
+            request => request with
+            {
+                GameArguments = request.GameArguments.Concat(["--pcln-diagnostics"]).ToArray()
+            })));
+
+        if (context.Services.TryGet<IPluginGameOutputService>(out var output))
+        {
+            context.Lifetime.Track(output.Subscribe(line =>
+            {
+                if (line.Stream == PluginGameOutputChannel.StandardError)
+                    context.Logger.Warn(line.Text);
+            }));
+        }
+
+        context.Lifetime.Track(commands.Register(new PluginCommandDescriptor(
+            "dev.example.launch-doctor.export",
+            "导出启动诊断报告",
+            async token =>
+            {
+                List<string> lines = [];
+
+                if (context.Services.TryGet<IPluginInstanceReadService>(out var instances))
+                {
+                    foreach (PluginInstanceInfo instance in instances.ListInstances())
+                        lines.Add($"Instance: {instance.Id} / {instance.Name}");
+                }
+
+                if (context.Services.TryGet<IPluginGameSessionService>(out var sessions))
+                {
+                    foreach (PluginGameSessionSnapshot session in sessions.ListSessions())
+                        lines.Add($"Session: {session.SessionId} / {session.State} / {session.ExitCode}");
+                }
+
+                if (context.Services.TryGet<IPluginAccountReadService>(out var accounts))
+                {
+                    foreach (PluginAccountProviderInfo provider in accounts.ListProviders())
+                        lines.Add($"Account provider: {provider.DisplayName}");
+                }
+
+                if (context.Services.TryGet<IPluginDownloadService>(out var downloads))
+                {
+                    foreach (PluginDownloadSourceInfo source in downloads.ListSources())
+                        lines.Add($"Download source: {source.DisplayName} ({source.Kind})");
+                }
+
+                if (context.Services.TryGet<IPluginProcessService>(out var processes))
+                {
+                    PluginProcessResult java = await processes.RunAsync(new PluginProcessRequest
+                    {
+                        FileName = "java",
+                        Arguments = ["-version"],
+                        CaptureOutput = true,
+                        Timeout = TimeSpan.FromSeconds(10)
+                    }, token);
+                    lines.Add("java -version: " + java.StandardError.Trim());
+                }
+
+                string report = string.Join(Environment.NewLine, lines);
+                await files.WriteAsync("reports/launch-doctor.txt", Encoding.UTF8.GetBytes(report), token);
+
+                if (context.Services.TryGet<IPluginClipboardService>(out var clipboard))
+                    await clipboard.WriteTextAsync(report, token);
+                if (context.Services.TryGet<IPluginNotificationService>(out var notifications))
+                    notifications.ShowInformation("启动诊断报告已生成。");
+            },
+            description: "收集实例、会话、账户、下载源和 Java 诊断信息。")));
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask ShutdownAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+}
+```
+
+这个例子体现了 0.1.0 的推荐模式：核心能力 required，观察/增强能力 optional；所有长生命周期注册都交给 `context.Lifetime.Track`；文件写入使用 `IPluginFileService`，进程启动使用 `IPluginProcessService`。
+
 ## 常见问题
 
 | 问题 | 处理方式 |
