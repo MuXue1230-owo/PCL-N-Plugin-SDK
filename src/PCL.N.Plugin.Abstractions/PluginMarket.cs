@@ -127,13 +127,23 @@ public sealed record PluginMarketDependency(
     string VersionRange,
     string Kind);
 
+/// <summary>One segment of a multipart market package (Free-plan storage object cap).</summary>
+public sealed record PluginMarketDownloadPart(
+    int Index,
+    Uri DownloadUri,
+    long Size,
+    string? Sha256 = null);
+
 public sealed record PluginMarketDownloadInfo(
     string PluginId,
     string Version,
-    Uri DownloadUri,
+    /// <summary>Single-object download URI. Null when <see cref="Multipart"/> is true.</summary>
+    Uri? DownloadUri,
     string? PackageSha256,
     IReadOnlyDictionary<string, string> Headers,
-    string? MarketSignatureFingerprint = null);
+    string? MarketSignatureFingerprint = null,
+    bool Multipart = false,
+    IReadOnlyList<PluginMarketDownloadPart>? Parts = null);
 
 public sealed record PluginMarketPackageVerificationRequest(
     string PluginId,
