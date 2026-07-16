@@ -4,7 +4,7 @@
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.1.0-alpha.1</Version>
+    <Version>0.1.1</Version>
     <PclNPluginId>dev.muxue.hello</PclNPluginId>
     <PclNPluginSign>false</PclNPluginSign>
     <PclNPluginBuildTool>$(MSBuildProjectDirectory)/../../src/PCL.N.Plugin.Sdk.Build/bin/$(Configuration)/net10.0/PCL.N.Plugin.Sdk.Build.dll</PclNPluginBuildTool>

@@ -76,7 +76,7 @@ public sealed class PluginContractTests
     {
         using TemporaryPluginRoot temporary = new();
         TestPluginContext context = new(
-            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
+            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.1")),
             new PluginApiVersion(0, 1),
             PluginDirectorySet.CreateUnder(temporary.Path));
 
@@ -135,7 +135,7 @@ public sealed class PluginContractTests
 
     private static TestPluginContext CreateContext() =>
         new(
-            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
+            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.1")),
             new PluginApiVersion(0, 1));
 
     private sealed class TemporaryPluginRoot : IDisposable

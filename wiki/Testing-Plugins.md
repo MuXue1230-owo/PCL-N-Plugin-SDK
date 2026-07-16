@@ -1,6 +1,6 @@
 # 测试插件
 
-> SDK `0.1.0`
+> SDK `0.1.1`
 
 `PCLN.Plugin.Testing` 提供不启动 PCL N 的内存宿主。你可以验证初始化、服务调用、命令、设置、任务、UI 注册和生命周期释放。
 
@@ -8,7 +8,7 @@
 
 ```powershell
 dotnet new mstest -n ExamplePlugin.Tests --framework net10.0
-dotnet add ExamplePlugin.Tests package PCLN.Plugin.Testing --version 0.1.0
+dotnet add ExamplePlugin.Tests package PCLN.Plugin.Testing --version 0.1.1
 dotnet add ExamplePlugin.Tests reference ExamplePlugin.csproj
 ```
 
@@ -23,7 +23,7 @@ using PCL.N.Plugin.Testing;
 PluginDescriptor descriptor = new(
     new PluginId("dev.example.plugin"),
     "Example Plugin",
-    PluginVersion.Parse("0.1.0"));
+    PluginVersion.Parse("0.1.1"));
 
 await using TestPluginContext context = new(
     descriptor,
@@ -47,7 +47,7 @@ public async Task Plugin_registers_command_and_shows_notification()
     PluginDescriptor descriptor = new(
         new PluginId("dev.example.plugin"),
         "Example Plugin",
-        PluginVersion.Parse("0.1.0"));
+        PluginVersion.Parse("0.1.1"));
 
     await using TestPluginContext context = new(descriptor, new PluginApiVersion(0, 2));
     TestPluginCommandService commands = new();
@@ -90,7 +90,7 @@ context.TestServices.Add<IPluginInstanceReadService>(instances);
 
 ## 测试扩展服务
 
-`TestPluginContext` 默认提供 0.1.0 的 Stable 服务替身，可直接验证进程、文件、剪贴板、账户、下载源和启动修改逻辑：
+`TestPluginContext` 默认提供 0.1.1 的 Stable 服务替身，可直接验证进程、文件、剪贴板、账户、下载源和启动修改逻辑：
 
 ```csharp
 await using TestPluginContext context = new(descriptor, new PluginApiVersion(0, 2));

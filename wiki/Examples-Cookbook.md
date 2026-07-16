@@ -1,6 +1,6 @@
 # 实战案例集
 
-> 以下片段基于 SDK `0.1.0`。示例中的服务应同步声明到 `plugin.json`。
+> 以下片段基于 SDK `0.1.1`。示例中的服务应同步声明到 `plugin.json`。
 
 ## 案例 1：注册一个命令并显示通知
 
@@ -237,7 +237,7 @@ public async Task Initialize_registers_and_executes_command()
     PluginDescriptor descriptor = new(
         new PluginId("dev.example.tools"),
         "Example Tools",
-        PluginVersion.Parse("0.1.0"));
+        PluginVersion.Parse("0.1.1"));
 
     await using TestPluginContext context = new(descriptor, new PluginApiVersion(0, 2));
     TestPluginCommandService commands = new();

@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          package="$GITHUB_WORKSPACE/examples/HelloPlugin/bin/Release/net10.0/dev.muxue.hello-0.1.0-alpha.1.pnp"
+          package="$GITHUB_WORKSPACE/examples/HelloPlugin/bin/Release/net10.0/dev.muxue.hello-0.1.1.pnp"
           rm -f "$package"
           dotnet build examples/HelloPlugin/HelloPlugin.csproj -c Release --no-restore -warnaserror
           test -s "$package"
@@ -101,7 +101,7 @@ jobs:
           test "$first" = "$second"
           python - <<'PY'
           import os, zipfile
-          p=os.environ['GITHUB_WORKSPACE'] + '/examples/HelloPlugin/bin/Release/net10.0/dev.muxue.hello-0.1.0-alpha.1.pnp'
+          p=os.environ['GITHUB_WORKSPACE'] + '/examples/HelloPlugin/bin/Release/net10.0/dev.muxue.hello-0.1.1.pnp'
           with zipfile.ZipFile(p) as z:
               names=set(z.namelist())
               required={'plugin.json','ui/HelloPanel.axaml','META-INF/pnp.files.json','META-INF/pnp.signed.json'}

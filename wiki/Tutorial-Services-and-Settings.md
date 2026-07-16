@@ -1,6 +1,6 @@
 # 服务、设置与后台任务实战
 
-> 适用于 SDK `0.1.0`。本教程把前一章的 Toolbox 扩展为“实例检查器”。
+> 适用于 SDK `0.1.1`。本教程把前一章的 Toolbox 扩展为“实例检查器”。
 
 目标功能：保存扫描间隔、注册手动扫描命令、定期读取 Minecraft 实例，并在宿主提供通知服务时显示结果。
 
@@ -308,7 +308,7 @@ public sealed class LaunchDoctorPlugin : IPclNPlugin
 }
 ```
 
-这个例子体现了 0.1.0 的推荐模式：核心能力 required，观察/增强能力 optional；所有长生命周期注册都交给 `context.Lifetime.Track`；文件写入使用 `IPluginFileService`，进程启动使用 `IPluginProcessService`。
+这个例子体现了 0.1.1 的推荐模式：核心能力 required，观察/增强能力 optional；所有长生命周期注册都交给 `context.Lifetime.Track`；文件写入使用 `IPluginFileService`，进程启动使用 `IPluginProcessService`。
 
 ## 常见问题
 

@@ -1,6 +1,6 @@
 # 故障排查
 
-> SDK `0.1.0`
+> SDK `0.1.1`
 
 ## NuGet 找不到包
 
@@ -8,7 +8,7 @@
 
 ```powershell
 dotnet nuget list source
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.0 --source https://api.nuget.org/v3/index.json
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.1 --source https://api.nuget.org/v3/index.json
 ```
 
 清理失败缓存：
