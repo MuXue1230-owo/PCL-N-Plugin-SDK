@@ -142,6 +142,69 @@ public sealed class TestPluginUriLauncher : IPluginUriLauncher
     }
 }
 
+/// <summary>In-memory host task manager for unit tests.</summary>
+public sealed class TestPluginBackgroundTaskService : IPluginBackgroundTaskService
+{
+    private readonly List<TestPluginBackgroundTask> _tasks = [];
+
+    public PluginServiceId Id => PluginServiceIds.BackgroundTasks;
+
+    public PluginApiVersion Version { get; } = new(0, 1);
+
+    public IReadOnlyList<TestPluginBackgroundTask> Tasks => _tasks;
+
+    public bool LastOpenTaskManager { get; private set; }
+
+    public IPluginBackgroundTask Begin(string title, bool openTaskManager = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        LastOpenTaskManager = openTaskManager;
+        TestPluginBackgroundTask task = new(title.Trim());
+        _tasks.Add(task);
+        return task;
+    }
+}
+
+public sealed class TestPluginBackgroundTask : IPluginBackgroundTask
+{
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly List<PluginBackgroundTaskProgress> _reports = [];
+
+    public TestPluginBackgroundTask(string title) => Title = title;
+
+    public string Title { get; }
+
+    public CancellationToken Token => _cancellation.Token;
+
+    public IReadOnlyList<PluginBackgroundTaskProgress> Reports => _reports;
+
+    public string? CompletedStage { get; private set; }
+
+    public string? FailedMessage { get; private set; }
+
+    public bool WasCanceled { get; private set; }
+
+    public void Report(PluginBackgroundTaskProgress progress)
+    {
+        ArgumentNullException.ThrowIfNull(progress);
+        _reports.Add(progress);
+    }
+
+    public void Complete(string stage) => CompletedStage = stage;
+
+    public void Fail(string message, bool canceled = false)
+    {
+        FailedMessage = message;
+        WasCanceled = canceled;
+        if (canceled)
+            _cancellation.Cancel();
+    }
+
+    public void Cancel() => _cancellation.Cancel();
+
+    public void Dispose() => _cancellation.Dispose();
+}
+
 public sealed class TestPluginExportRegistry(string pluginId, TestPluginLifetime lifetime) : IPluginExportRegistry
 {
     private static readonly ConcurrentDictionary<(string PluginId, string Name, Type Contract), (PluginApiVersion Version, object Value)> Exports = new();

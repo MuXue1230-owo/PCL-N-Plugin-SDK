@@ -25,10 +25,10 @@ dotnet --version
 mkdir HelloPclN
 cd HelloPclN
 dotnet new classlib --framework net10.0
-dotnet add package PCLN.Plugin.Abstractions --version 0.1.1
-dotnet add package PCLN.Plugin.Sdk --version 0.1.1
-dotnet add package PCLN.Plugin.Analyzers --version 0.1.1
-dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.1
+dotnet add package PCLN.Plugin.Abstractions --version 0.1.0
+dotnet add package PCLN.Plugin.Sdk --version 0.1.0
+dotnet add package PCLN.Plugin.Analyzers --version 0.1.0
+dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.0
 ```
 
 将项目文件整理为：
@@ -40,17 +40,17 @@ dotnet add package PCLN.Plugin.Sdk.Build --version 0.1.1
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.1.1</Version>
+    <Version>0.1.0</Version>
     <PclNPluginId>dev.example.hello</PclNPluginId>
     <!-- 仅用于本地开发：仍会自动使用本机开发密钥签名。 -->
     <PclNPluginSign>false</PclNPluginSign>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.1" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.1" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.1" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.1" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.1.0" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.1.0" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>
@@ -106,7 +106,7 @@ public sealed class HelloPlugin : IPclNPlugin
   "manifestVersion": 1,
   "id": "dev.example.hello",
   "name": "Hello PCL N",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "channel": "alpha",
   "summary": "第一个 PCL N 插件。",
   "publisher": {
@@ -123,7 +123,7 @@ public sealed class HelloPlugin : IPclNPlugin
     "maximumExclusive": "1.0"
   },
   "host": {
-    "minimumVersion": "0.1.1"
+    "minimumVersion": "0.1.0"
   },
   "services": {
     "optional": {
@@ -154,7 +154,7 @@ dotnet build -c Release
 成功后会生成：
 
 ```text
-bin/Release/net10.0/dev.example.hello-0.1.1.pnp
+bin/Release/net10.0/dev.example.hello-0.1.0.pnp
 ```
 
 `.pnp` 是一个可复现 ZIP 容器，包含 Manifest、入口程序集、私有依赖、文件表和签名元数据。不要手工把 `PCL.N.Plugin.Abstractions.dll` 塞进包内，构建器会把宿主共享程序集排除。

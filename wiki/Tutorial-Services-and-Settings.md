@@ -308,7 +308,7 @@ public sealed class LaunchDoctorPlugin : IPclNPlugin
 }
 ```
 
-这个例子体现了 0.1.1 的推荐模式：核心能力 required，观察/增强能力 optional；所有长生命周期注册都交给 `context.Lifetime.Track`；文件写入使用 `IPluginFileService`，进程启动使用 `IPluginProcessService`。
+这个例子体现了 0.1.0 的推荐模式：核心能力 required，观察/增强能力 optional；所有长生命周期注册都交给 `context.Lifetime.Track`；文件写入使用 `IPluginFileService`，进程启动使用 `IPluginProcessService`。
 
 ## 常见问题
 

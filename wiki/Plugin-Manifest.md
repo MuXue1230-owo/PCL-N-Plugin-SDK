@@ -14,7 +14,7 @@
   "manifestVersion": 1,
   "id": "dev.example.plugin",
   "name": "Example Plugin",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "publisher": {
     "id": "github:example",
     "namespace": "dev.example"
@@ -29,7 +29,7 @@
     "maximumExclusive": "1.0"
   },
   "host": {
-    "minimumVersion": "0.1.1"
+    "minimumVersion": "0.1.0"
   },
   "signing": {
     "fingerprint": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -97,7 +97,7 @@
   "maximumExclusive": "1.0"
 },
 "host": {
-  "minimumVersion": "0.1.1",
+  "minimumVersion": "0.1.0",
   "maximumVersionExclusive": "2.0.0"
 }
 ```

@@ -76,7 +76,7 @@ public sealed class PluginContractTests
     {
         using TemporaryPluginRoot temporary = new();
         TestPluginContext context = new(
-            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.1")),
+            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
             new PluginApiVersion(0, 1),
             PluginDirectorySet.CreateUnder(temporary.Path));
 
@@ -105,7 +105,6 @@ public sealed class PluginContractTests
         Assert.AreEqual("pcl.market", PluginServiceIds.Market.Value);
         Assert.AreEqual("pcl.secure-storage", PluginServiceIds.SecureStorage.Value);
         Assert.AreEqual("pcl.uri-launcher", PluginServiceIds.UriLauncher.Value);
-        Assert.AreEqual("pcl.package-assets", PluginServiceIds.PackageAssets.Value);
         Assert.IsFalse(UnconfiguredPluginMarketClient.Instance.IsRemoteConfigured);
 
         PluginApiVersion v = new(0, 1);
@@ -120,7 +119,6 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginInstanceReadService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginSecureStorage).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUriLauncher).IsAssignableTo(typeof(IPluginService)));
-        Assert.IsTrue(typeof(IPluginPackageAssetService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceRegistry).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));
@@ -135,7 +133,7 @@ public sealed class PluginContractTests
 
     private static TestPluginContext CreateContext() =>
         new(
-            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.1")),
+            new PluginDescriptor(new PluginId("example.hello"), "Hello Plugin", PluginVersion.Parse("0.1.0")),
             new PluginApiVersion(0, 1));
 
     private sealed class TemporaryPluginRoot : IDisposable

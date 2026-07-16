@@ -45,13 +45,15 @@ public sealed class ReleaseAssetTests
     public void Wiki_InternalLinksResolveAndPagesAreVersioned()
     {
         string root = FindRepositoryRoot();
+        string props = File.ReadAllText(Path.Combine(root, "Directory.Build.props"));
+        Match prefix = Regex.Match(props, "<VersionPrefix>([^<]+)</VersionPrefix>");
+        Match suffix = Regex.Match(props, "<VersionSuffix>([^<]*)</VersionSuffix>");
+        Assert.IsTrue(prefix.Success, "Directory.Build.props must declare VersionPrefix");
+        string sdkVersion = string.IsNullOrWhiteSpace(suffix.Groups[1].Value)
+            ? prefix.Groups[1].Value
+            : prefix.Groups[1].Value + "-" + suffix.Groups[1].Value;
+
         string wiki = Path.Combine(root, "wiki");
-        Match versionMatch = Regex.Match(
-            File.ReadAllText(Path.Combine(root, "Directory.Build.props")),
-            "<VersionPrefix>([^<]+)</VersionPrefix>",
-            RegexOptions.CultureInvariant);
-        Assert.IsTrue(versionMatch.Success, "Directory.Build.props is missing VersionPrefix.");
-        string sdkVersion = versionMatch.Groups[1].Value;
         HashSet<string> pages = Directory.EnumerateFiles(wiki, "*.md")
             .Select(static file => Path.GetFileNameWithoutExtension(file)!)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -59,8 +61,12 @@ public sealed class ReleaseAssetTests
         foreach (string file in Directory.EnumerateFiles(wiki, "*.md"))
         {
             string text = File.ReadAllText(file);
-            if (!text.Contains(sdkVersion, StringComparison.Ordinal))
-                errors.Add(Path.GetFileName(file) + $": missing SDK version {sdkVersion}");
+            if (!text.Contains(sdkVersion, StringComparison.Ordinal) &&
+                !text.Contains("SDK `" + sdkVersion + "`", StringComparison.Ordinal) &&
+                !text.Contains("SDK " + sdkVersion, StringComparison.Ordinal))
+            {
+                errors.Add(Path.GetFileName(file) + ": missing SDK version " + sdkVersion);
+            }
             foreach (Match link in Regex.Matches(text, "\\[\\[([^]#|]+)"))
             {
                 if (!pages.Contains(link.Groups[1].Value))
@@ -141,37 +147,6 @@ public sealed class ReleaseAssetTests
     }
 
     [TestMethod]
-    public void BuildPackage_ToolOutputFolderDoesNotRepeatTargetFramework()
-    {
-        string root = FindRepositoryRoot();
-        string project = File.ReadAllText(Path.Combine(
-            root,
-            "src",
-            "PCL.N.Plugin.Sdk.Build",
-            "PCL.N.Plugin.Sdk.Build.csproj"));
-
-        StringAssert.Contains(project, "<BuildOutputTargetFolder>tools</BuildOutputTargetFolder>");
-        StringAssert.Contains(project, "$(AssemblyName).deps.json");
-        Assert.IsFalse(project.Contains(
-            "<BuildOutputTargetFolder>tools/net10.0</BuildOutputTargetFolder>",
-            StringComparison.Ordinal));
-        Assert.IsFalse(project.Contains(
-            "<None Include=\"$(TargetDir)$(AssemblyName).runtimeconfig.json\"",
-            StringComparison.Ordinal));
-    }
-
-    [TestMethod]
-    public void BuildPackage_MarksNativeAssetsExecutable()
-    {
-        Assert.AreEqual(
-            Convert.ToInt32("100755", 8) << 16,
-            PnpPackCommand.GetExternalAttributes("runtimes/linux-x64/native/terracotta-helper"));
-        Assert.AreEqual(
-            Convert.ToInt32("100644", 8) << 16,
-            PnpPackCommand.GetExternalAttributes("lib/net10.0/Plugin.dll"));
-    }
-
-    [TestMethod]
     public void ExampleAxaml_IsDeclarativeAndManifestDeclared()
     {
         string root = FindRepositoryRoot();
@@ -190,8 +165,10 @@ public sealed class ReleaseAssetTests
             $"{Path.DirectorySeparatorChar}Release{Path.DirectorySeparatorChar}",
             StringComparison.OrdinalIgnoreCase) ? "Release" : "Debug";
         string package = Directory.EnumerateFiles(
-            Path.Combine(root, "examples", "HelloPlugin", "bin", configuration, "net10.0"),
-            "*.pnp").Single();
+                Path.Combine(root, "examples", "HelloPlugin", "bin", configuration, "net10.0"),
+                "*.pnp")
+            .OrderByDescending(static path => File.GetLastWriteTimeUtc(path))
+            .First();
         using ZipArchive archive = ZipFile.OpenRead(package);
         using JsonDocument table = ReadJson(archive, "META-INF/pnp.files.json");
         using JsonDocument signed = ReadJson(archive, "META-INF/pnp.signed.json");

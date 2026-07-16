@@ -184,6 +184,7 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
         Exports = new TestPluginExportRegistry(plugin.Id.Value, TestLifetime);
         SecureStorage = new TestPluginSecureStorage();
         UriLauncher = new TestPluginUriLauncher();
+        BackgroundTasks = new TestPluginBackgroundTaskService();
         Process = new TestPluginProcessService();
         Clipboard = new TestPluginClipboardService();
         Files = new TestPluginFileService(Directories);
@@ -202,6 +203,7 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
             .Add<IPluginExportRegistry>(Exports)
             .Add<IPluginSecureStorage>(SecureStorage)
             .Add<IPluginUriLauncher>(UriLauncher)
+            .Add<IPluginBackgroundTaskService>(BackgroundTasks)
             .Add<IPluginProcessService>(Process)
             .Add<IPluginClipboardService>(Clipboard)
             .Add<IPluginFileService>(Files)
@@ -241,6 +243,8 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
     public TestPluginSecureStorage SecureStorage { get; }
 
     public TestPluginUriLauncher UriLauncher { get; }
+
+    public TestPluginBackgroundTaskService BackgroundTasks { get; }
 
     public TestPluginProcessService Process { get; }
 

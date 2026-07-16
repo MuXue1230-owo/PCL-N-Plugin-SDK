@@ -237,7 +237,7 @@ public async Task Initialize_registers_and_executes_command()
     PluginDescriptor descriptor = new(
         new PluginId("dev.example.tools"),
         "Example Tools",
-        PluginVersion.Parse("0.1.1"));
+        PluginVersion.Parse("0.1.0"));
 
     await using TestPluginContext context = new(descriptor, new PluginApiVersion(0, 2));
     TestPluginCommandService commands = new();

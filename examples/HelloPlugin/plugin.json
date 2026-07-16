@@ -3,7 +3,7 @@
   "manifestVersion": 1,
   "id": "dev.muxue.hello",
   "name": "Hello Plugin",
-  "version": "0.1.1",
+  "version": "0.1.0-alpha.1",
   "channel": "alpha",
   "summary": "PCL N Plugin SDK example.",
   "publisher": { "id": "github:MuXue1230-owo", "namespace": "dev.muxue" },

@@ -1,6 +1,6 @@
 # Public API baseline — 0.1.1
 
-This alpha baseline protects the public ABI from accidental changes. Intentional alpha API changes must update this file and release notes.
+This baseline protects the public ABI from accidental changes. Intentional API changes must update this file and release notes.
 
 ## Entry and lifecycle
 
@@ -30,6 +30,12 @@ This alpha baseline protects the public ABI from accidental changes. Intentional
 - `IPluginLocalizationService`
 - `IPluginSecureStorage`
 - `IPluginUriLauncher`
+- `IPluginBackgroundTaskService`
+- `IPluginBackgroundTask`
+- `PluginBackgroundTaskProgress`
+- `PluginBackgroundTaskStep`
+- `PluginBackgroundTaskStepState`
+- `PluginServiceIds.BackgroundTasks`
 - `PluginSecretKey`
 - `PluginSecretReadResult`
 - `PluginSecretOperationResult`

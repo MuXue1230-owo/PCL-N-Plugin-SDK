@@ -69,8 +69,11 @@ public static class PluginServiceIds
     /// <summary>Host-mediated opener for external HTTP/HTTPS links.</summary>
     public static PluginServiceId UriLauncher { get; } = new("pcl.uri-launcher");
 
-    /// <summary>Verified, read-only access to files carried by the signed plugin package.</summary>
-    public static PluginServiceId PackageAssets { get; } = new("pcl.package-assets");
+    /// <summary>
+    /// Host task-manager progress surface (same UI as Minecraft install downloads).
+    /// Use for long-running plugin downloads, installs, and updates.
+    /// </summary>
+    public static PluginServiceId BackgroundTasks { get; } = new("pcl.background-tasks");
 }
 
 /// <summary>Host-provided stable service exposed to third-party plugins.</summary>
@@ -212,6 +215,60 @@ public interface IPluginSecureStorage : IPluginService
 public interface IPluginUriLauncher : IPluginService
 {
     ValueTask<bool> OpenAsync(Uri uri, CancellationToken cancellationToken = default);
+}
+
+/// <summary>State of one step inside a host-tracked background task.</summary>
+public enum PluginBackgroundTaskStepState
+{
+    Waiting = 0,
+    Running = 1,
+    Finished = 2,
+    Failed = 3
+}
+
+/// <summary>One pipeline step shown under a host task-manager card (MC install style).</summary>
+public sealed record PluginBackgroundTaskStep(
+    string Name,
+    string Detail,
+    double Progress,
+    PluginBackgroundTaskStepState State);
+
+/// <summary>Progress snapshot for <see cref="IPluginBackgroundTask.Report"/>.</summary>
+public sealed record PluginBackgroundTaskProgress(
+    string Stage,
+    string Detail = "",
+    double Progress = 0d,
+    int CompletedFiles = 0,
+    int TotalFiles = 0,
+    long SpeedBytesPerSecond = 0,
+    IReadOnlyList<PluginBackgroundTaskStep>? Steps = null);
+
+/// <summary>
+/// A single host-tracked background task (appears in the launcher task manager).
+/// Dispose after Complete/Fail to unregister cancellation ownership.
+/// </summary>
+public interface IPluginBackgroundTask : IDisposable
+{
+    /// <summary>Cancelled when the user cancels the task in the host UI.</summary>
+    CancellationToken Token { get; }
+
+    void Report(PluginBackgroundTaskProgress progress);
+
+    void Complete(string stage);
+
+    void Fail(string message, bool canceled = false);
+}
+
+/// <summary>
+/// Host task-manager bridge for plugin-owned downloads, installs, and updates.
+/// Matches the Minecraft install download UI (stage, file counts, speed, cancellable).
+/// No extra manifest permission is required; plugins only report progress for work they initiate.
+/// </summary>
+public interface IPluginBackgroundTaskService : IPluginService
+{
+    /// <param name="title">Task card title.</param>
+    /// <param name="openTaskManager">When true, navigates to the host task manager page.</param>
+    IPluginBackgroundTask Begin(string title, bool openTaskManager = true);
 }
 
 /// <summary>Host command palette / action registration (design §9.3).</summary>
