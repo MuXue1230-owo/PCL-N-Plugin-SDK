@@ -91,7 +91,11 @@
     },
     "permission": {
       "type": "object", "additionalProperties": false, "required": ["id", "reason"],
-      "properties": { "id": { "$ref": "#/$defs/simpleId" }, "reason": { "type": "string", "minLength": 1 } }
+      "properties": {
+        "id": { "$ref": "#/$defs/simpleId" },
+        "reason": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["required", "optional"], "default": "required" }
+      }
     },
     "ui": {
       "type": "object", "additionalProperties": false, "required": ["api"],

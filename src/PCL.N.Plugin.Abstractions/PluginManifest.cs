@@ -100,7 +100,13 @@ public sealed record PluginServiceRequirementsManifest
     public IReadOnlyDictionary<string, string> Optional { get; init; } = new Dictionary<string, string>();
 }
 
-public sealed record PluginPermissionManifest(string Id, string Reason);
+/// <param name="Id">Stable permission id (e.g. <c>process.start</c>).</param>
+/// <param name="Reason">User-facing justification shown in consent UI.</param>
+/// <param name="Kind">
+/// <c>required</c> (default): requested at install/update time.
+/// <c>optional</c>: requested the first time the capability is used.
+/// </param>
+public sealed record PluginPermissionManifest(string Id, string Reason, string Kind = "required");
 
 public sealed record PluginUiManifest
 {

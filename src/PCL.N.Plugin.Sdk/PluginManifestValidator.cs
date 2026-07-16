@@ -177,6 +177,9 @@ public static class PluginManifestValidator
                 issues.Add(new PluginManifestValidationIssue("PNPMAN026", path + ".id", "Permission ID is empty or duplicated."));
             if (string.IsNullOrWhiteSpace(permission.Reason))
                 issues.Add(new PluginManifestValidationIssue("PNPMAN027", path + ".reason", "Permission reason is required."));
+            string kind = string.IsNullOrWhiteSpace(permission.Kind) ? "required" : permission.Kind.Trim();
+            if (kind is not "required" and not "optional")
+                issues.Add(new PluginManifestValidationIssue("PNPMAN027b", path + ".kind", "Permission kind must be required or optional."));
         }
     }
 
