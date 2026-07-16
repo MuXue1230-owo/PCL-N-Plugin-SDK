@@ -1,4 +1,4 @@
-# Public API baseline — 0.1.2
+# Public API baseline — 0.1.3
 
 This baseline protects the public ABI from accidental changes. Intentional API changes must update this file and release notes.
 

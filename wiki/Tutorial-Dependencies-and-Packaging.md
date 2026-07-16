@@ -1,6 +1,6 @@
 # 依赖与打包实战
 
-> 适用于 SDK `0.1.2`。本页区分插件前置、NuGet 托管依赖、内容文件和原生资产。
+> 适用于 SDK `0.1.3`。本页区分插件前置、NuGet 托管依赖、内容文件和原生资产。
 
 这四类依赖的安装和加载方式不同，不能混为一谈：
 
@@ -63,7 +63,7 @@
 
 ```powershell
 dotnet build -c Release
-tar -tf .\bin\Release\net10.0\dev.example.toolbox-0.1.2.pnp
+tar -tf .\bin\Release\net10.0\dev.example.toolbox-0.1.3.pnp
 ```
 
 宿主共享或私有程序集会被排除：
@@ -146,7 +146,7 @@ META-INF/keys/<fingerprint>.asc
 ```powershell
 dotnet clean -c Release
 dotnet build -c Release
-Get-FileHash .\bin\Release\net10.0\dev.example.toolbox-0.1.2.pnp -Algorithm SHA256
+Get-FileHash .\bin\Release\net10.0\dev.example.toolbox-0.1.3.pnp -Algorithm SHA256
 ```
 
 重复后哈希应相同。若不同，检查：

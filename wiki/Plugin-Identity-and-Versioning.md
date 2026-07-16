@@ -1,6 +1,6 @@
 # 身份与版本
 
-> SDK `0.1.2`
+> SDK `0.1.3`
 
 ## 插件 ID
 
@@ -65,4 +65,4 @@ dev.example.tools-1.2.3.pnp
 | 服务版本 | `0.1` | `major.minor` 范围 |
 | UI Surface | `3.1` | 独立 Surface 版本 |
 
-不要把 SDK `0.1.2` 写进 `api.minimum` 或服务范围。
+不要把 SDK `0.1.3` 写进 `api.minimum` 或服务范围。

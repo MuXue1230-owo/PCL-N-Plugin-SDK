@@ -1,6 +1,6 @@
 # 构建 `.pnp`
 
-> SDK `0.1.2`
+> SDK `0.1.3`
 
 安装 `PCLN.Plugin.Sdk.Build` 后，MSBuild 会在普通项目构建结束时生成 `.pnp`。
 
