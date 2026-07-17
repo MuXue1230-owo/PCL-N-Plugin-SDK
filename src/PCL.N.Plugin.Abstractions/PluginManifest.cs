@@ -51,6 +51,8 @@ public sealed record PluginManifest
 
     public IReadOnlyList<PluginPermissionManifest> Permissions { get; init; } = [];
 
+    public PluginLocalizationManifest Localization { get; init; } = new();
+
     public PluginUiManifest? Ui { get; init; }
 
     public PluginDataManifest Data { get; init; } = new();
@@ -107,6 +109,15 @@ public sealed record PluginServiceRequirementsManifest
 /// <c>optional</c>: requested the first time the capability is used.
 /// </param>
 public sealed record PluginPermissionManifest(string Id, string Reason, string Kind = "required");
+
+public sealed record PluginLocalizationManifest
+{
+    public string DefaultCulture { get; init; } = "zh-CN";
+
+    public IReadOnlyList<string> SupportedCultures { get; init; } = ["zh-CN", "en-US"];
+
+    public string ResourcePath { get; init; } = "locales/{culture}.json";
+}
 
 public sealed record PluginUiManifest
 {

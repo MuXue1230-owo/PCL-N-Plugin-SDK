@@ -56,6 +56,8 @@ public interface IPluginNavigationService : IPluginService
 
 public static class PluginUiServiceIds
 {
+    public static PluginServiceId Components => PclUiServiceIds.Components;
+
     public static PluginServiceId Navigation { get; } = new("pcl.navigation");
 
     public static PluginServiceId AvaloniaAccess { get; } = new("pcl.ui.avalonia");

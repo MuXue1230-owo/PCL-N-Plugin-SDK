@@ -19,6 +19,7 @@ public sealed class PluginManifestTests
         Assert.AreEqual("pcl.page.launch", result.Manifest.Ui!.Targets.Single().Target);
         Assert.AreEqual("primary-actions.after", result.Manifest.Ui.Targets.Single().Operations.Single().Slot);
         Assert.AreEqual("ui/LaunchPanel.axaml", result.Manifest.Ui.Targets.Single().Operations.Single().Axaml);
+        CollectionAssert.Contains(result.Manifest.Localization.SupportedCultures.ToArray(), "en-US");
     }
 
     [TestMethod]
@@ -128,6 +129,11 @@ public sealed class PluginManifestTests
             { "id": "dev.example.library", "version": ">=2.0.0 <3.0.0", "kind": "required" }
           ],
           "permissions": [{ "id": "network", "reason": "Fetch remote data." }],
+          "localization": {
+            "defaultCulture": "zh-CN",
+            "supportedCultures": ["zh-CN", "en-US"],
+            "resourcePath": "locales/{culture}.json"
+          },
           "ui": {
             "api": { "minimum": "1.0", "maximumExclusive": "2.0" },
             "avalonia": { "minimum": "12.0", "maximumExclusive": "13.0" },

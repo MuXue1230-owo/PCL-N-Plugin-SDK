@@ -102,6 +102,7 @@ public sealed class PluginContractTests
         Assert.AreEqual("pcl.instances.read", PluginServiceIds.InstancesRead.Value);
         Assert.AreEqual("pcl.ui", PluginServiceIds.Ui.Value);
         Assert.AreEqual("pcl.ui.patch", PluginServiceIds.UiPatch.Value);
+        Assert.AreEqual("pcl.ui.components", PclUiServiceIds.Components.Value);
         Assert.AreEqual("pcl.market", PluginServiceIds.Market.Value);
         Assert.AreEqual("pcl.secure-storage", PluginServiceIds.SecureStorage.Value);
         Assert.AreEqual("pcl.uri-launcher", PluginServiceIds.UriLauncher.Value);
@@ -122,6 +123,7 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginUiSurfaceRegistry).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(PclUiService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.ListPluginsAsync)));
         Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.PriceCents)));
         Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.RequiresPurchase)));

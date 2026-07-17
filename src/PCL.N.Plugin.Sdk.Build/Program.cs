@@ -62,6 +62,7 @@ internal static class PnpPackCommand
         AddFile(files, entryPath, options.AssemblyPath);
         if (options.DepsPath is not null && File.Exists(options.DepsPath))
             AddFile(files, Path.ChangeExtension(entryPath, ".deps.json").Replace('\\', '/'), options.DepsPath);
+        AddLocalizationFiles(files, root, options.ContentRoot);
         AddManifestAxaml(files, root, options.ContentRoot);
         foreach (string dependency in options.Dependencies)
             AddFile(files, "lib/net10.0/" + Path.GetFileName(dependency), dependency);
@@ -189,6 +190,61 @@ internal static class PnpPackCommand
                 AddFile(files, packagePath, sourcePath);
             }
         }
+    }
+
+    private static void AddLocalizationFiles(IDictionary<string, byte[]> files, JsonElement root, string contentRoot)
+    {
+        if (!root.TryGetProperty("localization", out JsonElement localization) || localization.ValueKind != JsonValueKind.Object)
+            throw new InvalidOperationException("plugin.json must declare localization with at least zh-CN and en-US.");
+        string defaultCulture = RequiredString(localization, "defaultCulture");
+        string resourcePath = RequiredString(localization, "resourcePath");
+        if (resourcePath.Split("{culture}", StringSplitOptions.None).Length != 2)
+            throw new InvalidOperationException("localization.resourcePath must contain {culture} exactly once.");
+        if (!localization.TryGetProperty("supportedCultures", out JsonElement culturesElement) || culturesElement.ValueKind != JsonValueKind.Array)
+            throw new InvalidOperationException("localization.supportedCultures must be an array.");
+
+        string[] cultures = culturesElement.EnumerateArray()
+            .Select(static item => item.ValueKind == JsonValueKind.String ? item.GetString() : null)
+            .Where(static item => !string.IsNullOrWhiteSpace(item))
+            .Cast<string>()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (cultures.Length < 2 ||
+            !cultures.Contains("zh-CN", StringComparer.OrdinalIgnoreCase) ||
+            !cultures.Contains("en-US", StringComparer.OrdinalIgnoreCase) ||
+            !cultures.Contains(defaultCulture, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Localization must include zh-CN, en-US, and the declared default culture.");
+        }
+
+        foreach (string culture in cultures)
+        {
+            string packagePath = NormalizePath(resourcePath.Replace("{culture}", culture, StringComparison.Ordinal));
+            if (!packagePath.StartsWith("locales/", StringComparison.Ordinal) ||
+                !packagePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"Localization resource must be a JSON file under locales/: {packagePath}");
+            }
+            string sourcePath = ResolveContentPath(contentRoot, packagePath);
+            if (!File.Exists(sourcePath))
+                throw new FileNotFoundException($"Localization resource is missing: {packagePath}", sourcePath);
+            using JsonDocument locale = JsonDocument.Parse(File.ReadAllBytes(sourcePath));
+            if (locale.RootElement.ValueKind != JsonValueKind.Object ||
+                locale.RootElement.EnumerateObject().Any(static property => property.Value.ValueKind != JsonValueKind.String))
+            {
+                throw new InvalidOperationException($"Localization resource must be a flat JSON string map: {packagePath}");
+            }
+            AddFile(files, packagePath, sourcePath);
+        }
+    }
+
+    private static string ResolveContentPath(string contentRoot, string packagePath)
+    {
+        string sourcePath = Path.GetFullPath(Path.Combine(contentRoot, packagePath.Replace('/', Path.DirectorySeparatorChar)));
+        string rootPath = Path.GetFullPath(contentRoot) + Path.DirectorySeparatorChar;
+        if (!sourcePath.StartsWith(rootPath, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            throw new InvalidOperationException($"Package content escapes the content root: {packagePath}");
+        return sourcePath;
     }
 
     private static void AddFile(IDictionary<string, byte[]> files, string packagePath, string sourcePath)

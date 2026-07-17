@@ -83,8 +83,13 @@ public sealed class TestPluginLocalizationService(
     public PluginServiceId Id => PluginServiceIds.Localization;
     public PluginApiVersion Version { get; } = new(0, 1);
     public string CurrentCulture { get; } = culture ?? CultureInfo.CurrentUICulture.Name;
+    public string DefaultCulture { get; } = "zh-CN";
+    public IReadOnlyList<string> SupportedCultures { get; } = ["zh-CN", "en-US"];
     public string GetString(string key, string fallback) => _strings.TryGetValue(key, out string? value) ? value : fallback;
+    public string FormatString(string key, string fallback, params object?[] arguments) =>
+        string.Format(CultureInfo.GetCultureInfo(CurrentCulture), GetString(key, fallback), arguments);
     public IReadOnlyDictionary<string, string> GetStrings() => _strings;
+    public IReadOnlyDictionary<string, string> GetStrings(string culture) => _strings;
 }
 
 public sealed class TestPluginSecureStorage : IPluginSecureStorage

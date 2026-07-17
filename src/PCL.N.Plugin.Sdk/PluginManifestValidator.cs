@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 
 namespace PCL.N.Plugin.Sdk;
@@ -89,6 +90,7 @@ public static class PluginManifestValidator
         ValidatePermissions(manifest.Permissions ?? [], issues);
         ValidatePlatforms(manifest.Platforms ?? new PluginPlatformManifest(), issues);
         ValidateServiceRanges(manifest.Services ?? new PluginServiceRequirementsManifest(), issues);
+        ValidateLocalization(manifest.Localization ?? new PluginLocalizationManifest(), issues);
         ValidateUi(manifest.Ui, issues);
         PluginDataManifest data = manifest.Data ?? new PluginDataManifest();
         AddIf(data.MinimumReadableSchema > data.SchemaVersion,
@@ -206,6 +208,54 @@ public static class PluginManifestValidator
         }
         if (required.Keys.Intersect(optional.Keys, StringComparer.Ordinal).Any())
             issues.Add(new PluginManifestValidationIssue("PNPMAN031", "$.services", "A service cannot be both required and optional."));
+    }
+
+    private static void ValidateLocalization(
+        PluginLocalizationManifest localization,
+        List<PluginManifestValidationIssue> issues)
+    {
+        IReadOnlyList<string> cultures = localization.SupportedCultures ?? [];
+        string[] distinctCultures = cultures
+            .Where(static culture => !string.IsNullOrWhiteSpace(culture))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (cultures.Count != distinctCultures.Length || distinctCultures.Any(static culture => !IsCultureName(culture)))
+            issues.Add(new PluginManifestValidationIssue("PNPMAN057", "$.localization.supportedCultures", "Supported cultures must be valid, non-empty, and unique."));
+        if (distinctCultures.Length < 2 ||
+            !distinctCultures.Contains("zh-CN", StringComparer.OrdinalIgnoreCase) ||
+            !distinctCultures.Contains("en-US", StringComparer.OrdinalIgnoreCase))
+        {
+            issues.Add(new PluginManifestValidationIssue("PNPMAN058", "$.localization.supportedCultures", "Plugins must provide at least zh-CN and en-US resources."));
+        }
+        if (string.IsNullOrWhiteSpace(localization.DefaultCulture) ||
+            !distinctCultures.Contains(localization.DefaultCulture, StringComparer.OrdinalIgnoreCase))
+        {
+            issues.Add(new PluginManifestValidationIssue("PNPMAN059", "$.localization.defaultCulture", "Default culture must be one of the supported cultures."));
+        }
+
+        string path = localization.ResourcePath ?? string.Empty;
+        string probe = path.Replace("{culture}", "zh-CN", StringComparison.Ordinal);
+        if (path.CountOccurrences("{culture}") != 1 ||
+            !IsSafeRelativePath(probe) ||
+            !probe.StartsWith("locales/", StringComparison.Ordinal) ||
+            !probe.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            issues.Add(new PluginManifestValidationIssue("PNPMAN060", "$.localization.resourcePath", "Localization resourcePath must be a safe locales/{culture}.json-style package path."));
+        }
+    }
+
+    private static bool IsCultureName(string value)
+    {
+        try
+        {
+            _ = CultureInfo.GetCultureInfo(value);
+            return true;
+        }
+        catch (CultureNotFoundException)
+        {
+            return false;
+        }
     }
 
     private static void ValidateUi(PluginUiManifest? ui, List<PluginManifestValidationIssue> issues)
@@ -404,4 +454,16 @@ public static class PluginManifestValidator
 
     private static PluginManifestValidationResult Invalid(string code, string path, string message) =>
         new(null, [new PluginManifestValidationIssue(code, path, message)]);
+
+    private static int CountOccurrences(this string value, string search)
+    {
+        int count = 0;
+        int index = 0;
+        while ((index = value.IndexOf(search, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += search.Length;
+        }
+        return count;
+    }
 }

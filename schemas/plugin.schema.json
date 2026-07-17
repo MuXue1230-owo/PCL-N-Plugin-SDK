@@ -4,7 +4,7 @@
   "title": "PCL N Plugin Manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["formatVersion", "manifestVersion", "id", "name", "version", "publisher", "license", "entryPoint", "api", "host", "signing"],
+  "required": ["formatVersion", "manifestVersion", "id", "name", "version", "publisher", "license", "entryPoint", "api", "host", "localization", "signing"],
   "properties": {
     "formatVersion": { "const": 1 },
     "manifestVersion": { "const": 1 },
@@ -29,6 +29,7 @@
     "incompatibilities": { "type": "array", "items": { "$ref": "#/$defs/incompatibility" } },
     "services": { "$ref": "#/$defs/services" },
     "permissions": { "type": "array", "items": { "$ref": "#/$defs/permission" } },
+    "localization": { "$ref": "#/$defs/localization" },
     "ui": { "oneOf": [{ "$ref": "#/$defs/ui" }, { "type": "null" }] },
     "data": { "$ref": "#/$defs/data" },
     "activation": { "$ref": "#/$defs/activation" },
@@ -95,6 +96,22 @@
         "id": { "$ref": "#/$defs/simpleId" },
         "reason": { "type": "string", "minLength": 1 },
         "kind": { "type": "string", "enum": ["required", "optional"], "default": "required" }
+      }
+    },
+    "localization": {
+      "type": "object", "additionalProperties": false,
+      "required": ["defaultCulture", "supportedCultures", "resourcePath"],
+      "properties": {
+        "defaultCulture": { "type": "string", "minLength": 2 },
+        "supportedCultures": {
+          "type": "array", "minItems": 2, "uniqueItems": true,
+          "allOf": [
+            { "contains": { "const": "zh-CN" } },
+            { "contains": { "const": "en-US" } }
+          ],
+          "items": { "type": "string", "minLength": 2 }
+        },
+        "resourcePath": { "type": "string", "pattern": "^locales/[^\\\\]*\\{culture\\}[^\\\\]*\\.json$" }
       }
     },
     "ui": {

@@ -345,9 +345,17 @@ public interface IPluginLocalizationService : IPluginService
 {
     string CurrentCulture { get; }
 
+    string DefaultCulture { get; }
+
+    IReadOnlyList<string> SupportedCultures { get; }
+
     string GetString(string key, string fallback);
 
+    string FormatString(string key, string fallback, params object?[] arguments);
+
     IReadOnlyDictionary<string, string> GetStrings();
+
+    IReadOnlyDictionary<string, string> GetStrings(string culture);
 }
 
 /// <summary>Stable identifier of a service exported by another plugin.</summary>

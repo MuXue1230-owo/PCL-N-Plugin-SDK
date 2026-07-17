@@ -13,6 +13,11 @@
   "host": { "minimumVersion": "0.1.0" },
   "services": { "required": { "pcl.commands": ">=0.1 <1.0", "pcl.ui": ">=0.1 <1.0" } },
   "permissions": [{ "id": "ui.inject", "reason": "Display the sample panel on the launch page." }],
+  "localization": {
+    "defaultCulture": "zh-CN",
+    "supportedCultures": ["zh-CN", "en-US"],
+    "resourcePath": "locales/{culture}.json"
+  },
   "ui": {
     "api": { "minimum": "0.1", "maximumExclusive": "1.0" },
     "avalonia": { "minimum": "12.0", "maximumExclusive": "13.0" },
