@@ -9,8 +9,8 @@
     <Product>PCL N Plugin SDK</Product>
     <Copyright>Copyright 2026 PCL N contributors</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/PCL-N-Edition/PCL-N-Plugin-SDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PCL-N-Edition/PCL-N-Plugin-SDK</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>pcl-n;plugin;sdk;modding</PackageTags>

@@ -12,7 +12,7 @@
     <Title>PCL N Plugin SDK Build</Title>
     <Description>MSBuild integration for reproducible PCL N .pnp package creation and OpenPGP signing.</Description>
     <PackageTags>$(PackageTags);msbuild;pnp;packaging;openpgp</PackageTags>
-    <BuildOutputTargetFolder>tools/net10.0</BuildOutputTargetFolder>
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <SelfContained>false</SelfContained>
@@ -26,6 +26,5 @@
 
 
     <None Include="$(TargetDir)$(AssemblyName).deps.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
-    <None Include="$(TargetDir)$(AssemblyName).runtimeconfig.json" Pack="true" PackagePath="tools/net10.0/" Visible="false" />
   </ItemGroup>
 </Project>
