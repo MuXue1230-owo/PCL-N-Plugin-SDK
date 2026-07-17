@@ -1,6 +1,8 @@
 # 权限与安全
 
-> SDK `0.1.3`，运行时行为以 PCL.Plugin `v0.12.0` 为准。
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> SDK `0.2.0`，运行时行为以 PCL.Plugin `v0.12.0` 为准。
 
 插件在 PCL N 进程内运行。权限声明用于描述和约束官方 API、支持审核和用户决策，但不是操作系统级沙箱。用户仍应只安装可信发布者的有效签名包。
 
@@ -35,6 +37,19 @@
 - `ui.window-management`
 
 未知权限会 fail closed：运行时拒绝加载，而不是静默忽略拼写错误。
+
+## 必需与可选权限
+
+SDK `0.2.0` 支持在每项权限上声明 `kind`：
+
+```json
+"permissions": [
+  { "id": "pcl.settings", "reason": "保存插件设置。", "kind": "required" },
+  { "id": "pcl.notifications", "reason": "任务完成时显示通知。", "kind": "optional" }
+]
+```
+
+`required` 被拒绝时插件不能启动；`optional` 被拒绝时插件仍可运行，但必须通过服务可用性检查降级，不能假设该能力存在。省略 `kind` 时按 `required` 处理，以兼容旧 Manifest。
 
 ## 写好 reason
 

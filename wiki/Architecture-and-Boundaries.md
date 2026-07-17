@@ -1,6 +1,8 @@
 # 架构与边界
 
-> SDK `0.1.3`
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> SDK `0.2.0`
 
 ```text
 PCL N 桌面应用

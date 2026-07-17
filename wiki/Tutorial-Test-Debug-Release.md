@@ -1,6 +1,8 @@
 # 测试、调试与发布实战
 
-> 适用于 SDK `0.1.3`。目标是让同一个提交可重复通过测试、生成 `.pnp` 并发布。
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> 适用于 SDK `0.2.0`。目标是让同一个提交可重复通过测试、生成 `.pnp` 并发布。
 
 推荐把验证分成三层：
 
@@ -17,7 +19,7 @@
 ```powershell
 dotnet new mstest -n PclNToolbox.Plugin.Tests --framework net10.0
 dotnet sln add .\PclNToolbox.Plugin.Tests\PclNToolbox.Plugin.Tests.csproj
-dotnet add .\PclNToolbox.Plugin.Tests package PCLN.Plugin.Testing --version 0.1.3
+dotnet add .\PclNToolbox.Plugin.Tests package PCLN.Plugin.Testing --version 0.2.0
 dotnet add .\PclNToolbox.Plugin.Tests reference .\PclNToolbox.Plugin\PclNToolbox.Plugin.csproj
 ```
 
@@ -39,7 +41,7 @@ public sealed class ToolboxPluginTests
     private static PluginDescriptor CreateDescriptor() => new(
         new PluginId("dev.example.toolbox"),
         "PCL N Toolbox",
-        PluginVersion.Parse("0.1.3"));
+        PluginVersion.Parse("0.2.0"));
 
     [TestMethod]
     public async Task Initialize_registers_scan_command()
@@ -129,8 +131,8 @@ dotnet test -c Release --no-build
 然后检查生成的包：
 
 ```powershell
-tar -tf .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.1.3.pnp
-Get-FileHash .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.1.3.pnp -Algorithm SHA256
+tar -tf .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.2.0.pnp
+Get-FileHash .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.2.0.pnp -Algorithm SHA256
 ```
 
 Analyzer 警告应作为发布阻断项处理，不要长期使用 `NoWarn` 隐藏 Manifest、生命周期或边界问题。
@@ -198,12 +200,12 @@ jobs:
 
 ## 7. 发布版本
 
-发布前确认项目和 Manifest 都是目标版本，例如 `0.1.3`：
+发布前确认项目和 Manifest 都是目标版本，例如 `0.2.0`：
 
 ```powershell
 git status --short
-git tag -s v0.1.3 -m "PCL N Toolbox 0.1.3"
-git push origin v0.1.3
+git tag -s v0.2.0 -m "PCL N Toolbox 0.2.0"
+git push origin v0.2.0
 ```
 
 然后：

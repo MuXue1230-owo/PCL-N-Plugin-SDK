@@ -1,6 +1,8 @@
 # Analyzer 参考
 
-> SDK `0.1.3`
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> SDK `0.2.0`
 
 `PCLN.Plugin.Analyzers` 在编译期检查宿主边界、入口类型、生命周期、Manifest 和后台工作。运行时与打包器仍会重复执行安全验证。
 

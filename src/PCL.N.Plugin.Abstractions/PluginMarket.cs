@@ -85,7 +85,10 @@ public sealed record PluginMarketPluginSummary(
     string PricingModel = "free",
     int PriceCents = 0,
     string Currency = "CNY",
-    bool RequiresPurchase = false);
+    bool RequiresPurchase = false,
+    string? IconUrl = null,
+    string? Culture = null,
+    string? Description = null);
 
 public sealed record PluginMarketPluginDetail(
     string PluginId,
@@ -106,7 +109,9 @@ public sealed record PluginMarketPluginDetail(
     string PricingModel = "free",
     int PriceCents = 0,
     string Currency = "CNY",
-    bool RequiresPurchase = false);
+    bool RequiresPurchase = false,
+    string? IconUrl = null,
+    string? Culture = null);
 
 public sealed record PluginMarketVersionInfo(
     string PluginId,

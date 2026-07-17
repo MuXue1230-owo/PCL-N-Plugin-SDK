@@ -1,10 +1,12 @@
 # Plugin Manifest
 
-> SDK `0.1.3`
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> SDK `0.2.0`
 
 `.pnp` 根目录的 `plugin.json` 是插件的机器可读契约。它描述身份、入口、版本范围、依赖、服务、权限、UI、数据迁移和签名。构建器会规范化 Manifest，Analyzer、打包器和运行时会分别验证它。
 
-完整 JSON Schema 位于 [`schemas/plugin.schema.json`](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/blob/main/schemas/plugin.schema.json)。根对象禁止未知字段，字段拼错会直接失败。
+完整 JSON Schema 位于 [`schemas/plugin.schema.json`](https://github.com/PCL-N-Edition/PCL-N-Plugin-SDK/blob/main/schemas/plugin.schema.json)。根对象禁止未知字段，字段拼错会直接失败。
 
 ## 最小可加载 Manifest
 
@@ -133,6 +135,20 @@
 ```
 
 细节见 [依赖与兼容声明](Dependencies-and-Compatibility)。
+
+### 本地化
+
+SDK `0.2.0` 要求插件至少包含简体中文与英文资源：
+
+```json
+"localization": {
+  "defaultCulture": "zh-CN",
+  "supportedCultures": ["zh-CN", "en-US"],
+  "resourcePath": "locales/{culture}.json"
+}
+```
+
+`defaultCulture` 必须出现在 `supportedCultures` 中；资源路径必须是安全的包内相对路径，并且只包含一次 `{culture}`。`locales/zh-CN.json` 与 `locales/en-US.json` 都必须打包。包内资源用于插件运行时 UI；插件中心中的中英文名称、摘要和详细说明需在开发者工作台单独填写。
 
 ### 服务与权限
 

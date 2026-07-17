@@ -1,6 +1,8 @@
 # 实战案例集
 
-> 以下片段基于 SDK `0.1.3`。示例中的服务应同步声明到 `plugin.json`。
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> 以下片段基于 SDK `0.2.0`。示例中的服务应同步声明到 `plugin.json`。
 
 ## 案例 1：注册一个命令并显示通知
 

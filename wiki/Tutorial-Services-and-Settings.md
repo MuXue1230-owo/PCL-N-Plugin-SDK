@@ -1,6 +1,8 @@
 # 服务、设置与后台任务实战
 
-> 适用于 SDK `0.1.3`。本教程把前一章的 Toolbox 扩展为“实例检查器”。
+> Applies to PCL N Plugin SDK 0.2.0.
+
+> 适用于 SDK `0.2.0`。本教程把前一章的 Toolbox 扩展为“实例检查器”。
 
 目标功能：保存扫描间隔、注册手动扫描命令、定期读取 Minecraft 实例，并在宿主提供通知服务时显示结果。
 
@@ -321,4 +323,3 @@ public sealed class LaunchDoctorPlugin : IPclNPlugin
 | 设置读取失败 | 确认类型没有变化；若从 `int` 改为 `string`，需要显式迁移 |
 
 下一步可以加入 [UI 扩展](Tutorial-UI-Extension)，为扫描间隔和结果提供设置页或启动页面板。
-
