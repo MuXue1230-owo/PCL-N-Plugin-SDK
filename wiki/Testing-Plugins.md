@@ -1,7 +1,5 @@
 # 测试插件
 
-> Applies to PCL N Plugin SDK 0.2.0.
-
 > SDK `0.2.0`
 
 `PCLN.Plugin.Testing` 提供不启动 PCL N 的内存宿主。你可以验证初始化、服务调用、命令、设置、任务、UI 注册和生命周期释放。
@@ -166,4 +164,4 @@ Assert.AreEqual(0, commands.Commands.Count);
 - Manifest 通过 `PluginManifestValidator.ParseAndValidate`；
 - Release 构建实际生成 `.pnp`。
 
-仓库中的 SDK 测试和 [`examples/HelloPlugin`](https://github.com/MuXue1230-owo/PCL-N-Plugin-SDK/tree/main/examples/HelloPlugin) 可作为基线。
+仓库中的 SDK 测试和 [`examples/HelloPlugin`](https://github.com/PCL-N-Edition/PCL-N-Plugin-SDK/tree/main/examples/HelloPlugin) 可作为基线。

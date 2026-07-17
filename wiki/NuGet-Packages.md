@@ -1,7 +1,5 @@
 # NuGet 包
 
-> Applies to PCL N Plugin SDK 0.2.0.
-
 > 当前公开版本：`0.2.0`
 
 所有包 ID 使用 `PCLN.Plugin.*`。为保持源码和二进制兼容，程序集名与命名空间仍使用 `PCL.N.Plugin.*`，因此 C# 代码继续写 `using PCL.N.Plugin;`。

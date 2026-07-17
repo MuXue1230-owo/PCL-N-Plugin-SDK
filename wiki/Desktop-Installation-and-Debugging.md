@@ -1,7 +1,5 @@
 # 桌面端安装与调试
 
-> Applies to PCL N Plugin SDK 0.2.0.
-
 > 适用于 SDK `0.2.0`，并描述 PCL.Plugin `v0.11.0` 的现行桌面流程。
 
 ## 安装已签名插件
