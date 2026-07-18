@@ -14,7 +14,7 @@ public sealed class PluginContractTests
     {
         InMemoryPluginSettingsPageCapability pages = new();
         await using TestPluginContext context = CreateContext();
-        context.TestCapabilities.Add<IPluginSettingsPageCapability>(pages);
+        context.TestCapabilities.Add<IPluginLocalizedSettingsPageCapability>(pages);
 
         await new HelloPlugin.HelloPlugin().InitializeAsync(context, CancellationToken.None);
 
@@ -51,7 +51,7 @@ public sealed class PluginContractTests
         TestPluginCapabilityProvider capabilities = new();
 
         Assert.ThrowsExactly<NotSupportedException>(
-            () => capabilities.Require<IPluginSettingsPageCapability>());
+            () => capabilities.Require<IPluginLocalizedSettingsPageCapability>());
     }
 
     [TestMethod]
@@ -162,6 +162,22 @@ public sealed class PluginContractTests
         }
     }
 
-    private static PluginSettingsPageDescriptor CreatePage(string id) =>
-        new(id, "Page", "lucide/puzzle", "Heading", "Description", []);
+    [TestMethod]
+    public void LegacySettingsContracts_AreMarkedObsolete()
+    {
+#pragma warning disable CS0618
+        Assert.IsNotNull(typeof(PluginSettingsPageDescriptor).GetCustomAttributes(typeof(ObsoleteAttribute), false).SingleOrDefault());
+        Assert.IsNotNull(typeof(IPluginSettingsPageCapability).GetCustomAttributes(typeof(ObsoleteAttribute), false).SingleOrDefault());
+        Assert.IsNotNull(typeof(PclUiString).GetCustomAttributes(typeof(ObsoleteAttribute), false).SingleOrDefault());
+#pragma warning restore CS0618
+    }
+
+    private static PluginLocalizedSettingsPageDescriptor CreatePage(string id) =>
+        new(
+            id,
+            new PclLocalizedString("page.title", "页面"),
+            "lucide/puzzle",
+            new PclLocalizedString("page.heading", "标题"),
+            new PclLocalizedString("page.description", "描述"),
+            []);
 }

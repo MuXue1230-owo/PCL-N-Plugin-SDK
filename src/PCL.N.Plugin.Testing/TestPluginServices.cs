@@ -85,6 +85,8 @@ public sealed class TestPluginLocalizationService(
     public string CurrentCulture { get; } = culture ?? CultureInfo.CurrentUICulture.Name;
     public string DefaultCulture { get; } = "zh-CN";
     public IReadOnlyList<string> SupportedCultures { get; } = ["zh-CN", "en-US"];
+    public event EventHandler? LanguageChanged;
+    public void RaiseLanguageChanged() => LanguageChanged?.Invoke(this, EventArgs.Empty);
     public string GetString(string key, string fallback) => _strings.TryGetValue(key, out string? value) ? value : fallback;
     public string FormatString(string key, string fallback, params object?[] arguments) =>
         string.Format(CultureInfo.GetCultureInfo(CurrentCulture), GetString(key, fallback), arguments);

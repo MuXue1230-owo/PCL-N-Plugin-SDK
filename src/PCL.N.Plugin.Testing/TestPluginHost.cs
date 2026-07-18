@@ -304,22 +304,22 @@ public sealed class CollectingPluginLogger : IPluginLogger
     }
 }
 
-public sealed class InMemoryPluginSettingsPageCapability : IPluginSettingsPageCapability
+public sealed class InMemoryPluginSettingsPageCapability : IPluginLocalizedSettingsPageCapability
 {
-    private readonly List<PluginSettingsPageDescriptor> _pages = [];
+    private readonly List<PluginLocalizedSettingsPageDescriptor> _pages = [];
     private readonly HashSet<string> _ids = new(StringComparer.OrdinalIgnoreCase);
 
     public string Id => "pcl.settings-pages";
 
-    public PluginApiVersion Version => new(0, 1);
+    public PluginApiVersion Version => new(0, 2);
 
-    public IReadOnlyList<PluginSettingsPageDescriptor> Pages => _pages;
+    public IReadOnlyList<PluginLocalizedSettingsPageDescriptor> Pages => _pages;
 
-    public IPluginRegistration Register(PluginSettingsPageDescriptor descriptor)
+    public IPluginRegistration Register(PluginLocalizedSettingsPageDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
         ArgumentException.ThrowIfNullOrWhiteSpace(descriptor.Id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(descriptor.Title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(descriptor.Title.Key);
         if (!_ids.Add(descriptor.Id))
             throw new InvalidOperationException($"Settings page already registered: {descriptor.Id}");
 

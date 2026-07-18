@@ -1,4 +1,8 @@
 {
   "hello.title": "你好，PCL N",
-  "hello.description": "这是一个支持多语言的插件示例。"
+  "hello.description": "这是一个支持多语言的插件示例。",
+  "settings.title": "你好插件",
+  "settings.heading": "来自 IPclNPlugin 的问候",
+  "settings.description": "此页面由示例插件注册。",
+  "settings.experimental": "SDK 仍处于实验阶段。"
 }

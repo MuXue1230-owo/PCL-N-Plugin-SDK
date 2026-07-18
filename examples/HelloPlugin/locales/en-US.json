@@ -1,4 +1,8 @@
 {
   "hello.title": "Hello, PCL N",
-  "hello.description": "This is a multilingual plugin example."
+  "hello.description": "This is a multilingual plugin example.",
+  "settings.title": "Hello Plugin",
+  "settings.heading": "Hello from IPclNPlugin",
+  "settings.description": "This page was registered by the example plugin.",
+  "settings.experimental": "The SDK is experimental."
 }

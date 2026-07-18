@@ -2,21 +2,14 @@ namespace PCL.N.Plugin;
 
 #pragma warning disable CA1711, CA1715 // Public names intentionally follow the required PclUiXXX convention.
 
-/// <summary>A localized string rendered with the host-selected culture.</summary>
-public sealed record PclUiString
+/// <summary>Compatibility wrapper. Use <see cref="PclLocalizedString"/> for new code.</summary>
+[Obsolete("PclUiString is deprecated. Use PclLocalizedString from PCLN.Plugin.i18n instead.")]
+public sealed record PclUiString : PclLocalizedString
 {
     public PclUiString(string fallback, string? key = null)
+        : base(fallback, key, allowMissingKey: true)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(fallback);
-        if (key is not null && string.IsNullOrWhiteSpace(key))
-            throw new ArgumentException("Localization key cannot be empty.", nameof(key));
-        Fallback = fallback;
-        Key = key;
     }
-
-    public string Fallback { get; init; }
-
-    public string? Key { get; init; }
 
     public static PclUiString Localized(string key, string fallback) => new(fallback, key);
 
@@ -89,7 +82,7 @@ public sealed record PclUiStack : PclUiElement
 
 public sealed record PclUiCard : PclUiElement
 {
-    public required PclUiString Title { get; init; }
+    public required PclLocalizedString Title { get; init; }
 
     public required PclUiElement Content { get; init; }
 
@@ -98,7 +91,7 @@ public sealed record PclUiCard : PclUiElement
 
 public sealed record PclUiText : PclUiElement
 {
-    public required PclUiString Text { get; init; }
+    public required PclLocalizedString Text { get; init; }
 
     public PclUiTextStyle Style { get; init; } = PclUiTextStyle.Body;
 
@@ -107,20 +100,20 @@ public sealed record PclUiText : PclUiElement
 
 public sealed record PclUiButton : PclUiElement
 {
-    public required PclUiString Text { get; init; }
+    public required PclLocalizedString Text { get; init; }
 
     public PclUiButtonStyle Style { get; init; } = PclUiButtonStyle.Normal;
 
     public string? CommandId { get; init; }
 
-    public PclUiString? ToolTip { get; init; }
+    public PclLocalizedString? ToolTip { get; init; }
 }
 
 public sealed record PclUiTextBox : PclUiElement
 {
-    public PclUiString? Label { get; init; }
+    public PclLocalizedString? Label { get; init; }
 
-    public PclUiString? Placeholder { get; init; }
+    public PclLocalizedString? Placeholder { get; init; }
 
     public string Value { get; init; } = string.Empty;
 
@@ -131,16 +124,16 @@ public sealed record PclUiTextBox : PclUiElement
 
 public sealed record PclUiToggle : PclUiElement
 {
-    public required PclUiString Text { get; init; }
+    public required PclLocalizedString Text { get; init; }
 
     public bool IsChecked { get; init; }
 }
 
-public sealed record PclUiOption(string Value, PclUiString Text);
+public sealed record PclUiOption(string Value, PclLocalizedString Text);
 
 public sealed record PclUiSelect : PclUiElement
 {
-    public PclUiString? Label { get; init; }
+    public PclLocalizedString? Label { get; init; }
 
     public string? Value { get; init; }
 
@@ -149,7 +142,7 @@ public sealed record PclUiSelect : PclUiElement
 
 public sealed record PclUiSlider : PclUiElement
 {
-    public PclUiString? Label { get; init; }
+    public PclLocalizedString? Label { get; init; }
 
     public int Minimum { get; init; }
 
@@ -164,12 +157,12 @@ public sealed record PclUiProgress : PclUiElement
 {
     public double Value { get; init; }
 
-    public PclUiString? Text { get; init; }
+    public PclLocalizedString? Text { get; init; }
 }
 
 public sealed record PclUiMarkdown : PclUiElement
 {
-    public required PclUiString Markdown { get; init; }
+    public required PclLocalizedString Markdown { get; init; }
 }
 
 public sealed record PclUiSpacer : PclUiElement
@@ -183,7 +176,7 @@ public sealed record PclUiPage
 
     public required string Route { get; init; }
 
-    public required PclUiString Title { get; init; }
+    public required PclLocalizedString Title { get; init; }
 
     public string? Icon { get; init; }
 
@@ -200,7 +193,7 @@ public sealed record PclUiContribution
 
     public required string Slot { get; init; }
 
-    public required PclUiString Title { get; init; }
+    public required PclLocalizedString Title { get; init; }
 
     public int Order { get; init; } = 1000;
 

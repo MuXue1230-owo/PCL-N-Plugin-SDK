@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>PCL.N.Plugin.UI</AssemblyName>
+    <AssemblyName>PCL.N.Plugin.i18n</AssemblyName>
     <RootNamespace>PCL.N.Plugin</RootNamespace>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -9,13 +9,12 @@
     <IsPackable>true</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
-    <PackageId>PCLN.Plugin.UI</PackageId>
-    <Title>PCL N Plugin UI Contracts</Title>
-    <Description>Stable UI target, navigation, page, window, and composition contracts for PCL N plugins.</Description>
-    <PackageTags>$(PackageTags);ui;surface;navigation</PackageTags>
+    <PackageId>PCLN.Plugin.i18n</PackageId>
+    <Title>PCL N Plugin Internationalization</Title>
+    <Description>Strongly typed localized text and host localization helpers for PCL N plugins.</Description>
+    <PackageTags>$(PackageTags);i18n;localization;resources</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj" />
-    <ProjectReference Include="../PCL.N.Plugin.i18n/PCL.N.Plugin.i18n.csproj" />
   </ItemGroup>
 </Project>

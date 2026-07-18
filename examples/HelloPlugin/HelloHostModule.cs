@@ -18,14 +18,16 @@ public sealed class HelloPlugin : IPclNPlugin
                 return Task.CompletedTask;
             })));
 
-        IPluginSettingsPageCapability pages = context.Capabilities.Require<IPluginSettingsPageCapability>();
-        IPluginRegistration registration = pages.Register(new PluginSettingsPageDescriptor(
+        IPluginLocalizedSettingsPageCapability pages = context.Capabilities.Require<IPluginLocalizedSettingsPageCapability>();
+        IPluginRegistration registration = pages.Register(new PluginLocalizedSettingsPageDescriptor(
             "example.hello.settings",
-            "Hello Plugin",
+            new PclLocalizedString("settings.title", "你好插件"),
             "lucide/puzzle",
-            "Hello from IPclNPlugin",
-            "This page was registered by the example plugin.",
-            [new PluginSettingsHintDescriptor("The SDK is experimental.", PluginSettingsHintKind.Warning)]));
+            new PclLocalizedString("settings.heading", "来自 IPclNPlugin 的问候"),
+            new PclLocalizedString("settings.description", "此页面由示例插件注册。"),
+            [new PluginLocalizedSettingsHintDescriptor(
+                new PclLocalizedString("settings.experimental", "SDK 仍处于实验阶段。"),
+                PluginSettingsHintKind.Warning)]));
         context.Lifetime.Track(registration);
         return ValueTask.CompletedTask;
     }

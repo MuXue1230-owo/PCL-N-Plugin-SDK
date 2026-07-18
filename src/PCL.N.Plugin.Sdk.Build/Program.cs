@@ -12,7 +12,7 @@ internal static class PnpPackCommand
     private static readonly DateTimeOffset ZipTimestamp = new(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly HashSet<string> ForbiddenAssemblies = new(StringComparer.OrdinalIgnoreCase)
     {
-        "PCL.N.Plugin.Abstractions.dll", "PCL.N.Plugin.UI.dll", "PCL.N.Plugin.UI.Avalonia.dll",
+        "PCL.N.Plugin.Abstractions.dll", "PCL.N.Plugin.i18n.dll", "PCL.N.Plugin.UI.dll", "PCL.N.Plugin.UI.Avalonia.dll",
         "PCL.Application.dll", "PCL.Desktop.dll", "PCL.Plugin.dll"
     };
 
@@ -217,6 +217,7 @@ internal static class PnpPackCommand
             throw new InvalidOperationException("Localization must include zh-CN, en-US, and the declared default culture.");
         }
 
+        Dictionary<string, HashSet<string>> localeKeys = new(StringComparer.OrdinalIgnoreCase);
         foreach (string culture in cultures)
         {
             string packagePath = NormalizePath(resourcePath.Replace("{culture}", culture, StringComparison.Ordinal));
@@ -234,7 +235,20 @@ internal static class PnpPackCommand
             {
                 throw new InvalidOperationException($"Localization resource must be a flat JSON string map: {packagePath}");
             }
+            localeKeys[culture] = locale.RootElement.EnumerateObject()
+                .Select(static property => property.Name)
+                .ToHashSet(StringComparer.Ordinal);
             AddFile(files, packagePath, sourcePath);
+        }
+
+        HashSet<string> requiredKeys = localeKeys["zh-CN"];
+        HashSet<string> englishKeys = localeKeys["en-US"];
+        if (!requiredKeys.SetEquals(englishKeys))
+        {
+            string missingInEnglish = string.Join(", ", requiredKeys.Except(englishKeys, StringComparer.Ordinal).Order());
+            string missingInChinese = string.Join(", ", englishKeys.Except(requiredKeys, StringComparer.Ordinal).Order());
+            throw new InvalidOperationException(
+                $"zh-CN and en-US localization keys must match. Missing in en-US: [{missingInEnglish}]; missing in zh-CN: [{missingInChinese}].");
         }
     }
 

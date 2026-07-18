@@ -7,10 +7,12 @@ public enum PluginSettingsHintKind
     Error
 }
 
+[Obsolete("Use PluginLocalizedSettingsHintDescriptor from PCLN.Plugin.i18n.")]
 public sealed record PluginSettingsHintDescriptor(
     string Text,
     PluginSettingsHintKind Kind = PluginSettingsHintKind.Information);
 
+[Obsolete("Use PluginLocalizedSettingsPageGroupDescriptor from PCLN.Plugin.i18n.")]
 public sealed record PluginSettingsPageGroupDescriptor(
     string Id,
     string Title,
@@ -18,6 +20,7 @@ public sealed record PluginSettingsPageGroupDescriptor(
     int Order = 500,
     string? Description = null);
 
+[Obsolete("Use PluginLocalizedSettingsPageDescriptor from PCLN.Plugin.i18n.")]
 public sealed record PluginSettingsPageDescriptor(
     string Id,
     string Title,
@@ -33,11 +36,13 @@ public sealed record PluginSettingsPageDescriptor(
     public bool RequiresDeveloperMode { get; init; }
 }
 
+[Obsolete("Use IPluginLocalizedSettingsPageGroupCapability from PCLN.Plugin.i18n.")]
 public interface IPluginSettingsPageGroupCapability : IPluginCapability
 {
     IPluginRegistration Register(PluginSettingsPageGroupDescriptor descriptor);
 }
 
+[Obsolete("Use IPluginLocalizedSettingsPageCapability from PCLN.Plugin.i18n.")]
 public interface IPluginSettingsPageCapability : IPluginCapability
 {
     IPluginRegistration Register(PluginSettingsPageDescriptor descriptor);

@@ -349,6 +349,12 @@ public interface IPluginLocalizationService : IPluginService
 
     IReadOnlyList<string> SupportedCultures { get; }
 
+    event EventHandler? LanguageChanged
+    {
+        add { }
+        remove { }
+    }
+
     string GetString(string key, string fallback);
 
     string FormatString(string key, string fallback, params object?[] arguments);
