@@ -1,8 +1,8 @@
 # Plugin Manifest
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 `.pnp` 根目录的 `plugin.json` 是插件的机器可读契约。它描述身份、入口、版本范围、依赖、服务、权限、UI、数据迁移和签名。构建器会规范化 Manifest，Analyzer、打包器和运行时会分别验证它。
 
@@ -138,7 +138,7 @@
 
 ### 本地化
 
-SDK `0.2.0` 要求插件至少包含简体中文与英文资源：
+SDK `0.2.1` 要求插件至少包含简体中文与英文资源：
 
 ```json
 "localization": {

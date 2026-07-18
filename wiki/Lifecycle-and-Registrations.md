@@ -1,8 +1,8 @@
 # 生命周期与注册项
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 一个插件实例只经历一次初始化和一次停止。宿主负责验证包、创建隔离加载上下文、提供服务、释放注册项，并尝试卸载程序集。
 

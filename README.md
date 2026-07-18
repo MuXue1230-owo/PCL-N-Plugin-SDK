@@ -2,13 +2,14 @@
 
 PCL N 第三方插件的公开契约、开发工具、分析器、测试宿主和 `.pnp` 构建工具。
 
-> 当前版本：`0.2.0`。
+> 当前版本：`0.2.1`。
 
 ## 包
 
 | NuGet 包 | 用途 |
 |---|---|
 | `PCLN.Plugin.Abstractions` | 插件入口、生命周期、服务、Manifest 和 UI 公共 ABI |
+| `PCLN.Plugin.i18n` | 强类型本地化文本和本地化设置页契约 |
 | `PCLN.Plugin.UI` | UI Target、导航和页面注册的稳定契约 |
 | `PCLN.Plugin.UI.Avalonia` | 受权限控制的 Raw Avalonia、页面和窗口契约 |
 | `PCLN.Plugin.Sdk` | Manifest 验证、SemVer 范围和开发辅助 API |
@@ -75,6 +76,6 @@ Manifest Schema 位于 `schemas/plugin.schema.json`。
 
 ## CI 与发布
 
-CI 在 Windows、Linux 和 macOS 上构建与测试，并验证七个 NuGet 包、示例 `.pnp`、AXAML 资源和可复现输出。`sdk-v*` Tag 经 `nuget-production` 环境审批后发布 NuGet 并同步 Wiki。
+CI 在 Windows、Linux 和 macOS 上构建与测试，并验证八个 NuGet 包、示例 `.pnp`、AXAML 资源和可复现输出。`sdk-v*` Tag 经 `nuget-production` 环境审批后发布 NuGet 并同步 Wiki。
 
 Licensed under the Apache License 2.0.

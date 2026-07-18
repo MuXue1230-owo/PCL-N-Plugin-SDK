@@ -1,8 +1,8 @@
 # 快速开始
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> 适用于 SDK `0.2.0`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
+> 适用于 SDK `0.2.1`。本页从空目录开始创建一个可以打包为 `.pnp` 的插件。
 
 ## 1. 准备环境
 

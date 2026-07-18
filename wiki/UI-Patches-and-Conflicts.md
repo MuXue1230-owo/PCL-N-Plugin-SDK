@@ -1,8 +1,8 @@
 # UI Patch 与冲突
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 UI Patch 用于描述插件对稳定 Surface 的操作。支持：`observe`、`register`、`inject`、`modify`、`replace`、`remove`、`reorder`、资源/样式/模板覆写、输入拦截和 `wrap`。
 

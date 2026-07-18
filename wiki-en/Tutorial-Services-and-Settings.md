@@ -1,10 +1,10 @@
 # Tutorial Services and Settings
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
 This page is the English counterpart of the matching Chinese SDK guide. It documents the same contracts, examples, and compatibility requirements.
 
-## SDK 0.2.0 requirements
+## SDK 0.2.1 requirements
 
 - Target .NET 10 and reference only public PCLN.Plugin packages.
 - Provide both locales/zh-CN.json and locales/en-US.json through the localization resource path.

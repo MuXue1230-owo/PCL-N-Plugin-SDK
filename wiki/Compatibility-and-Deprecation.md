@@ -1,8 +1,8 @@
 # 兼容与废弃
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 0.1 alpha 允许调整公共 ABI，变更会记录在 Release Notes。插件项目应固定 SDK 版本，并在升级前运行完整测试和桌面集成验证。
 

@@ -1,8 +1,8 @@
 # 学习路线
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> 适用于 SDK `0.2.0` 与 PCL.Plugin `v0.12.0`。
+> 适用于 SDK `0.2.1` 与 PCL.Plugin `v0.12.0`。
 
 本页把零散的 API 参考整理成一条可以照着完成的开发路线。第一次开发插件时，建议依次完成前四个阶段；准备公开发布时，再完成第五阶段。
 

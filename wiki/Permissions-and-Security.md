@@ -1,8 +1,8 @@
 # 权限与安全
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`，运行时行为以 PCL.Plugin `v0.12.0` 为准。
+> SDK `0.2.1`，运行时行为以 PCL.Plugin `v0.12.0` 为准。
 
 插件在 PCL N 进程内运行。权限声明用于描述和约束官方 API、支持审核和用户决策，但不是操作系统级沙箱。用户仍应只安装可信发布者的有效签名包。
 
@@ -40,7 +40,7 @@
 
 ## 必需与可选权限
 
-SDK `0.2.0` 支持在每项权限上声明 `kind`：
+SDK `0.2.1` 支持在每项权限上声明 `kind`：
 
 ```json
 "permissions": [

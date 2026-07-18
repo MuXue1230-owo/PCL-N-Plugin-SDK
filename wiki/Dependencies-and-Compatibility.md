@@ -1,8 +1,8 @@
 # 依赖与兼容声明
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 插件依赖、宿主兼容和 UI 兼容是三个不同层次。把它们写清楚，运行时才能在加载前给出可操作的错误，而不是在插件代码中随机失败。
 
@@ -67,7 +67,7 @@
   "maximumExclusive": "1.0"
 },
 "host": {
-  "minimumVersion": "0.2.0",
+  "minimumVersion": "0.2.1",
   "maximumVersionExclusive": "2.0.0"
 }
 ```

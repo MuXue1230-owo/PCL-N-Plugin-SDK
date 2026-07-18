@@ -1,8 +1,8 @@
 # 发布插件
 
-> Applies to PCL N Plugin SDK 0.2.0.
+> Applies to PCL N Plugin SDK 0.2.1.
 
-> SDK `0.2.0`
+> SDK `0.2.1`
 
 上传物是不可变的、由开发者正式密钥自签名的候选 `.pnp`。不要上传普通 DLL、Debug 输出或 SDK 本机开发密钥签名包。
 

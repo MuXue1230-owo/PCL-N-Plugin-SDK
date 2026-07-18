@@ -1,6 +1,6 @@
 # 从零完成第一个插件
 
-> 适用于 SDK `0.2.0`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
+> 适用于 SDK `0.2.1`。完成后你会得到一个能在 PCL N 中安装、注册命令并显示通知的 `.pnp`。
 
 本教程使用 `dev.example.toolbox` 作为插件 ID。实际项目必须换成你长期控制的反向域名式 ID；插件发布后不要再修改它。
 
@@ -23,16 +23,16 @@ dotnet sln add .\PclNToolbox.Plugin\PclNToolbox.Plugin.csproj
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <PclNPluginId>dev.example.toolbox</PclNPluginId>
     <PclNPluginSign>false</PclNPluginSign>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.2.0" />
-    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.2.0" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.2.0" PrivateAssets="all" />
-    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.2.0" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Abstractions" Version="0.2.1" />
+    <PackageReference Include="PCLN.Plugin.Sdk" Version="0.2.1" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Analyzers" Version="0.2.1" PrivateAssets="all" />
+    <PackageReference Include="PCLN.Plugin.Sdk.Build" Version="0.2.1" PrivateAssets="all" />
     <AdditionalFiles Include="plugin.json" />
   </ItemGroup>
 </Project>
@@ -118,7 +118,7 @@ public sealed class ToolboxPlugin : IPclNPlugin
   "manifestVersion": 1,
   "id": "dev.example.toolbox",
   "name": "PCL N Toolbox",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "channel": "alpha",
   "summary": "用于学习 PCL N 插件开发的工具箱。",
   "publisher": {
@@ -135,7 +135,7 @@ public sealed class ToolboxPlugin : IPclNPlugin
     "maximumExclusive": "1.0"
   },
   "host": {
-    "minimumVersion": "0.2.0"
+    "minimumVersion": "0.2.1"
   },
   "services": {
     "required": {
@@ -171,13 +171,13 @@ dotnet build -c Release
 产物位于：
 
 ```text
-PclNToolbox.Plugin/bin/Release/net10.0/dev.example.toolbox-0.2.0.pnp
+PclNToolbox.Plugin/bin/Release/net10.0/dev.example.toolbox-0.2.1.pnp
 ```
 
 `.pnp` 是 ZIP 容器，可以只读检查：
 
 ```powershell
-tar -tf .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.2.0.pnp
+tar -tf .\PclNToolbox.Plugin\bin\Release\net10.0\dev.example.toolbox-0.2.1.pnp
 ```
 
 至少应看到：
