@@ -62,6 +62,7 @@ jobs:
           mkdir -p artifacts/nuget
           for project in \
             src/PCL.N.Plugin.Abstractions/PCL.N.Plugin.Abstractions.csproj \
+            src/PCL.N.Plugin.i18n/PCL.N.Plugin.i18n.csproj \
             src/PCL.N.Plugin.UI/PCL.N.Plugin.UI.csproj \
             src/PCL.N.Plugin.UI.Avalonia/PCL.N.Plugin.UI.Avalonia.csproj \
             src/PCL.N.Plugin.Sdk/PCL.N.Plugin.Sdk.csproj \
@@ -70,8 +71,8 @@ jobs:
             src/PCL.N.Plugin.Sdk.Build/PCL.N.Plugin.Sdk.Build.csproj; do
             dotnet pack "$project" -c Release --no-build -o artifacts/nuget
           done
-          test "$(find artifacts/nuget -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 7
-          test "$(find artifacts/nuget -name '*.snupkg' | wc -l)" -eq 7
+          test "$(find artifacts/nuget -name '*.nupkg' ! -name '*.symbols.nupkg' | wc -l)" -eq 8
+          test "$(find artifacts/nuget -name '*.snupkg' | wc -l)" -eq 8
       - name: Verify packages restore in a clean project
         shell: bash
         run: |
@@ -81,6 +82,7 @@ jobs:
           dotnet new classlib --framework net10.0 --no-restore
           version="${{ steps.package-version.outputs.version }}"
           dotnet add package PCLN.Plugin.Abstractions --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
+          dotnet add package PCLN.Plugin.i18n --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
           dotnet add package PCLN.Plugin.UI --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
           dotnet add package PCLN.Plugin.UI.Avalonia --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
           dotnet add package PCLN.Plugin.Sdk --version "$version" --source "$GITHUB_WORKSPACE/artifacts/nuget"
