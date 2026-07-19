@@ -193,6 +193,8 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
         LaunchModifications = new TestPluginLaunchModificationService(TestLifetime);
         UiSurfaces = new TestPluginUiSurfaceRegistry();
         UiPatches = new TestPluginUiPatchService(TestLifetime);
+        Registry = new TestPluginRegistryService(plugin.Id.Value, TestLifetime);
+        RuntimePatches = new TestPluginRuntimePatchService(plugin.Id.Value, TestLifetime);
         TestServices
             .Add<IPluginNotificationService>(Notifications)
             .Add<IPluginSettingsStore>(Settings)
@@ -211,7 +213,9 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
             .Add<IPluginDownloadService>(Downloads)
             .Add<IPluginLaunchModificationService>(LaunchModifications)
             .Add<IPluginUiSurfaceRegistry>(UiSurfaces)
-            .Add<IPluginUiPatchService>(UiPatches);
+            .Add<IPluginUiPatchService>(UiPatches)
+            .Add<IPluginRegistryService>(Registry)
+            .Add<IPluginRuntimePatchService>(RuntimePatches);
     }
 
     public PluginDescriptor Plugin { get; }
@@ -261,6 +265,10 @@ public sealed class TestPluginContext : IPluginContext, IAsyncDisposable
     public TestPluginUiSurfaceRegistry UiSurfaces { get; }
 
     public TestPluginUiPatchService UiPatches { get; }
+
+    public TestPluginRegistryService Registry { get; }
+
+    public TestPluginRuntimePatchService RuntimePatches { get; }
 
     public IPluginServiceProvider Services { get; }
 

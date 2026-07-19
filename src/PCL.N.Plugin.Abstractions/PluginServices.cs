@@ -56,6 +56,12 @@ public static class PluginServiceIds
 
     public static PluginServiceId UiPatch { get; } = new("pcl.ui.patch");
 
+    /// <summary>ACL-protected, composable extension registry.</summary>
+    public static PluginServiceId Registry { get; } = new("pcl.registry");
+
+    /// <summary>Trusted runtime method patching (Mixin/Harmony style).</summary>
+    public static PluginServiceId RuntimePatches { get; } = new("pcl.runtime-patches");
+
     /// <summary>Host-managed access to the PCL.N plugin market.</summary>
     public static PluginServiceId Market { get; } = new("pcl.market");
 

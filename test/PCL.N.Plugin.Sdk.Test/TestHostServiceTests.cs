@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PCL.N.Plugin.Testing;
+using System.Reflection;
+using System.Text.Json;
 
 namespace PCL.N.Plugin.Sdk.Test;
 
@@ -45,6 +47,18 @@ public sealed class TestHostServiceTests
         context.LaunchModifications.Register(new PluginLaunchModification(
             "demo",
             request => request with { GameArguments = request.GameArguments.Concat(["--demo"]).ToArray() }));
+        using JsonDocument registryJson = JsonDocument.Parse("""{"enabled":true}""");
+        context.Registry.Register(new PluginRegistryNodeDescriptor(
+            "plugins.dev.muxue.test.feature",
+            registryJson.RootElement.Clone()));
+        context.RuntimePatches.Register(new PluginRuntimePatchDescriptor
+        {
+            PatchId = "sample-postfix",
+            Target = new PluginRuntimePatchTarget("PCL.Application", "PCL.Sample", "Run"),
+            Postfix = typeof(TestHostServiceTests).GetMethod(
+                nameof(SamplePostfix),
+                BindingFlags.Static | BindingFlags.NonPublic)
+        });
 
         Assert.AreEqual(1, invoked);
         Assert.AreEqual(42, await context.Settings.GetAsync(new PluginSettingKey<int>("count"), 0));
@@ -61,11 +75,17 @@ public sealed class TestHostServiceTests
         Assert.AreEqual("official", context.Downloads.ListSources().Single().Id);
         PluginLaunchRequest launch = context.LaunchModifications.ApplyAll(new PluginLaunchRequest("i", [], [], new Dictionary<string, string>()));
         Assert.AreEqual("--demo", launch.GameArguments.Single());
+        Assert.IsNotNull(context.Registry.GetNode("plugins.dev.muxue.test.feature"));
+        Assert.AreEqual(1, context.RuntimePatches.ListOwned().Count);
         Assert.IsTrue(context.Services.Supports(PluginServiceIds.Exports, PluginApiVersionRange.Parse(">=0.1 <1.0")));
 
         await context.DisposeAsync();
         Assert.AreEqual(0, context.Commands.Commands.Count);
         Assert.AreEqual(0, context.UiPatches.ListPatches().Count);
         Assert.AreEqual(0, context.LaunchModifications.Modifications.Count);
+        Assert.IsNull(context.Registry.GetNode("plugins.dev.muxue.test.feature"));
+        Assert.AreEqual(0, context.RuntimePatches.ListOwned().Count);
     }
+
+    private static void SamplePostfix() { }
 }

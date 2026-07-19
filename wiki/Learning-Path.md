@@ -1,8 +1,8 @@
 # 学习路线
 
-> Applies to PCL N Plugin SDK 0.2.1.
+> Applies to PCL N Plugin SDK 0.2.2.
 
-> 适用于 SDK `0.2.1` 与 PCL.Plugin `v0.12.0`。
+> 适用于 SDK `0.2.2` 与 PCL.Plugin `v0.14.0`。
 
 本页把零散的 API 参考整理成一条可以照着完成的开发路线。第一次开发插件时，建议依次完成前四个阶段；准备公开发布时，再完成第五阶段。
 
@@ -14,6 +14,7 @@
 | 保存设置、读取实例、执行后台任务 | [服务、设置与后台任务实战](Tutorial-Services-and-Settings) | 功能在可选服务缺失时仍能安全降级 |
 | 添加设置页或启动页内容 | [UI 扩展实战](Tutorial-UI-Extension) | UI 通过公开 Capability、Surface 和 Slot 接入 |
 | 使用其他插件或第三方库 | [依赖与打包实战](Tutorial-Dependencies-and-Packaging) | 前置、托管依赖和原生资产都声明正确 |
+| 发布注册项或修改主程序/其他插件逻辑 | [注册表与运行时注入](Registry-and-Runtime-Patches) | ACL、权限、冲突和卸载回滚均可验证 |
 | 建立测试与发布流水线 | [测试、调试与发布实战](Tutorial-Test-Debug-Release) | 测试通过、包已签名、版本可以追溯 |
 
 ## 阶段一：做出最小插件

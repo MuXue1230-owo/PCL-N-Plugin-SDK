@@ -1,8 +1,8 @@
 # 权限与安全
 
-> Applies to PCL N Plugin SDK 0.2.1.
+> Applies to PCL N Plugin SDK 0.2.2.
 
-> SDK `0.2.1`，运行时行为以 PCL.Plugin `v0.12.0` 为准。
+> SDK `0.2.2`，运行时行为以 PCL.Plugin `v0.14.0` 为准。
 
 插件在 PCL N 进程内运行。权限声明用于描述和约束官方 API、支持审核和用户决策，但不是操作系统级沙箱。用户仍应只安装可信发布者的有效签名包。
 
@@ -22,6 +22,13 @@
 - `pcl.ui.surface`
 - `pcl.ui.patch`
 - `pcl.network.limited`
+- `registry.read`
+- `registry.write-own`
+- `registry.cross-plugin`
+- `registry.manage-acl`
+- `runtime.patch.host`
+- `runtime.patch.plugins`
+- `runtime.patch.transpiler`
 
 ### UI
 
@@ -40,7 +47,7 @@
 
 ## 必需与可选权限
 
-SDK `0.2.1` 支持在每项权限上声明 `kind`：
+SDK `0.2.2` 支持在每项权限上声明 `kind`：
 
 ```json
 "permissions": [
@@ -50,6 +57,10 @@ SDK `0.2.1` 支持在每项权限上声明 `kind`：
 ```
 
 `required` 被拒绝时插件不能启动；`optional` 被拒绝时插件仍可运行，但必须通过服务可用性检查降级，不能假设该能力存在。省略 `kind` 时按 `required` 处理，以兼容旧 Manifest。
+
+桌面权限中心会像移动系统一样逐插件、逐能力显示开关。必要权限也允许用户稍后撤销；宿主会按新的有效权限集合重载插件，且不会因为插件重启或普通更新而自动恢复已撤销权限。
+
+注册表使用 ACL 的 allow/deny 规则，deny 优先。跨插件修改必须同时满足 Manifest 权限和目标所有者 ACL。`pcl.plugin` 与 `pcl.security` 是永久保护命名空间，运行时注入权限同样不能修改它们。完整示例见 [注册表与运行时注入](Registry-and-Runtime-Patches)。
 
 ## 写好 reason
 
@@ -78,6 +89,7 @@ reason 应说明“读/写什么、为什么、用户得到什么”，不要写
 - 账户和启动流程；
 - 原生代码；
 - 网络和外部进程。
+- 主程序/其他插件运行时注入和 IL Transpiler。
 
 能用稳定服务或 `inject` 完成时，不要申请 `raw-access` 或 `replace`。
 
