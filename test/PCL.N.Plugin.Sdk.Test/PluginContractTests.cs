@@ -124,6 +124,10 @@ public sealed class PluginContractTests
         Assert.IsTrue(typeof(IPluginUiSurfaceCapability).IsAssignableTo(typeof(IPluginCapability)));
         Assert.IsTrue(typeof(IPluginUiPatchService).IsAssignableTo(typeof(IPluginService)));
         Assert.IsTrue(typeof(PclUiService).IsAssignableTo(typeof(IPluginService)));
+        Assert.IsTrue(typeof(PclUiPageRegistration).IsAssignableTo(typeof(IPluginRegistration)));
+        Assert.IsTrue(typeof(PclUiContributionRegistration).IsAssignableTo(typeof(IPluginRegistration)));
+        Assert.IsNotNull(typeof(PclUiService).GetMethod(nameof(PclUiService.RegisterDynamicPage)));
+        Assert.IsNotNull(typeof(PclUiService).GetMethod(nameof(PclUiService.InjectDynamic)));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.ListPluginsAsync)));
         Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.PriceCents)));
         Assert.IsNotNull(typeof(PluginMarketPluginSummary).GetProperty(nameof(PluginMarketPluginSummary.RequiresPurchase)));
@@ -131,6 +135,18 @@ public sealed class PluginContractTests
         Assert.IsTrue(Enum.IsDefined(PluginMarketAccessFailure.PurchaseRequired));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.GetDownloadAsync)));
         Assert.IsNotNull(typeof(IPluginMarketClient).GetMethod(nameof(IPluginMarketClient.VerifyPackageAsync)));
+    }
+
+    [TestMethod]
+    public void LocalizedString_FormatsWithCurrentPluginCulture()
+    {
+        TestPluginLocalizationService localization = new(new Dictionary<string, string>
+        {
+            ["status.address"] = "联机地址：{0}"
+        }, "zh-CN");
+        PclLocalizedString text = new PclLocalizedString("status.address", "联机地址：{0}").Format("127.0.0.1:25565");
+
+        Assert.AreEqual("联机地址：127.0.0.1:25565", localization.GetString(text));
     }
 
     private static TestPluginContext CreateContext() =>

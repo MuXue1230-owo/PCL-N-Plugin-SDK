@@ -23,7 +23,14 @@ public record PclLocalizedString
 
     public string Fallback { get; init; }
 
+    /// <summary>Formatting arguments resolved with the plugin's active culture.</summary>
+    public IReadOnlyList<object?> Arguments { get; init; } = [];
+
     public static PclLocalizedString Create(string key, string fallback) => new(key, fallback);
+
+    /// <summary>Returns an immutable formatted copy of this localized string.</summary>
+    public PclLocalizedString Format(params object?[] arguments) =>
+        this with { Arguments = arguments?.ToArray() ?? [] };
 }
 
 /// <summary>Helpers that resolve strongly typed plugin text through the host localization service.</summary>
@@ -36,6 +43,8 @@ public static class PclPluginI18n
     {
         ArgumentNullException.ThrowIfNull(service);
         ArgumentNullException.ThrowIfNull(text);
+        if (text.Arguments.Count > 0)
+            return service.FormatString(text, [.. text.Arguments]);
         return text.Key is null ? text.Fallback : service.GetString(text.Key, text.Fallback);
     }
 

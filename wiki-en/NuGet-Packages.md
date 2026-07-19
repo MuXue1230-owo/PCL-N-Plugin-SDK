@@ -1,10 +1,10 @@
 # NuGet Packages
 
-> Applies to PCL N Plugin SDK 0.2.2.
+> Applies to PCL N Plugin SDK 0.2.3.
 
 This page is the English counterpart of the matching Chinese SDK guide. It documents the same contracts, examples, and compatibility requirements.
 
-## SDK 0.2.2 requirements
+## SDK 0.2.3 requirements
 
 - Target .NET 10 and reference only public PCLN.Plugin packages.
 - Reference `PCLN.Plugin.i18n` in every plugin and use `PclLocalizedString` for every user-visible UI or settings-page string.

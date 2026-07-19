@@ -1,4 +1,4 @@
-# Public API baseline — 0.1.3
+# Public API baseline — 0.2.3
 
 This baseline protects the public ABI from accidental changes. Intentional API changes must update this file and release notes.
 
@@ -47,6 +47,8 @@ This baseline protects the public ABI from accidental changes. Intentional API c
 - `IPluginMarketClient`
 - `PluginMarketPackageVerificationRequest`
 - `PluginMarketPackageVerification`
+- `IPluginRegistryService`
+- `IPluginRuntimePatchService`
 
 ## Manifest and UI
 
@@ -56,6 +58,11 @@ This baseline protects the public ABI from accidental changes. Intentional API c
 - `PluginUiOperationManifest`
 - `IPluginUiSurfaceRegistry`
 - `IPluginUiPatchService`
+- `PclLocalizedString`
+- `PclUiService`
+- `PclUiElement`
+- `PclUiPageRegistration`
+- `PclUiContributionRegistration`
 - `UiTargetId`
 - `PluginPageDescriptor`
 - `IPluginNavigationService`

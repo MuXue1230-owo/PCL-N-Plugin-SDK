@@ -212,6 +212,21 @@ public sealed class PclUiEventArgs(string elementId, PclUiEventKind kind, object
 }
 
 /// <summary>
+/// A live launcher-native page registration. Metadata remains stable for the registration lifetime;
+/// content can be replaced from any thread and is rendered on the host UI dispatcher.
+/// </summary>
+public interface PclUiPageRegistration : IPluginRegistration
+{
+    ValueTask UpdateContentAsync(PclUiElement content, CancellationToken cancellationToken = default);
+}
+
+/// <summary>A live contribution registration whose content can be replaced without unregistering its slot.</summary>
+public interface PclUiContributionRegistration : IPluginRegistration
+{
+    ValueTask UpdateContentAsync(PclUiElement content, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
 /// High-level launcher-native UI service. Elements are rendered by the host with PCL N's
 /// original controls and never expose launcher-private CLR types to plugins.
 /// </summary>
@@ -221,7 +236,11 @@ public interface PclUiService : IPluginService
 
     IPluginRegistration RegisterPage(PclUiPage page);
 
+    PclUiPageRegistration RegisterDynamicPage(PclUiPage page);
+
     IPluginRegistration Inject(PclUiContribution contribution);
+
+    PclUiContributionRegistration InjectDynamic(PclUiContribution contribution);
 
     ValueTask NavigateAsync(string route, CancellationToken cancellationToken = default);
 }
