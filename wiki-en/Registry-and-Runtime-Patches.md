@@ -55,3 +55,5 @@ context.Lifetime.Track(patch);
 ```
 
 Runtime patch permissions are the highest review tier. Packages must use the host service; bundling an independent patch engine or targeting protected platform code is rejected by market review. These controls reduce risk but do not turn in-process .NET plugins into an operating-system sandbox.
+
+Provide `ParameterTypeNames` for overloaded methods and `TargetPluginId` when patching another plugin, so identically named assemblies in separate load contexts cannot make the target ambiguous.

@@ -8,7 +8,8 @@ public sealed record PluginRuntimePatchTarget(
     string TypeName,
     string MethodName,
     IReadOnlyList<string>? ParameterTypeNames = null,
-    int? GenericArity = null);
+    int? GenericArity = null,
+    string? TargetPluginId = null);
 
 /// <summary>
 /// Harmony-compatible patch methods. Prefix, postfix and finalizer are ordinary static methods using
