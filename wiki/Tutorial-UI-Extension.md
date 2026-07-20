@@ -1,6 +1,6 @@
 # UI 扩展实战
 
-> 适用于 SDK `0.2.3` 与 PCL.Plugin `v0.14.0`。本教程只使用公开 Capability、Surface 和 Slot。
+> 适用于 SDK `0.2.4` 与 PCL.Plugin `v0.14.0`。本教程只使用公开 Capability、Surface 和 Slot。
 
 PCL N 插件可按风险与耦合程度选择五类 UI 接入。优先使用能满足需求的最低层能力：
 
@@ -385,7 +385,7 @@ if (context.Services.TryGet<IAvaloniaUiAccessService>(out var avalonia))
 |---|---:|---|---|
 | `pcl.window.main` | `1.0` | 无 | 观察主窗口状态 |
 | `pcl.navigation.main` | `1.0` | `items.after-download` | 增加导航入口 |
-| `pcl.page.launch` | `3.1` | `primary-actions.launch-button`、`primary-actions.after` | 启动按钮附近的工具 |
+| `pcl.page.launch` | `3.2` | `primary-actions.launch-button`、`cards.flip`（推荐）、`primary-actions.after`（弃用兼容） | 启动页翻页卡片 / 启动按钮 |
 | `pcl.page.settings` | `1.0` | `sidebar.after-plugin` | 设置导航扩展 |
 
 Surface 独立版本化，不能把 PCL N 产品版本当作 Surface 版本。最新契约以 [UI Surface 与 Slot](UI-Surfaces-and-Slots) 为准。

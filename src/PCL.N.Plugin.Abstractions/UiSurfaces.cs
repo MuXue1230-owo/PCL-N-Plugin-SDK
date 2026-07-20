@@ -29,7 +29,7 @@ public enum PluginUiSlotCardinality
     Many
 }
 
-/// <summary>Stable slot within a surface (e.g. <c>primary-actions.after</c>).</summary>
+/// <summary>Stable slot within a surface (e.g. <c>cards.flip</c> or legacy <c>primary-actions.after</c>).</summary>
 public sealed record PluginUiSlotDescriptor
 {
     public PluginUiSlotDescriptor(

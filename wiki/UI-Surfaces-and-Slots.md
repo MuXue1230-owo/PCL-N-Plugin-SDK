@@ -1,8 +1,8 @@
 # UI Surface 与 Slot
 
-> Applies to PCL N Plugin SDK 0.2.3.
+> Applies to PCL N Plugin SDK 0.2.4.
 
-> SDK `0.2.3`；Surface 目录以当前 PCL.Plugin `v0.14.0` 为准。
+> SDK `0.2.4`；Surface 目录以当前 PCL Desktop 实验性启动页 / 宿主发布为准。
 
 Surface 是宿主发布的稳定 UI 边界，Target 是 Manifest 中引用的 Surface ID，Slot 是稳定插入点。插件不能依赖控件类名、XAML Name、本地化文本或 Visual Tree 索引。
 
@@ -12,10 +12,18 @@ Surface 是宿主发布的稳定 UI 边界，Target 是 Manifest 中引用的 Su
 |---|---:|---|---|
 | `pcl.window.main` | `1.0` | `observe` | 无 |
 | `pcl.navigation.main` | `1.0` | `observe`、`inject` | `items.after-download` |
-| `pcl.page.launch` | `3.1` | `observe`、`inject`、`modify`、`replace`、`wrap` | `primary-actions.launch-button`、`primary-actions.after` |
+| `pcl.page.launch` | `3.2` | `observe`、`inject`、`modify`、`replace`、`wrap` | `primary-actions.launch-button`、**`cards.flip`（推荐）**、`primary-actions.after`（弃用兼容） |
 | `pcl.page.settings` | `1.0` | `observe`、`inject` | `sidebar.after-plugin` |
 
 Surface 会独立版本化。插件应声明经过测试的范围，而不是写死当前产品版本。
+
+### `pcl.page.launch` Slot 说明（3.2）
+
+| Slot | 状态 | 行为 |
+|---|---|---|
+| `cards.flip` | **推荐** | 每次 inject 成为一张可上下翻页的全幅注册卡片 |
+| `primary-actions.after` | **弃用 / 兼容套壳** | 注入到单张兼容卡内的堆叠区域；保留旧插件行为，新插件请改用 `cards.flip` |
+| `primary-actions.launch-button` | 稳定 | 观察 / 修改 / 包装启动主按钮 |
 
 ## 先查询能力
 
@@ -24,8 +32,8 @@ IPluginUiSurfaceRegistry ui = context.Services.Require<IPluginUiSurfaceRegistry>
 
 bool supported = ui.SupportsSlot(
     "pcl.page.launch",
-    "primary-actions.after",
-    ">=3.0 <4.0",
+    "cards.flip",
+    ">=3.2 <4.0",
     PluginUiOperation.Inject);
 ```
 
@@ -38,13 +46,13 @@ Manifest：
 ```json
 {
   "target": "pcl.page.launch",
-  "surface": ">=3.0 <4.0",
+  "surface": ">=3.2 <4.0",
   "access": ["inject"],
   "operations": [
     {
       "id": "hello-panel",
       "kind": "inject",
-      "slot": "primary-actions.after",
+      "slot": "cards.flip",
       "axaml": "ui/HelloPanel.axaml",
       "command": "dev.example.hello",
       "priority": 0,
@@ -88,7 +96,7 @@ if (context.Capabilities.TryGet<IPluginUiSurfaceCapability>(out var capability))
     context.Lifetime.Track(capability.Contribute(
         new PluginUiSlotContributionDescriptor(
             "pcl.page.launch",
-            "primary-actions.after",
+            "cards.flip",
             "dev.example.hello.panel",
             order: 100,
             title: "Hello Panel")));

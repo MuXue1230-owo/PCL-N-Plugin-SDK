@@ -28,7 +28,7 @@
       "operations": [{
         "id": "hello-panel",
         "kind": "inject",
-        "slot": "primary-actions.after",
+        "slot": "cards.flip",
         "axaml": "ui/HelloPanel.axaml",
         "command": "dev.muxue.hello.say-hello",
         "required": true,

@@ -1,6 +1,6 @@
 # Registry and Runtime Patches
 
-> Applies to PCL N Plugin SDK `0.2.3` and PCL.Plugin `v0.14.0`.
+> Applies to PCL N Plugin SDK `0.2.4` and PCL.Plugin `v0.14.0`.
 
 The PCL registry is a composable extension registry, not the Windows system Registry. Plugins publish immutable JSON nodes, observe changes, and may add reversible overrides to another plugin only when both the effective permission and the target ACL allow it. Every mutation returns a lifetime-owned registration.
 

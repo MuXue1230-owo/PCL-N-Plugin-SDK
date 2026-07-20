@@ -1,6 +1,6 @@
 # 服务
 
-> SDK `0.2.3`。服务通过稳定 ID 和独立版本范围协商。
+> SDK `0.2.4`。服务通过稳定 ID 和独立版本范围协商。
 
 插件从 `context.Services` 获取宿主服务。真正不可缺少的服务写入 Manifest 的 `services.required`；增强体验但可降级的服务写入 `services.optional`。
 

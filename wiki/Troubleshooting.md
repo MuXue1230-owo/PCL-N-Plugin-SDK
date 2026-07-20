@@ -1,8 +1,8 @@
 # 故障排查
 
-> Applies to PCL N Plugin SDK 0.2.3.
+> Applies to PCL N Plugin SDK 0.2.4.
 
-> SDK `0.2.3`
+> SDK `0.2.4`
 
 ## NuGet 找不到包
 

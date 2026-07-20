@@ -2,7 +2,7 @@
 
 PCL N 第三方插件的公开契约、开发工具、分析器、测试宿主和 `.pnp` 构建工具。
 
-> 当前版本：`0.2.3`。
+> 当前版本：`0.2.4`。
 
 ## 包
 
@@ -55,7 +55,7 @@ Manifest 的 UI operation 可以引用包内 `ui/*.axaml`：
 {
   "id": "hello-panel",
   "kind": "inject",
-  "slot": "primary-actions.after",
+  "slot": "cards.flip",
   "axaml": "ui/HelloPanel.axaml",
   "command": "dev.muxue.hello.say-hello"
 }
